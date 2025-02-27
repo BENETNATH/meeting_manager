@@ -265,10 +265,10 @@ def edit_event(event_id):
             signature = request.files.get('signature')
             if signature:
                 filename = secure_filename(signature.filename)
-                signature_path = os.path.join('static/uploads', filename)
+                signature_path = os.path.join('uploads', filename)
                 os.makedirs(os.path.dirname(signature_path), exist_ok=True)
                 signature.save(signature_path)
-                event.signature_url = url_for('static', filename=f'uploads/{filename}')
+                event.signature_url = signature_path
 
             db.session.commit()
             flash('Événement mis à jour avec succès', 'success')
