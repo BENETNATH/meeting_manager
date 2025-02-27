@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Événements</h1>
+    <div class="row">
+        {% for event in events %}
+            {% if event.status != 'hidden' or (current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))) %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if event.photo_url %}
+                            <img src="{{ event.photo_url }}" class="card-img-top" alt="{{ event.title }}" style="width: 100%; height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text">{{ event.description|safe|truncate(100) }}</p>
+                            <p class="card-text"><small class="text-muted">{{ event.date.strftime('%Y-%m-%d') }}</small></p>
+                            <p><strong>Statut :</strong> {{ event.status }}</p>
+                            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-primary">Voir les Détails</a>
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id) %}
+                                    <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-secondary">Modifier</a>
+                                    <a href="{{ url_for('mark_attendance', event_id=event.id) }}" class="btn btn-info">Voir les Inscrits</a>
+                                    {% if current_user.role == 'super-admin' or current_user.role == 'editor' %}
+                                        <p><strong>Inscrits :</strong> {{ event.total_registered }}</p>
+                                        <p><strong>Présents :</strong> {{ event.total_attended }}</p>
+										<form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')">Supprimer</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('update_status', event_id=event.id) }}" style="display:inline;">
+                                    <select name="status" class="form-control-sm" onchange="this.form.submit()">
+                                        <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>Caché</option>
+                                        <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>Visible</option>
+                                        <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>Archivé</option>
+                                    </select>
+                                </form>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if current_user.is_authenticated and current_user.role in ['super-admin', 'editor'] %}
+        <a href="{{ url_for('create_event') }}" class="btn btn-success">Créer un Nouvel Événement</a>
+    {% endif %}
+</div>
+{% endblock %}

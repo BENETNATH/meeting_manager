@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>Gestion des Inscriptions pour : {{ event.title }}</h1>
+            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">Retour à l'Événement</a>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <p><strong>Nombre d'inscrits :</strong> {{ registrations|length }}</p>
+            <p><strong>Nombre de présents :</strong> {{ registrations|selectattr('attended')|list|length }}</p>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <form id="bulk-attendance-form">
+                <div class="form-group">
+                    <label for="bulk-emails">Extraire les emails et cocher les présents (collez les emails séparés par des virgules ou des lignes) :</label>
+                    <textarea class="form-control" id="bulk-emails" rows="3" placeholder="email1@example.com, email2@example.com"></textarea>
+                </div>
+                <button type="button" class="btn btn-success" onclick="extractAndMarkAttendance()">Extraire les emails et cocher les présents</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <form method="POST" id="attendance-form">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                                <th>Clé Unique</th>
+                                <th>Présent</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registration in registrations %}
+                                <tr>
+                                    <td>{{ registration.last_name }}</td>
+                                    <td>{{ registration.first_name }}</td>
+                                    <td>{{ registration.email|safe }}</td>
+                                    <td>{{ registration.unique_key }}</td>
+                                    <td>
+                                        <input type="checkbox" name="attended_{{ registration.id }}" {% if registration.attended %}checked{% endif %} data-email="{{ registration.email|strip_html }}">
+                                    </td>
+                                    <td>
+                                        <button type="button" onclick="deleteRegistration({{ registration.id }})" class="btn btn-danger btn-sm">Supprimer</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" name="action" value="check_all" class="btn btn-primary mt-3">Marquer Tous comme Présents</button>
+                <button type="submit" name="action" value="update_attendance" class="btn btn-success mt-3">Mettre à Jour la Présence</button>
+				    <a href="{{ url_for('extract_attendance', event_id=event.id) }}" class="btn btn-secondary mt-3">Extraire les Inscrits</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function extractAndMarkAttendance() {
+        console.log("Extract and Mark Attendance triggered");
+        const emails = document.getElementById('bulk-emails').value.split(/[\n,]+/);
+        let countChecked = 0;
+
+        emails.forEach(email => {
+            const cleanEmail = email.trim().replace(/<.*?>/g, ''); // Remove HTML tags
+            console.log("Checking email:", cleanEmail);
+            const checkbox = document.querySelector(`input[type="checkbox"][data-email="${cleanEmail}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                countChecked++;
+                console.log("Checked:", cleanEmail);
+            } else {
+                console.log("No match found for email:", cleanEmail);
+            }
+        });
+
+        if (countChecked > 0) {
+            alert(`${countChecked} case(s) mise(s) à jour. Cliquez sur "Mettre à Jour la Présence" pour sauvegarder.`);
+        } else {
+            alert('Aucun email correspondant trouvé.');
+        }
+    }
+
+    function deleteRegistration(registrationId) {
+        console.log("Delete Registration triggered for ID:", registrationId);
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('mark_attendance', event_id=event.id) }}";
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'action';
+        input.value = 'delete_' + registrationId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+{% endblock %}

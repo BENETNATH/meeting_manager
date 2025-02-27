@@ -1,2 +1,2 @@
 # meeting_manager
-A meeting manager that allows to generate certificate of attendance.
+Manager for meeting with certificate of attendance
