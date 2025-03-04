@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">Événements</h1>
+    <h1 class="mb-4">{{ _('Events') }}</h1>
     <div class="row">
         {% for event in events %}
             {% if event.status != 'hidden' or (current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))) %}
@@ -16,22 +16,22 @@
                             <p class="card-text">{{ event.description|safe|truncate(100) }}</p>
                             <p class="card-text"><small class="text-muted">{{ event.date.strftime('%d-%m-%Y') }}</small></p>
                             <p><strong>Statut :</strong> {{ event.status }}</p>
-                            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-primary">Voir les Détails</a>
+                            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-primary">{{ _('See details') }}</a>
                             {% if current_user.is_authenticated %}
                                 {% if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id) %}
-                                    <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-secondary">Modifier</a>
-                                    <a href="{{ url_for('mark_attendance', event_id=event.id) }}" class="btn btn-info">Voir les Inscrits</a>
+                                    <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-secondary">{{ _('Modify') }}</a>
+                                    <a href="{{ url_for('mark_attendance', event_id=event.id) }}" class="btn btn-info">{{ _('See registered') }}</a>
                                     {% if current_user.role == 'super-admin' or current_user.role == 'editor' %}
-                                        <p><strong>Inscrits :</strong> {{ event.total_registered }}</p>
-                                        <p><strong>Présents :</strong> {{ event.total_attended }}</p>
+                                        <p><strong>{{ _('Registered') }} :</strong> {{ event.total_registered }}</p>
+                                        <p><strong>{{ _('Present') }} :</strong> {{ event.total_attended }}</p>
 										<form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')">Supprimer</button>
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure to delete the event ?')">{{ _('Delete') }}</button>
                                 </form>
                                 <form method="POST" action="{{ url_for('update_status', event_id=event.id) }}" style="display:inline;">
                                     <select name="status" class="form-control-sm" onchange="this.form.submit()">
-                                        <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>Caché</option>
-                                        <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>Visible</option>
-                                        <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>Archivé</option>
+                                        <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
+                                        <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
+                                        <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
                                     </select>
                                 </form>
                                     {% endif %}
@@ -45,7 +45,7 @@
     </div>
 
     {% if current_user.is_authenticated and current_user.role in ['super-admin', 'editor'] %}
-        <a href="{{ url_for('create_event') }}" class="btn btn-success">Créer un Nouvel Événement</a>
+        <a href="{{ url_for('create_event') }}" class="btn btn-success">{{ _('Create a new event') }}</a>
     {% endif %}
 </div>
 {% endblock %}

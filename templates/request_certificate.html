@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Demander un certificat</h1>
+<h1>{{ _('Ask for a certificate of attendance') }}</h1>
 
 <form method="POST">
-    <label for="email">Email:</label>
+    <label for="email">{{ _('Email') }}:</label>
     <input type="email" id="email" name="email" required><br>
-    <label for="unique_key">Clé unique:</label>
+    <label for="unique_key">{{ _('Unique key') }}:</label>
     <input type="text" id="unique_key" name="unique_key" required><br>
-    <button type="submit">Obtenir le certificat</button>
+    <button type="submit">{{ _('Get your certificate') }}</button>
 </form>
 {% endblock %}

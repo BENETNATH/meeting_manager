@@ -1,0 +1,233 @@
+# English translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-03-04 16:10+0100\n"
+"PO-Revision-Date: 2025-03-04 16:10+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: templates/base.html:29
+msgid "Meeting Manager"
+msgstr ""
+
+#: templates/base.html:36 templates/register.html:9
+msgid "Home"
+msgstr ""
+
+#: templates/base.html:39
+msgid "English"
+msgstr ""
+
+#: templates/base.html:39
+msgid "French"
+msgstr ""
+
+#: templates/base.html:43
+msgid "Log out"
+msgstr ""
+
+#: templates/base.html:47
+msgid "Manage users"
+msgstr ""
+
+#: templates/base.html:52 templates/login.html:10
+msgid "Login"
+msgstr ""
+
+#: templates/create_event.html:4 templates/index.html:48
+msgid "Create a new event"
+msgstr ""
+
+#: templates/create_event.html:6 templates/edit_event.html:6
+msgid "Title"
+msgstr ""
+
+#: templates/create_event.html:9 templates/edit_event.html:8
+#: templates/event.html:14
+msgid "Description"
+msgstr ""
+
+#: templates/create_event.html:12 templates/edit_event.html:10
+msgid "URL of the picture"
+msgstr ""
+
+#: templates/create_event.html:15 templates/event.html:18
+msgid "Program"
+msgstr ""
+
+#: templates/create_event.html:19 templates/edit_event.html:15
+msgid "Date of the event"
+msgstr ""
+
+#: templates/create_event.html:23 templates/edit_event.html:19
+msgid "Statut"
+msgstr ""
+
+#: templates/create_event.html:25 templates/edit_event.html:21
+#: templates/event.html:46 templates/index.html:32
+msgid "Hidden"
+msgstr ""
+
+#: templates/create_event.html:26 templates/edit_event.html:22
+#: templates/event.html:47 templates/index.html:33
+msgid "Visible"
+msgstr ""
+
+#: templates/create_event.html:27 templates/edit_event.html:23
+#: templates/event.html:48 templates/index.html:34
+msgid "Archived"
+msgstr ""
+
+#: templates/create_event.html:31 templates/edit_event.html:26
+msgid "Organizer"
+msgstr ""
+
+#: templates/create_event.html:34 templates/edit_event.html:28
+msgid "Number of training hours"
+msgstr ""
+
+#: templates/create_event.html:37
+msgid "Signature of the organizer"
+msgstr ""
+
+#: templates/create_event.html:40
+msgid "Create the event"
+msgstr ""
+
+#: templates/edit_event.html:4
+msgid "Modify the event"
+msgstr ""
+
+#: templates/edit_event.html:12
+msgid "Programme"
+msgstr ""
+
+#: templates/edit_event.html:30
+msgid "Organizer signature"
+msgstr ""
+
+#: templates/edit_event.html:32
+msgid "Update the event"
+msgstr ""
+
+#: templates/edit_event.html:33
+msgid "Are you sure that you want to delete the event ?"
+msgstr ""
+
+#: templates/edit_event.html:33 templates/event.html:58
+msgid "Delete the event"
+msgstr ""
+
+#: templates/event.html:8
+msgid "Date"
+msgstr ""
+
+#: templates/event.html:56
+msgid "Extract registered"
+msgstr ""
+
+#: templates/event.html:58
+msgid "Are you sure to delete this event ?"
+msgstr ""
+
+#: templates/index.html:5
+msgid "Events"
+msgstr ""
+
+#: templates/index.html:22
+msgid "Modify"
+msgstr ""
+
+#: templates/index.html:23
+msgid "See registered"
+msgstr ""
+
+#: templates/index.html:25
+msgid "Registered"
+msgstr ""
+
+#: templates/index.html:26
+msgid "Present"
+msgstr ""
+
+#: templates/login.html:6 templates/manage_users.html:9
+#: templates/manage_users.html:22
+msgid "Username"
+msgstr ""
+
+#: templates/login.html:8
+msgid "Password"
+msgstr ""
+
+#: templates/manage_users.html:13
+msgid "Create an editor"
+msgstr ""
+
+#: templates/manage_users.html:17
+msgid "Existing users"
+msgstr ""
+
+#: templates/manage_users.html:24
+msgid "Actual role"
+msgstr ""
+
+#: templates/manage_users.html:25
+msgid "New role"
+msgstr ""
+
+#: templates/manage_users.html:37
+msgid "Editor"
+msgstr ""
+
+#: templates/manage_users.html:43
+msgid "Update"
+msgstr ""
+
+#: templates/manage_users.html:48
+msgid "Are you sure you want to delete this user"
+msgstr ""
+
+#: templates/manage_users.html:48
+msgid "Delete"
+msgstr ""
+
+#: templates/register.html:5
+msgid "Register to the event"
+msgstr ""
+
+#: templates/register.html:6
+msgid "Back to the event"
+msgstr ""
+
+#: templates/register.html:13
+msgid "Last Name"
+msgstr ""
+
+#: templates/register.html:20
+msgid "Register"
+msgstr ""
+
+#: templates/request_certificate.html:4
+msgid "Ask for a certificate of attendance"
+msgstr ""
+
+#: templates/request_certificate.html:9
+msgid "Unique key"
+msgstr ""
+
+#: templates/request_certificate.html:11
+msgid "Get your certificate"
+msgstr ""
+

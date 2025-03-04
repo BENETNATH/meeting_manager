@@ -2,22 +2,22 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Inscription à l'Événement : {{ event.title }}</h1>
-	            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">Retour à l'Événement</a>
+    <h1>{{ _('Register to the event') }}: {{ event.title }}</h1>
+	            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
     <form method="POST" action="{{ url_for('register', event_id=event.id) }}">
         <div class="form-group">
-            <label for="first_name">Prénom*:</label>
+            <label for="first_name">{{ _('First Name') }}*:</label>
             <input type="text" id="first_name" name="first_name" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="last_name">Nom*:</label>
+            <label for="last_name">{{ _('Last Name') }}*:</label>
             <input type="text" id="last_name" name="last_name" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="email">Email*:</label>
+            <label for="email">{{ _('Email') }}*:</label>
             <input type="email" id="email" name="email" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-primary">S'inscrire</button>
+        <button type="submit" class="btn btn-primary">{{ _('Register') }}</button>
     </form>
 </div>
 {% endblock %}

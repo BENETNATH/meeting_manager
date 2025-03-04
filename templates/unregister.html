@@ -3,18 +3,18 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Se Désinscrire de l'Événement : {{ event.title }}</h1>
-	            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">Retour à l'Événement</a>
+    <h1>{{ _('Unregister from the event') }}: {{ event.title }}</h1>
+	            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
     <form method="POST" action="{{ url_for('unregister', event_id=event.id) }}">
         <div class="form-group">
-            <label for="email">Email*:</label>
+            <label for="email">{{ _('Email') }}*:</label>
             <input type="email" id="email" name="email" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="unique_key">Clé Unique*:</label>
+            <label for="unique_key">{{ _('Unique key') }}*:</label>
             <input type="text" id="unique_key" name="unique_key" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-danger">Se Désinscrire</button>
+        <button type="submit" class="btn btn-danger">{{ _('Unregister') }}</button>
     </form>
 </div>
 {% endblock %}

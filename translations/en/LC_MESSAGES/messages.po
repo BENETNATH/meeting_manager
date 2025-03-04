@@ -1,0 +1,459 @@
+# English translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-03-04 19:32+0100\n"
+"PO-Revision-Date: 2025-03-04 17:07+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app.py:66 templates/attendance.html:36 templates/register.html:9
+#, fuzzy
+msgid "First Name"
+msgstr "First Name"
+
+#: app.py:66 templates/attendance.html:35 templates/register.html:13
+msgid "Last Name"
+msgstr "Last Name"
+
+#: app.py:66 templates/attendance.html:37 templates/create_editor.html:8
+#: templates/manage_users.html:11 templates/manage_users.html:23
+#: templates/register.html:17 templates/unregister.html:10
+msgid "Email"
+msgstr ""
+
+#: app.py:66 templates/attendance.html:38
+#, fuzzy
+msgid "Unique Key"
+msgstr "Unique key"
+
+#: app.py:66
+#, fuzzy
+msgid "Presence"
+msgstr "Present"
+
+#: app.py:122
+msgid "Wrong credentials"
+msgstr "Wrong credentials"
+
+#: app.py:179
+msgid "Status updated successfully !"
+msgstr ""
+
+#: app.py:181
+msgid "Invalid status"
+msgstr ""
+
+#: app.py:206
+msgid "Event and registrees successfully deleted !"
+msgstr ""
+
+#: app.py:249
+msgid "Signature must be smaller than 800*600"
+msgstr ""
+
+#: app.py:272
+msgid "Event successfully created"
+msgstr ""
+
+#: app.py:309
+msgid "Event successfully updated"
+msgstr ""
+
+#: app.py:342
+msgid "Modifications saved !"
+msgstr ""
+
+#: app.py:358
+#, fuzzy
+msgid "You have been unregistered."
+msgstr "See registered"
+
+#: app.py:427
+msgid "User successfully deleted"
+msgstr ""
+
+#: app.py:442
+msgid "User successfully updated."
+msgstr ""
+
+#: app.py:470
+msgid "Registration Confirmation"
+msgstr ""
+
+#: app.py:471
+#, python-format
+msgid ""
+"Hello %(name)s,\n"
+"\n"
+"You have successfully registered for the event: %(event)s that will take "
+"place on %(date)s.\n"
+"Your unique key is: %(key)s\n"
+"\n"
+"Thank you!"
+msgstr ""
+
+#: app.py:482
+msgid "Registration in not available"
+msgstr ""
+
+#: app.py:489
+#, fuzzy
+msgid "Email already registered"
+msgstr "See registered"
+
+#: app.py:507
+msgid "Registration successfull. Your unique key is "
+msgstr ""
+
+#: app.py:527
+msgid "Successful unregistration"
+msgstr ""
+
+#: app.py:529
+msgid "No registration for this email and unique key on this event"
+msgstr ""
+
+#: app.py:543
+msgid "Sorry, Your presence was not confirmed by the organizer."
+msgstr ""
+
+#: templates/attendance.html:7
+msgid "Registration management"
+msgstr "Registration management"
+
+#: templates/attendance.html:8 templates/register.html:6
+#: templates/unregister.html:7
+msgid "Back to the event"
+msgstr "Back to the event"
+
+#: templates/attendance.html:13 templates/index.html:25
+msgid "Registered"
+msgstr "Registered"
+
+#: templates/attendance.html:14
+#, fuzzy
+msgid "Presents"
+msgstr "Present"
+
+#: templates/attendance.html:21
+msgid ""
+"Extract emails and check those present (paste emails separated by commas "
+"or lines)"
+msgstr ""
+
+#: templates/attendance.html:24
+msgid "Extract emails and check present"
+msgstr ""
+
+#: templates/attendance.html:39
+#, fuzzy
+msgid "Present?"
+msgstr "Present"
+
+#: templates/attendance.html:40
+msgid "Actions"
+msgstr ""
+
+#: templates/attendance.html:54 templates/index.html:28
+#: templates/manage_users.html:48
+msgid "Delete"
+msgstr "Delete"
+
+#: templates/attendance.html:61
+msgid "Mark all as present"
+msgstr ""
+
+#: templates/attendance.html:62
+#, fuzzy
+msgid "Update presence"
+msgstr "Present"
+
+#: templates/attendance.html:63
+#, fuzzy
+msgid "Extract registrees in csv"
+msgstr "Extract registered"
+
+#: templates/attendance.html:81
+msgid "Not matching email found"
+msgstr ""
+
+#: templates/attendance.html:86
+msgid "updated cell(s). Click \"Update Presence\" to save."
+msgstr ""
+
+#: templates/attendance.html:88
+msgid "No matching email found"
+msgstr ""
+
+#: templates/base.html:28
+msgid "Meeting Manager"
+msgstr "Meeting Manager"
+
+#: templates/base.html:35
+msgid "Home"
+msgstr "Home"
+
+#: templates/base.html:38
+msgid "English"
+msgstr "English"
+
+#: templates/base.html:39
+msgid "French"
+msgstr "French"
+
+#: templates/base.html:43
+msgid "Log out"
+msgstr "Log out"
+
+#: templates/base.html:47
+msgid "Manage users"
+msgstr "Manage users"
+
+#: templates/base.html:52 templates/login.html:10
+msgid "Login"
+msgstr "Login"
+
+#: templates/create_editor.html:4
+#, fuzzy
+msgid "Create editor"
+msgstr "Create an editor"
+
+#: templates/create_editor.html:6 templates/login.html:6
+#: templates/manage_users.html:9 templates/manage_users.html:22
+msgid "Username"
+msgstr "Username"
+
+#: templates/create_event.html:4 templates/index.html:48
+msgid "Create a new event"
+msgstr "Create a new event"
+
+#: templates/create_event.html:6 templates/edit_event.html:6
+msgid "Title"
+msgstr "Title"
+
+#: templates/create_event.html:9 templates/edit_event.html:8
+#: templates/event.html:14
+msgid "Description"
+msgstr "Description"
+
+#: templates/create_event.html:12 templates/edit_event.html:10
+msgid "URL of the picture"
+msgstr "URL of the picture"
+
+#: templates/create_event.html:15 templates/event.html:18
+msgid "Program"
+msgstr "Program"
+
+#: templates/create_event.html:19 templates/edit_event.html:15
+msgid "Date of the event"
+msgstr "Date of the event"
+
+#: templates/create_event.html:23 templates/edit_event.html:19
+msgid "Statut"
+msgstr "Status"
+
+#: templates/create_event.html:25 templates/edit_event.html:21
+#: templates/event.html:46 templates/index.html:32
+msgid "Hidden"
+msgstr "Hidden"
+
+#: templates/create_event.html:26 templates/edit_event.html:22
+#: templates/event.html:47 templates/index.html:33
+msgid "Visible"
+msgstr "Visible"
+
+#: templates/create_event.html:27 templates/edit_event.html:23
+#: templates/event.html:48 templates/index.html:34
+msgid "Archived"
+msgstr "Archived"
+
+#: templates/create_event.html:31 templates/edit_event.html:26
+#: templates/event.html:28
+msgid "Organizer"
+msgstr "Organizer"
+
+#: templates/create_event.html:34 templates/edit_event.html:28
+msgid "Number of training hours"
+msgstr "Number of training hours"
+
+#: templates/create_event.html:37
+msgid "Signature of the organizer"
+msgstr "Signature of the organizer"
+
+#: templates/create_event.html:40
+msgid "Create the event"
+msgstr "Create the event"
+
+#: templates/create_event.html:85
+msgid "Picture must be smaller than 800*600"
+msgstr ""
+
+#: templates/edit_event.html:4
+msgid "Modify the event"
+msgstr "Modify the event"
+
+#: templates/edit_event.html:12
+msgid "Programme"
+msgstr "Program"
+
+#: templates/edit_event.html:30
+msgid "Organizer signature"
+msgstr "Organizer signature"
+
+#: templates/edit_event.html:32
+msgid "Update the event"
+msgstr "Update the event"
+
+#: templates/edit_event.html:33
+msgid "Are you sure that you want to delete the event ?"
+msgstr "Are you sure that you want to delete the event?"
+
+#: templates/edit_event.html:33 templates/event.html:58
+msgid "Delete the event"
+msgstr "Delete the event"
+
+#: templates/event.html:8
+msgid "Date"
+msgstr "Date"
+
+#: templates/event.html:31
+#, fuzzy
+msgid "Training hours"
+msgstr "Number of training hours"
+
+#: templates/event.html:36 templates/register.html:20
+msgid "Register"
+msgstr "Register"
+
+#: templates/event.html:37 templates/unregister.html:17
+#, fuzzy
+msgid "Unregister"
+msgstr "Register"
+
+#: templates/event.html:40
+#, fuzzy
+msgid "Ask a certificate of attendance"
+msgstr "Ask for a certificate of attendance"
+
+#: templates/event.html:51
+#, fuzzy
+msgid "Modify event"
+msgstr "Modify the event"
+
+#: templates/event.html:52 templates/index.html:23
+msgid "See registered"
+msgstr "See registered"
+
+#: templates/event.html:56
+msgid "Extract registered"
+msgstr "Extract registered"
+
+#: templates/event.html:58
+msgid "Are you sure to delete this event ?"
+msgstr "Are you sure you want to delete this event?"
+
+#: templates/index.html:5
+msgid "Events"
+msgstr "Events"
+
+#: templates/index.html:19
+msgid "See details"
+msgstr ""
+
+#: templates/index.html:22
+msgid "Modify"
+msgstr "Modify"
+
+#: templates/index.html:26
+msgid "Present"
+msgstr "Present"
+
+#: templates/index.html:28
+#, fuzzy
+msgid "Are you sure you want to delete this event ?"
+msgstr "Are you sure that you want to delete the event?"
+
+#: templates/login.html:8
+msgid "Password"
+msgstr "Password"
+
+#: templates/manage_users.html:4
+#, fuzzy
+msgid "Manage editors"
+msgstr "Manage users"
+
+#: templates/manage_users.html:7
+#, fuzzy
+msgid "Add a new editor"
+msgstr "Create an editor"
+
+#: templates/manage_users.html:13
+msgid "Create an editor"
+msgstr "Create an editor"
+
+#: templates/manage_users.html:17
+msgid "Existing users"
+msgstr "Existing users"
+
+#: templates/manage_users.html:24
+msgid "Actual role"
+msgstr "Current role"
+
+#: templates/manage_users.html:25
+msgid "New role"
+msgstr "New role"
+
+#: templates/manage_users.html:26
+msgid "Action"
+msgstr ""
+
+#: templates/manage_users.html:37
+msgid "Editor"
+msgstr "Editor"
+
+#: templates/manage_users.html:42
+#, fuzzy
+msgid "New password"
+msgstr "Password"
+
+#: templates/manage_users.html:43
+msgid "Update"
+msgstr "Update"
+
+#: templates/manage_users.html:48
+msgid "Are you sure you want to delete this user"
+msgstr "Are you sure you want to delete this user?"
+
+#: templates/register.html:5
+msgid "Register to the event"
+msgstr "Register for the event"
+
+#: templates/request_certificate.html:4
+msgid "Ask for a certificate of attendance"
+msgstr "Ask for a certificate of attendance"
+
+#: templates/request_certificate.html:9 templates/unregister.html:14
+msgid "Unique key"
+msgstr "Unique key"
+
+#: templates/request_certificate.html:11
+msgid "Get your certificate"
+msgstr "Get your certificate"
+
+#: templates/unregister.html:6
+#, fuzzy
+msgid "Unregister from the event"
+msgstr "Register for the event"
+

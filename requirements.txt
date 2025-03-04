@@ -6,3 +6,4 @@ Flask-Mail
 Werkzeug
 Pillow
 python-dotenv
+Flask-Babel

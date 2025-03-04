@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,27 +25,31 @@
 </head>
 <body>
    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('index') }}">Gestionnaire de Réunions</a>
+        <a class="navbar-brand" href="{{ url_for('index') }}">{{ _('Meeting Manager') }}</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i> Retour à l'accueil</a>
+                    <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i> {{ _('Home') }}</a>
                 </li>
+<nav>
+    <a href="{{ url_for(request.endpoint, **dict(request.view_args, lang='en')) }}">{{ _('English') }}</a> |
+    <a href="{{ url_for(request.endpoint, **dict(request.view_args, lang='fr')) }}">{{ _('French') }}</a>
+</nav>
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a>
+                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> {{ _('Log out') }}</a>
                     </li>
                     {% if current_user.role == 'super-admin' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('manage_users') }}"><i class="fas fa-users"></i> Gérer les utilisateurs</a>
+                            <a class="nav-link" href="{{ url_for('manage_users') }}"><i class="fas fa-users"></i> {{ _('Manage users') }}</a>
                         </li>
                     {% endif %}
 				{% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        <a class="nav-link" href="{{ url_for('login') }}">{{ _('Login') }}</a>
                     </li>
                 {% endif %}
             </ul>

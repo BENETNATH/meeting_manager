@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, jsonify
+from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, jsonify, session
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
+from flask_babel import Babel, lazy_gettext
+from flask_babel import _
 from PIL import Image
 from datetime import datetime
 import re
@@ -12,6 +14,7 @@ from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
+babel = Babel(app)
 load_dotenv()  # Load environment variables from .env file
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
@@ -21,17 +24,16 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-
+app.config['BABEL_DEFAULT_LOCALE'] = os.getenv('BABEL_DEFAULT_LOCALE')
+app.config['BABEL_DEFAULT_TIMEZONE'] = os.getenv('BABEL_DEFAULT_TIMEZONE')
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 bcrypt = Bcrypt(app)
-
 mail = Mail(app)
 
-
-
+   
 
 # Filtre personnalisé pour supprimer les balises HTML
 def strip_html(value):
@@ -41,10 +43,27 @@ def strip_html(value):
 # Enregistrer le filtre dans Jinja2
 app.jinja_env.filters['strip_html'] = strip_html
 
+
+def get_locale():
+    # Vérifiez le paramètre 'lang' dans l'URL
+    lang = request.args.get('lang')
+    if lang in ['fr', 'en']:
+        session['lang'] = lang  # Stockez la langue dans la session
+        return lang
+
+    # Vérifiez la session
+    if 'lang' in session:
+        return session['lang']
+
+    # Sinon, utilisez les préférences du navigateur
+    return request.accept_languages.best_match(['fr', 'en'])
+
+babel=Babel(app, locale_selector=get_locale)
+ 
 def generate_csv(data):
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Prénom", "Nom", "Email", "Clé Unique", "Présent"])
+    writer.writerow([_('First Name'), _('Last Name'), _('Email'), _('Unique Key'), _('Presence')])
     for row in data:
         writer.writerow([s if isinstance(s, str) else str(s) for s in row])
     return output.getvalue()
@@ -73,7 +92,7 @@ class Event(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     organizer = db.Column(db.String(100), nullable=True)
     eligible_hours = db.Column(db.Float, nullable=True)
-    status = db.Column(db.String(50), nullable=False, default='hidden')  # 'hidden', 'visible', 'archived'
+    status = db.Column(db.String(50), nullable=False, default='hidden')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     signature_url = db.Column(db.String(200), nullable=True) 
 
@@ -100,7 +119,7 @@ def login():
             login_user(user)
             return redirect(url_for('index'))
         else:
-            flash('Identifiants invalides', 'danger')
+            flash(_('Wrong credentials'), 'danger')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -157,9 +176,9 @@ def update_status(event_id):
         if new_status in ['hidden', 'visible', 'archived']:
             event.status = new_status
             db.session.commit()
-            flash('Statut de l\'événement mis à jour avec succès.', 'success')
+            flash(_('Status updated successfully !'), 'success')
         else:
-            flash('Statut invalide.', 'error')
+            flash(_('Invalid status'), 'error')
         return redirect(url_for('index'))
     else:
         abort(403)
@@ -184,7 +203,7 @@ def delete_event(event_id):
         # Supprimer l'événement
         db.session.delete(event)
         db.session.commit()
-        flash('Événement et inscriptions supprimés avec succès.', 'success')
+        flash(_('Event and registrees successfully deleted !'), 'success')
         return redirect(url_for('index'))
     else:
         abort(403)
@@ -227,7 +246,7 @@ def create_event():
             # Vérifier et redimensionner l'image
             with Image.open(signature_path) as img:
                 if img.width > 800 or img.height > 600:
-                    flash('La signature doit être inférieure à 800x600 pixels.', 'danger')
+                    flash(_('Signature must be smaller than 800*600'), 'danger')
                     return redirect(url_for('create_event'))
 
                 # Redimensionner pour le certificat
@@ -250,7 +269,7 @@ def create_event():
         )
         db.session.add(new_event)
         db.session.commit()
-        flash('Événement créé avec succès', 'success')
+        flash(_('Event successfully created'), 'success')
         return redirect(url_for('index'))
 
     return render_template('create_event.html')
@@ -287,7 +306,7 @@ def edit_event(event_id):
                 event.signature_url = signature_path
 
             db.session.commit()
-            flash('Événement mis à jour avec succès', 'success')
+            flash(_('Event successfully updated'), 'success')
             return redirect(url_for('index'))
         return render_template('edit_event.html', event=event)
     else:
@@ -320,7 +339,7 @@ def mark_attendance(event_id):
                     pass
 
             db.session.commit()
-            flash('Modifications enregistrées', 'success')
+            flash(_('Modifications saved !'), 'success')
             return redirect(url_for('mark_attendance', event_id=event_id))
 
         return render_template('attendance.html', event=event, registrations=registrations)
@@ -336,7 +355,7 @@ def delete_registration(registration_id):
     if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id):
         db.session.delete(registration)
         db.session.commit()
-        flash('Inscription supprimée avec succès', 'success')
+        flash(_('You have been unregistered.'), 'success')
     else:
         abort(403)
 
@@ -356,7 +375,7 @@ def create_editor():
         new_user.set_password(temp_password)
         db.session.add(new_user)
         db.session.commit()
-        flash(f'Éditeur créé avec succès. Mot de passe temporaire : {temp_password}', 'success')
+        flash(f'Password  : {temp_password}', 'success')
 
     return redirect(url_for('manage_users'))
 
@@ -383,7 +402,7 @@ def manage_users():
         if user:
             user.role = new_role
             db.session.commit()
-            flash(f'Rôle de {user.username} mis à jour en {new_role}', 'success')
+            flash(f"_('Role of') {user.username} _('update to') {new_role}", "success")
         return redirect(url_for('manage_users'))
 
     return render_template('manage_users.html', users=users)
@@ -405,7 +424,7 @@ def delete_user(user_id):
 
     db.session.delete(user)
     db.session.commit()
-    flash('Utilisateur supprimé avec succès.', 'success')
+    flash(_('User successfully deleted'), 'success')
     return redirect(url_for('manage_users'))
 
 @app.route('/update_user/<int:user_id>', methods=['POST'])
@@ -420,7 +439,7 @@ def update_user(user_id):
             user.password = bcrypt.generate_password_hash(request.form.get('password'))
 
         db.session.commit()
-        flash('Utilisateur mis à jour avec succès.', 'success')
+        flash(_('User successfully updated.'), 'success')
     else:
         abort(403)
 
@@ -446,13 +465,12 @@ def register_page(event_id):
     return render_template('register.html', event=event)
 
 
-def send_registration_email(email, first_name, event_title, event_date,unique_key):
-    msg = Message(
-        subject='Registration Confirmation',
-        recipients=[email],
-        body=f'Hello {first_name},\n\nYou have successfully registered for the event: {event_title} that will take place on {event_date}.\nYour unique key is : {unique_key}\n\nThank you!'
-    )
-    mail.send(msg)
+def send_registration_email(email, first_name, event_title, event_date, unique_key):
+    with app.app_context():
+        subject = _('Registration Confirmation')
+        body = _('Hello %(name)s,\n\nYou have successfully registered for the event: %(event)s that will take place on %(date)s.\nYour unique key is: %(key)s\n\nThank you!', name=first_name, event=event_title, date=event_date, key=unique_key)
+        msg = Message(subject=subject, recipients=[email], body=body)
+        mail.send(msg)
     
     
 @app.route('/register/<int:event_id>', methods=['POST'])
@@ -461,14 +479,14 @@ def register(event_id):
 
     # Vérification du statut de l'événement
     if event.status != 'visible':
-        flash('Les inscriptions ne sont pas autorisées pour cet événement.', 'error')
+        flash(_('Registration in not available'), 'error')
         return redirect(url_for('event', event_id=event_id))
         
     # Vérification si l'email est déjà inscrit
     email = request.form.get('email')
     existing_registration = Registration.query.filter_by(event_id=event_id, email=email).first()
     if existing_registration:
-        flash('Cet email est déjà inscrit à cet événement.', 'error')
+        flash(_('Email already registered'), 'error')
         return redirect(url_for('register_page', event_id=event_id))
 
     # Logique d'inscription avec génération de clé unique
@@ -486,7 +504,7 @@ def register(event_id):
     # Send registration email
     send_registration_email(email, request.form.get('first_name'), event.title, event.date, unique_key)
     
-    flash('Inscription réussie. Votre clé unique est : ' + unique_key, 'success')
+    flash(_('Registration successfull. Your unique key is ') + unique_key, 'success')
     return redirect(url_for('event', event_id=event_id))
 
 @app.route('/unregister_page/<int:event_id>', methods=['GET', 'POST'])
@@ -506,9 +524,9 @@ def unregister(event_id):
     if registration:
         db.session.delete(registration)
         db.session.commit()
-        flash('Désinscription réussie.', 'success')
+        flash(_('Successful unregistration'), 'success')
     else:
-        flash('Aucune inscription trouvée avec cet email et cette clé unique.', 'error')
+        flash(_('No registration for this email and unique key on this event'), 'error')
 
     return redirect(url_for('event', event_id=event_id))
     
@@ -522,7 +540,7 @@ def request_certificate():
             event = Event.query.get(registration.event_id)
             return render_template('certificate.html', registration=registration, event=event)
         else:
-            flash('Désolé, mais votre présence n\'a pas été confirmée par l\'organisateur.', 'danger')
+            flash(_('Sorry, Your presence was not confirmed by the organizer.'), 'danger')
     return render_template('request_certificate.html')
 
 if __name__ == '__main__':

@@ -1,43 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Créer un nouvel événement</h1>
+<h1>{{ _('Create a new event') }}</h1>
 <form method="POST" enctype="multipart/form-data" action="{{ url_for('create_event') }}" onsubmit="return validateForm()">
-    <label for="title">Titre*:</label>
+    <label for="title">{{ _('Title') }}*:</label>
     <input type="text" id="title" name="title" required><br>
 
-    <label for="description">Description*:</label>
+    <label for="description">{{ _('Description') }}*:</label>
     <textarea id="description" name="description" required></textarea><br>
 
-    <label for="photo_url">URL de la photo:</label>
+    <label for="photo_url">{{ _('URL of the picture') }}:</label>
     <input type="url" id="photo_url" name="photo_url"><br>
 
-    <label for="program">Programme*:</label>
+    <label for="program">{{ _('Program') }}*:</label>
     <textarea id="program" name="program" required></textarea><br>
 
         <div class="form-group">
-            <label for="date">Date de l'événement*:</label>
+            <label for="date">{{ _('Date of the event') }}*:</label>
             <input type="date" id="date" name="date" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="status">Statut*:</label>
+            <label for="status">{{ _('Statut') }}*:</label>
             <select id="status" name="status" class="form-control" required>
-                <option value="hidden">Caché</option>
-                <option value="visible">Visible</option>
-                <option value="archived">Archivé</option>
+                <option value="hidden">{{ _('Hidden') }}</option>
+                <option value="visible">{{ _('Visible') }}</option>
+                <option value="archived">{{ _('Archived') }}</option>
             </select>
         </div>
 
-    <label for="organizer">Organisateur*:</label>
+    <label for="organizer">{{ _('Organizer') }}*:</label>
     <input type="text" id="organizer" name="organizer" required><br>
 
-    <label for="eligible_hours">Nombre d'heures éligibles*:</label>
+    <label for="eligible_hours">{{ _('Number of training hours') }}*:</label>
     <input type="number" step="0.1" id="eligible_hours" name="eligible_hours" value="0" required><br>
 
-    <label for="signature">Signature de l'organisateur :</label>
+    <label for="signature">{{ _('Signature of the organizer') }} :</label>
     <input type="file" id="signature" name="signature" accept="image/*" onchange="validateImageSize(this)"><br>
 
-    <button type="submit">Créer l'événement</button>
+    <button type="submit">{{ _('Create the event') }}</button>
 </form>
 <script>
     document.getElementById('eventForm').addEventListener('submit', function(event) {
@@ -82,7 +82,7 @@
             const img = new Image();
             img.onload = function() {
                 if (img.width > 800 || img.height > 600) {
-                    alert('La signature doit être inférieure à 800x600 pixels.');
+                    alert({{ _('Picture must be smaller than 800*600') }});
                     input.value = ''; // Réinitialiser le champ de fichier
                 }
             };
