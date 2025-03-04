@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, jsonify
+from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
@@ -7,15 +8,30 @@ from datetime import datetime
 import re
 from werkzeug.utils import secure_filename
 import uuid,csv,io
+from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+load_dotenv()  # Load environment variables from .env file
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS')
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 bcrypt = Bcrypt(app)
+
+mail = Mail(app)
+
+
+
 
 # Filtre personnalisé pour supprimer les balises HTML
 def strip_html(value):
@@ -429,6 +445,16 @@ def register_page(event_id):
         return register(event_id)
     return render_template('register.html', event=event)
 
+
+def send_registration_email(email, first_name, event_title, event_date,unique_key):
+    msg = Message(
+        subject='Registration Confirmation',
+        recipients=[email],
+        body=f'Hello {first_name},\n\nYou have successfully registered for the event: {event_title} that will take place on {event_date}.\nYour unique key is : {unique_key}\n\nThank you!'
+    )
+    mail.send(msg)
+    
+    
 @app.route('/register/<int:event_id>', methods=['POST'])
 def register(event_id):
     event = Event.query.get_or_404(event_id)
@@ -456,6 +482,10 @@ def register(event_id):
     )
     db.session.add(new_registration)
     db.session.commit()
+    
+    # Send registration email
+    send_registration_email(email, request.form.get('first_name'), event.title, event.date, unique_key)
+    
     flash('Inscription réussie. Votre clé unique est : ' + unique_key, 'success')
     return redirect(url_for('event', event_id=event_id))
 
