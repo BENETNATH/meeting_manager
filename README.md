@@ -48,47 +48,37 @@ Meeting Manager is a web application designed to manage events and generate cert
    MAIL_DEFAULT_SENDER=your-email@example.com
    SECRET_KEY=your-secret-key
    SQLALCHEMY_DATABASE_URI=sqlite:///database.db
+   ADMIN_EMAIL='admin@email.com'
+   ADMIN_PASSWORD='password'
    ```
 
-5. **Run the Application**:
+5. **Run the Application ONCE to initialize database**:
    ```bash
-   flask run
+   python app.py
    ```
-
-## Deployment
-
-### Using a Platform as a Service (PaaS)
-
-1. **Heroku**:
-   - Create a new Heroku app.
-   - Connect your GitHub repository to Heroku.
-   - Set the config vars in Heroku to match your `.env` file.
-   - Deploy the app using the Heroku GitHub integration.
-
-2. **Vercel** or **Netlify**:
-   - These platforms are more suited for frontend applications but can be configured to deploy full-stack applications with serverless functions.
-
-### Using Docker
-
-1. **Create a Dockerfile**:
-   ```dockerfile
-   FROM python:3.9-slim
-
-   WORKDIR /app
-
-   COPY requirements.txt requirements.txt
-   RUN pip install -r requirements.txt
-
-   COPY . .
-
-   CMD ["flask", "run", "--host=0.0.0.0"]
-   ```
-
-2. **Build and Run the Docker Container**:
+   
+6. **Close the running script**: 
    ```bash
-   docker build -t meeting-manager .
-   docker run -p 5000:5000 meeting-manager
+   Press Ctrl+C twice
    ```
+
+7. **Run the Application in production**:
+   ```bash
+   waitress-serve --port=8000 app:app
+   ```
+   
+8. **Reach your webapp and start to worl**: 
+   ```bash
+   http://localhost:8000
+   ```  
+Default credentials  are defined in .env
+
+
+
+## Related ressources
+
+This project was mostly developped with Mistral.ai
+This project is using TinyMCE for text edition
 
 ## Contributing
 

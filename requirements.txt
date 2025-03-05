@@ -7,3 +7,4 @@ Werkzeug
 Pillow
 python-dotenv
 Flask-Babel
+waitress

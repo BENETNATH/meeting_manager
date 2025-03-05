@@ -26,6 +26,8 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['BABEL_DEFAULT_LOCALE'] = os.getenv('BABEL_DEFAULT_LOCALE')
 app.config['BABEL_DEFAULT_TIMEZONE'] = os.getenv('BABEL_DEFAULT_TIMEZONE')
+admin_password = os.getenv('ADMIN_PASSWORD')
+admin_email = os.getenv('ADMIN_EMAIL')
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -551,8 +553,8 @@ if __name__ == '__main__':
         db.create_all()
 
         if not User.query.filter_by(username='admin').first():
-            admin_user = User(username='admin', email='admin@example.com', role='super-admin')
-            admin_user.set_password('gestionnaire')
+            admin_user = User(username='admin', email=admin_email, role='super-admin')
+            admin_user.set_password(admin_password)
             db.session.add(admin_user)
             db.session.commit()
 

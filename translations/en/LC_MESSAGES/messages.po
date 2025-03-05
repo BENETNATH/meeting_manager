@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-04 19:32+0100\n"
+"POT-Creation-Date: 2025-03-05 09:56+0100\n"
 "PO-Revision-Date: 2025-03-04 17:07+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -29,7 +29,8 @@ msgstr "Last Name"
 
 #: app.py:66 templates/attendance.html:37 templates/create_editor.html:8
 #: templates/manage_users.html:11 templates/manage_users.html:23
-#: templates/register.html:17 templates/unregister.html:10
+#: templates/register.html:17 templates/request_certificate.html:7
+#: templates/unregister.html:10
 msgid "Email"
 msgstr ""
 
@@ -380,10 +381,9 @@ msgstr "Modify"
 msgid "Present"
 msgstr "Present"
 
-#: templates/index.html:28
-#, fuzzy
-msgid "Are you sure you want to delete this event ?"
-msgstr "Are you sure that you want to delete the event?"
+#: templates/login.html:4
+msgid "Connexion"
+msgstr ""
 
 #: templates/login.html:8
 msgid "Password"
@@ -456,4 +456,7 @@ msgstr "Get your certificate"
 #, fuzzy
 msgid "Unregister from the event"
 msgstr "Register for the event"
+
+#~ msgid "Are you sure you want to delete this event ?"
+#~ msgstr "Are you sure that you want to delete the event?"
 
