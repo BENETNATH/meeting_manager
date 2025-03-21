@@ -60,11 +60,14 @@
                 </div>
                 <button type="submit" name="action" value="check_all" class="btn btn-primary mt-3">{{ _('Mark all as present') }}</button>
                 <button type="submit" name="action" value="update_attendance" class="btn btn-success mt-3">{{ _('Update presence') }}</button>
-				    <a href="{{ url_for('extract_attendance', event_id=event.id) }}" class="btn btn-secondary mt-3">{{ _('Extract registrees in csv') }}</a>
+                <a href="{{ url_for('extract_attendance', event_id=event.id) }}" class="btn btn-secondary mt-3">{{ _('Extract registrees in csv') }}</a>
             </form>
         </div>
     </div>
 </div>
+<!-- Inclure Quill CSS et JS -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 
 <script>
     function extractAndMarkAttendance() {
@@ -85,7 +88,7 @@
         if (countChecked > 0) {
             alert(`${countChecked} {{ _('updated cell(s). Click "Update Presence" to save.') }}`);
         } else {
-            alert({{ _('No matching email found') }});
+            alert('{{ _('No matching email found') }}');
         }
     }
 

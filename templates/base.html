@@ -6,22 +6,13 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="{{ url_for('static', filename='tinymce/tinymce.min.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            tinymce.init({
-                selector: 'textarea',
-				license_key: 'gpl',
-                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-                setup: function (editor) {
-                    editor.on('change', function () {
-                        editor.save();
-                    });
-                }
-            });
-        });
-    </script>
+	<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+	<script>
+	  const quill = new Quill('#editor', {
+		theme: 'snow'
+	  });
+	</script>
 </head>
 <body>
    <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -41,6 +32,9 @@
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> {{ _('Log out') }}</a>
+                    </li>
+					<li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('change_password') }}"><i class="fas fa-sign-out-alt"></i> {{ _('Change password') }}</a>
                     </li>
                     {% if current_user.role == 'super-admin' %}
                         <li class="nav-item">

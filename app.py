@@ -1,21 +1,29 @@
-from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, jsonify, session
+import csv
+import io
+import os
+import re
+import uuid
+import logging
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
+from PIL import Image
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, session
+from flask_babel import Babel
+from flask_babel import _
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_bcrypt import Bcrypt
-from flask_babel import Babel, lazy_gettext
-from flask_babel import _
-from PIL import Image
-from datetime import datetime
-import re
+from waitress import serve
 from werkzeug.utils import secure_filename
-import uuid,csv,io
-from dotenv import load_dotenv
-import os
 
+# Initiation
 app = Flask(__name__)
-babel = Babel(app)
-load_dotenv()  # Load environment variables from .env file
+
+
+# Load environment variables from .env file
+load_dotenv()  
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS')
@@ -29,48 +37,30 @@ app.config['BABEL_DEFAULT_TIMEZONE'] = os.getenv('BABEL_DEFAULT_TIMEZONE')
 admin_password = os.getenv('ADMIN_PASSWORD')
 admin_email = os.getenv('ADMIN_EMAIL')
 
+babel = Babel(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 
-   
 
-# Filtre personnalisé pour supprimer les balises HTML
-def strip_html(value):
-    clean_text = re.sub('<.*?>', '', value)
-    return clean_text
+# Log config
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-# Enregistrer le filtre dans Jinja2
-app.jinja_env.filters['strip_html'] = strip_html
+# Timestamp format
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Log rotation
+file_handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=3)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 
-def get_locale():
-    # Vérifiez le paramètre 'lang' dans l'URL
-    lang = request.args.get('lang')
-    if lang in ['fr', 'en']:
-        session['lang'] = lang  # Stockez la langue dans la session
-        return lang
+### CLASS DEFINITIONS ####
 
-    # Vérifiez la session
-    if 'lang' in session:
-        return session['lang']
-
-    # Sinon, utilisez les préférences du navigateur
-    return request.accept_languages.best_match(['fr', 'en'])
-
-babel=Babel(app, locale_selector=get_locale)
- 
-def generate_csv(data):
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow([_('First Name'), _('Last Name'), _('Email'), _('Unique Key'), _('Presence')])
-    for row in data:
-        writer.writerow([s if isinstance(s, str) else str(s) for s in row])
-    return output.getvalue()
-
-    
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
@@ -91,7 +81,7 @@ class Event(db.Model):
     description = db.Column(db.Text, nullable=False)
     photo_url = db.Column(db.String(200), nullable=True)
     program = db.Column(db.Text, nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=datetime.now)
     organizer = db.Column(db.String(100), nullable=True)
     eligible_hours = db.Column(db.Float, nullable=True)
     status = db.Column(db.String(50), nullable=False, default='hidden')
@@ -106,6 +96,35 @@ class Registration(db.Model):
     email = db.Column(db.String(100), nullable=False)
     unique_key = db.Column(db.String(100), unique=True, nullable=False)
     attended = db.Column(db.Boolean, default=False)
+
+#### ROUTES AND FUNCTIONS DEFINITIONS ####
+
+# stripping HTML function
+def strip_html(value):
+    clean_text = re.sub('<.*?>', '', value)
+    return clean_text
+app.jinja_env.filters['strip_html'] = strip_html
+
+def get_locale():
+#Check and store language
+    lang = request.args.get('lang')
+    if lang in ['fr', 'en']:
+        session['lang'] = lang
+        return lang
+#Check session
+    if 'lang' in session:
+        return session['lang']
+# Use browser as default otherwise
+    return request.accept_languages.best_match(['fr', 'en'])
+babel=Babel(app, locale_selector=get_locale)
+ 
+def generate_csv(data):
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([_('First Name'), _('Last Name'), _('Email'), _('Unique Key'), _('Presence')])
+    for row in data:
+        writer.writerow([s if isinstance(s, str) else str(s) for s in row])
+    return output.getvalue()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -148,7 +167,7 @@ def extract_attendance(event_id):
     if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id):
         registrations = Registration.query.filter_by(event_id=event_id).all()
 
-        # Générer le CSV
+# CSV creation
         output = []
         for reg in registrations:
             output.append([reg.first_name, reg.last_name, reg.email, reg.unique_key, reg.attended])
@@ -166,13 +185,12 @@ def extract_attendance(event_id):
     else:
         abort(403)
 
-
 @app.route('/update_status/<int:event_id>', methods=['POST'])
 @login_required
 def update_status(event_id):
     event = Event.query.get_or_404(event_id)
 
-    # Vérifier si l'utilisateur a les droits nécessaires
+
     if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id):
         new_status = request.form.get('status')
         if new_status in ['hidden', 'visible', 'archived']:
@@ -191,18 +209,12 @@ def update_status(event_id):
 def delete_event(event_id):
     event = Event.query.get_or_404(event_id)
 
-    # Vérifier si l'utilisateur a les droits nécessaires
     if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id):
-        # Supprimer les inscriptions associées à l'événement
         registrations = Registration.query.filter_by(event_id=event_id).all()
         for registration in registrations:
             db.session.delete(registration)
-            
-        # Supprimer les fichiers associés
         if event.signature_url:
             os.remove(event.signature_url)
-            
-        # Supprimer l'événement
         db.session.delete(event)
         db.session.commit()
         flash(_('Event and registrees successfully deleted !'), 'success')
@@ -234,27 +246,21 @@ def create_event():
         if eligible_hours == '':
             eligible_hours = 0
 
-        # Gérer le téléchargement de l'image de signature
         signature = request.files.get('signature')
         signature_url = None
         if signature:
-            # Créer un nom de fichier unique
             file_extension = os.path.splitext(signature.filename)[1]
             filename = f"{uuid.uuid4()}_signature{file_extension}"
             signature_path = os.path.join('uploads', filename)
             os.makedirs(os.path.dirname(signature_path), exist_ok=True)
             signature.save(signature_path)
 
-            # Vérifier et redimensionner l'image
             with Image.open(signature_path) as img:
                 if img.width > 800 or img.height > 600:
                     flash(_('Signature must be smaller than 800*600'), 'danger')
                     return redirect(url_for('create_event'))
-
-                # Redimensionner pour le certificat
                 img.thumbnail((250, 250))
                 img.save(signature_path)
-
             signature_url = signature_path
 
         new_event = Event(
@@ -276,9 +282,6 @@ def create_event():
 
     return render_template('create_event.html')
 
-
-
-    
 @app.route('/admin/edit_event/<int:event_id>', methods=['GET', 'POST'])
 @login_required
 def edit_event(event_id):
@@ -298,7 +301,6 @@ def edit_event(event_id):
             if event.eligible_hours == '':
                 event.eligible_hours = 0
 
-            # Gérer le téléchargement de l'image de signature
             signature = request.files.get('signature')
             if signature:
                 filename = secure_filename(signature.filename)
@@ -377,6 +379,7 @@ def create_editor():
         new_user.set_password(temp_password)
         db.session.add(new_user)
         db.session.commit()
+        logger.info(f'user {username} successfully created')
         flash(f'Password  : {temp_password}', 'success')
 
     return redirect(url_for('manage_users'))
@@ -404,12 +407,11 @@ def manage_users():
         if user:
             user.role = new_role
             db.session.commit()
+            logger.info(f"_('Role of') {user.username} _('update to') {new_role}", "success")
             flash(f"_('Role of') {user.username} _('update to') {new_role}", "success")
         return redirect(url_for('manage_users'))
 
     return render_template('manage_users.html', users=users)
-
-
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
@@ -419,13 +421,20 @@ def delete_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    # Réattribuer les événements au super-admin
+    if user.role == 'super-admin':
+        other_super_admins = User.query.filter_by(role='super-admin').filter(User.id != user_id).count()
+        if other_super_admins == 0:
+            flash(_('Cannot delete the only super-admin user.'), 'danger')
+            return redirect(url_for('manage_users'))
+
     events = Event.query.filter_by(created_by=user_id).all()
     for event in events:
         event.created_by = current_user.id
 
+    logger.info(f'User {user.username} will be deleted')
     db.session.delete(user)
     db.session.commit()
+
     flash(_('User successfully deleted'), 'success')
     return redirect(url_for('manage_users'))
 
@@ -433,20 +442,38 @@ def delete_user(user_id):
 @login_required
 def update_user(user_id):
     user = User.query.get_or_404(user_id)
-
     if current_user.role == 'super-admin' or current_user.id == user_id:
-        user.first_name = request.form.get('first_name')
-        user.last_name = request.form.get('last_name')
+        user.role = request.form.get('role')
         if request.form.get('password'):
-            user.password = bcrypt.generate_password_hash(request.form.get('password'))
-
+            user.set_password(request.form.get('password'))
         db.session.commit()
         flash(_('User successfully updated.'), 'success')
     else:
         abort(403)
-
     return redirect(url_for('manage_users'))
 
+@app.route('/reset_password/<int:user_id>', methods=['POST'])
+@login_required
+def reset_password(user_id):
+    if current_user.role != 'super-admin':
+        abort(403)
+
+    user = User.query.get_or_404(user_id)
+    new_password = generate_temp_password()
+    user.set_password(new_password)
+    db.session.commit()
+    send_reset_password_email(user.email, new_password)
+
+    flash(_('Password has been reset and sent to the user\'s email.'), 'success')
+    return redirect(url_for('manage_users'))
+
+def send_reset_password_email(email, new_password):
+    with app.app_context():
+        subject = _('Password Reset')
+        body = _('Hello,\n\nYour password has been reset. Your new password is: %(password)s\n\nPlease login and change your password as soon as possible.\n\nThank you!', password=new_password)
+        msg = Message(subject=subject, recipients=[email], body=body)
+        mail.send(msg)
+        
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
@@ -455,7 +482,7 @@ def change_password():
         current_user.set_password(new_password)
         current_user.temp_password = None
         db.session.commit()
-        flash('Mot de passe mis à jour avec succès', 'success')
+        flash(_('Password updated.'), 'success')
         return redirect(url_for('index'))
     return render_template('change_password.html')
 
@@ -465,7 +492,6 @@ def register_page(event_id):
     if request.method == 'POST':
         return register(event_id)
     return render_template('register.html', event=event)
-
 
 def send_registration_email(email, first_name, event_title, event_date, unique_key):
     with app.app_context():
@@ -478,20 +504,14 @@ def send_registration_email(email, first_name, event_title, event_date, unique_k
 @app.route('/register/<int:event_id>', methods=['POST'])
 def register(event_id):
     event = Event.query.get_or_404(event_id)
-
-    # Vérification du statut de l'événement
     if event.status != 'visible':
-        flash(_('Registration in not available'), 'error')
+        flash(_('Registration is not available'), 'error')
         return redirect(url_for('event', event_id=event_id))
-        
-    # Vérification si l'email est déjà inscrit
     email = request.form.get('email')
     existing_registration = Registration.query.filter_by(event_id=event_id, email=email).first()
     if existing_registration:
         flash(_('Email already registered'), 'error')
         return redirect(url_for('register_page', event_id=event_id))
-
-    # Logique d'inscription avec génération de clé unique
     unique_key = str(uuid.uuid4())
     new_registration = Registration(
         event_id=event_id,
@@ -502,11 +522,13 @@ def register(event_id):
     )
     db.session.add(new_registration)
     db.session.commit()
-    
-    # Send registration email
-    send_registration_email(email, request.form.get('first_name'), event.title, event.date, unique_key)
-    
-    flash(_('Registration successfull. Your unique key is ') + unique_key, 'success')
+
+    try:
+        send_registration_email(email, request.form.get('first_name'), event.title, event.date, unique_key)
+        flash(_('Registration successful. Your unique key is ') + unique_key, 'success')
+    except Exception as e:
+        flash(_('Email notifications are not configured. Please note down your unique key: ') + unique_key, 'warning')
+
     return redirect(url_for('event', event_id=event_id))
 
 @app.route('/unregister_page/<int:event_id>', methods=['GET', 'POST'])
@@ -520,8 +542,6 @@ def unregister_page(event_id):
 def unregister(event_id):
     email = request.form.get('email')
     unique_key = request.form.get('unique_key')
-
-    # Vérifier si l'inscription existe
     registration = Registration.query.filter_by(event_id=event_id, email=email, unique_key=unique_key).first()
     if registration:
         db.session.delete(registration)
@@ -539,11 +559,14 @@ def request_certificate():
         unique_key = request.form['unique_key']
         registration = Registration.query.filter_by(email=email, unique_key=unique_key).first()
         if registration and registration.attended:
-            event = Event.query.get(registration.event_id)
+            event = Event.query.filter_by(id=registration.event_id).first()
             return render_template('certificate.html', registration=registration, event=event)
         else:
             flash(_('Sorry, Your presence was not confirmed by the organizer.'), 'danger')
     return render_template('request_certificate.html')
+
+
+#########
 
 if __name__ == '__main__':
     with app.app_context():
@@ -557,5 +580,5 @@ if __name__ == '__main__':
             admin_user.set_password(admin_password)
             db.session.add(admin_user)
             db.session.commit()
-
-    app.run()
+    logger.info('Server is starting on port 8000...')
+    serve(app, host="0.0.0.0", port=8000)

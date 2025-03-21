@@ -1,23 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1>{{ _('Register to the event') }}: {{ event.title }}</h1>
-	            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
-    <form method="POST" action="{{ url_for('register', event_id=event.id) }}">
-        <div class="form-group">
-            <label for="first_name">{{ _('First Name') }}*:</label>
-            <input type="text" id="first_name" name="first_name" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="last_name">{{ _('Last Name') }}*:</label>
-            <input type="text" id="last_name" name="last_name" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="email">{{ _('Email') }}*:</label>
-            <input type="email" id="email" name="email" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">{{ _('Register') }}</button>
-    </form>
-</div>
-{% endblock %}
+    <div class="container mt-4">
+        <h1>{{ _('Register to the event') }}: {{ event.title }}</h1>
+        <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
+        <form method="POST" action="{{ url_for('register', event_id=event.id) }}">
+            <div class="form-group">
+                <label for="first_name">{{ _('First Name') }}*:</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">{{ _('Last Name') }}*:</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">{{ _('Email') }}*:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ _('Register') }}</button>
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if 'unique key' in message %}
+                        <div class="alert alert-warning mt-3">
+                            {{ message }}
+                            <button type="button" onclick="copyToClipboard('{{ message.split(':')[1].strip() }}')" class="btn btn-sm btn-secondary">
+                                {{ _('Copy to Clipboard') }}
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+	{% endblock %}
+    <script>
+        function copyToClipboard(text) {
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Copied to clipboard: ' + text);
+        }
+    </script>
+

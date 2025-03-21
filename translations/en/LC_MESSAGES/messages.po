@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-05 09:56+0100\n"
+"POT-Creation-Date: 2025-03-21 17:45+0100\n"
 "PO-Revision-Date: 2025-03-04 17:07+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,82 +18,114 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:66 templates/attendance.html:36 templates/register.html:9
+#: app.py:84 controllers.py:59 templates/attendance.html:36
+#: templates/register.html:9
 #, fuzzy
 msgid "First Name"
 msgstr "First Name"
 
-#: app.py:66 templates/attendance.html:35 templates/register.html:13
+#: app.py:84 controllers.py:59 templates/attendance.html:35
+#: templates/register.html:13
 msgid "Last Name"
 msgstr "Last Name"
 
-#: app.py:66 templates/attendance.html:37 templates/create_editor.html:8
-#: templates/manage_users.html:11 templates/manage_users.html:23
-#: templates/register.html:17 templates/request_certificate.html:7
-#: templates/unregister.html:10
+#: app.py:84 controllers.py:59 templates/attendance.html:37
+#: templates/create_editor.html:8 templates/manage_users.html:11
+#: templates/manage_users.html:22 templates/register.html:17
+#: templates/request_certificate.html:7 templates/unregister.html:10
 msgid "Email"
 msgstr ""
 
-#: app.py:66 templates/attendance.html:38
+#: app.py:84 controllers.py:59 templates/attendance.html:38
 #, fuzzy
 msgid "Unique Key"
 msgstr "Unique key"
 
-#: app.py:66
+#: app.py:84 controllers.py:59
 #, fuzzy
 msgid "Presence"
 msgstr "Present"
 
-#: app.py:122
+#: app.py:140 controllers.py:78
 msgid "Wrong credentials"
 msgstr "Wrong credentials"
 
-#: app.py:179
+#: app.py:197 controllers.py:124
 msgid "Status updated successfully !"
 msgstr ""
 
-#: app.py:181
+#: app.py:199 controllers.py:126
 msgid "Invalid status"
 msgstr ""
 
-#: app.py:206
+#: app.py:224 controllers.py:143
 msgid "Event and registrees successfully deleted !"
 msgstr ""
 
-#: app.py:249
+#: app.py:267 controllers.py:180
 msgid "Signature must be smaller than 800*600"
 msgstr ""
 
-#: app.py:272
+#: app.py:290 controllers.py:199
 msgid "Event successfully created"
 msgstr ""
 
-#: app.py:309
+#: app.py:327 controllers.py:227
 msgid "Event successfully updated"
 msgstr ""
 
-#: app.py:342
+#: app.py:360 controllers.py:256
 msgid "Modifications saved !"
 msgstr ""
 
-#: app.py:358
+#: app.py:376 controllers.py:270
 #, fuzzy
 msgid "You have been unregistered."
 msgstr "See registered"
 
-#: app.py:427
+#: app.py:445
+msgid "Cannot delete the only super-admin user."
+msgstr ""
+
+#: app.py:457 controllers.py:326
 msgid "User successfully deleted"
 msgstr ""
 
-#: app.py:442
+#: app.py:471 controllers.py:339
 msgid "User successfully updated."
 msgstr ""
 
-#: app.py:470
+#: app.py:491
+msgid "Password has been reset and sent to the user's email."
+msgstr ""
+
+#: app.py:496
+#, fuzzy
+msgid "Password Reset"
+msgstr "Password"
+
+#: app.py:497
+#, python-format
+msgid ""
+"Hello,\n"
+"\n"
+"Your password has been reset. Your new password is: %(password)s\n"
+"\n"
+"Please login and change your password as soon as possible.\n"
+"\n"
+"Thank you!"
+msgstr ""
+
+#: app.py:509 controllers.py:352
+#, fuzzy
+msgid "Password updated."
+msgstr "Password"
+
+#: app.py:523 controllers.py:365
 msgid "Registration Confirmation"
 msgstr ""
 
-#: app.py:471
+#: app.py:524 controllers.py:366
 #, python-format
 msgid ""
 "Hello %(name)s,\n"
@@ -105,28 +137,33 @@ msgid ""
 "Thank you!"
 msgstr ""
 
-#: app.py:482
-msgid "Registration in not available"
-msgstr ""
+#: app.py:535 controllers.py:374
+#, fuzzy
+msgid "Registration is not available"
+msgstr "Registration management"
 
-#: app.py:489
+#: app.py:542 controllers.py:379
 #, fuzzy
 msgid "Email already registered"
 msgstr "See registered"
 
-#: app.py:507
-msgid "Registration successfull. Your unique key is "
+#: app.py:560 controllers.py:393
+msgid "Registration successful. Your unique key is "
 msgstr ""
 
-#: app.py:527
+#: app.py:563 controllers.py:395
+msgid "Email notifications are not configured. Please note down your unique key: "
+msgstr ""
+
+#: app.py:584 controllers.py:413
 msgid "Successful unregistration"
 msgstr ""
 
-#: app.py:529
+#: app.py:586 controllers.py:415
 msgid "No registration for this email and unique key on this event"
 msgstr ""
 
-#: app.py:543
+#: app.py:600 controllers.py:428
 msgid "Sorry, Your presence was not confirmed by the organizer."
 msgstr ""
 
@@ -168,7 +205,7 @@ msgid "Actions"
 msgstr ""
 
 #: templates/attendance.html:54 templates/index.html:28
-#: templates/manage_users.html:48
+#: templates/manage_users.html:50
 msgid "Delete"
 msgstr "Delete"
 
@@ -186,45 +223,64 @@ msgstr "Present"
 msgid "Extract registrees in csv"
 msgstr "Extract registered"
 
-#: templates/attendance.html:81
+#: templates/attendance.html:84
 msgid "Not matching email found"
 msgstr ""
 
-#: templates/attendance.html:86
+#: templates/attendance.html:89
 msgid "updated cell(s). Click \"Update Presence\" to save."
 msgstr ""
 
-#: templates/attendance.html:88
+#: templates/attendance.html:91
 msgid "No matching email found"
 msgstr ""
 
-#: templates/base.html:28
+#: templates/base.html:19
 msgid "Meeting Manager"
 msgstr "Meeting Manager"
 
-#: templates/base.html:35
+#: templates/base.html:26
 msgid "Home"
 msgstr "Home"
 
-#: templates/base.html:38
+#: templates/base.html:29
 msgid "English"
 msgstr "English"
 
-#: templates/base.html:39
+#: templates/base.html:30
 msgid "French"
 msgstr "French"
 
-#: templates/base.html:43
+#: templates/base.html:34
 msgid "Log out"
 msgstr "Log out"
 
-#: templates/base.html:47
+#: templates/base.html:37
+#, fuzzy
+msgid "Change password"
+msgstr "Password"
+
+#: templates/base.html:41
 msgid "Manage users"
 msgstr "Manage users"
 
-#: templates/base.html:52 templates/login.html:10
+#: templates/base.html:46 templates/login.html:10
 msgid "Login"
 msgstr "Login"
+
+#: templates/change_password.html:4
+#, fuzzy
+msgid "Change your password"
+msgstr "Password"
+
+#: templates/change_password.html:6
+#, fuzzy
+msgid "New password"
+msgstr "Password"
+
+#: templates/change_password.html:8
+msgid "Update"
+msgstr "Update"
 
 #: templates/create_editor.html:4
 #, fuzzy
@@ -232,7 +288,7 @@ msgid "Create editor"
 msgstr "Create an editor"
 
 #: templates/create_editor.html:6 templates/login.html:6
-#: templates/manage_users.html:9 templates/manage_users.html:22
+#: templates/manage_users.html:9 templates/manage_users.html:21
 msgid "Username"
 msgstr "Username"
 
@@ -244,84 +300,76 @@ msgstr "Create a new event"
 msgid "Title"
 msgstr "Title"
 
-#: templates/create_event.html:9 templates/edit_event.html:8
+#: templates/create_event.html:9 templates/edit_event.html:9
 #: templates/event.html:14
 msgid "Description"
 msgstr "Description"
 
-#: templates/create_event.html:12 templates/edit_event.html:10
+#: templates/create_event.html:13 templates/edit_event.html:13
 msgid "URL of the picture"
 msgstr "URL of the picture"
 
-#: templates/create_event.html:15 templates/event.html:18
+#: templates/create_event.html:16 templates/event.html:18
 msgid "Program"
 msgstr "Program"
 
-#: templates/create_event.html:19 templates/edit_event.html:15
+#: templates/create_event.html:21 templates/edit_event.html:21
 msgid "Date of the event"
 msgstr "Date of the event"
 
-#: templates/create_event.html:23 templates/edit_event.html:19
+#: templates/create_event.html:25 templates/edit_event.html:25
 msgid "Statut"
 msgstr "Status"
 
-#: templates/create_event.html:25 templates/edit_event.html:21
+#: templates/create_event.html:27 templates/edit_event.html:27
 #: templates/event.html:46 templates/index.html:32
 msgid "Hidden"
 msgstr "Hidden"
 
-#: templates/create_event.html:26 templates/edit_event.html:22
+#: templates/create_event.html:28 templates/edit_event.html:28
 #: templates/event.html:47 templates/index.html:33
 msgid "Visible"
 msgstr "Visible"
 
-#: templates/create_event.html:27 templates/edit_event.html:23
+#: templates/create_event.html:29 templates/edit_event.html:29
 #: templates/event.html:48 templates/index.html:34
 msgid "Archived"
 msgstr "Archived"
 
-#: templates/create_event.html:31 templates/edit_event.html:26
+#: templates/create_event.html:33 templates/edit_event.html:33
 #: templates/event.html:28
 msgid "Organizer"
 msgstr "Organizer"
 
-#: templates/create_event.html:34 templates/edit_event.html:28
+#: templates/create_event.html:36 templates/edit_event.html:36
 msgid "Number of training hours"
 msgstr "Number of training hours"
 
-#: templates/create_event.html:37
+#: templates/create_event.html:39
 msgid "Signature of the organizer"
 msgstr "Signature of the organizer"
 
-#: templates/create_event.html:40
+#: templates/create_event.html:42
 msgid "Create the event"
 msgstr "Create the event"
-
-#: templates/create_event.html:85
-msgid "Picture must be smaller than 800*600"
-msgstr ""
 
 #: templates/edit_event.html:4
 msgid "Modify the event"
 msgstr "Modify the event"
 
-#: templates/edit_event.html:12
+#: templates/edit_event.html:16
 msgid "Programme"
 msgstr "Program"
 
-#: templates/edit_event.html:30
+#: templates/edit_event.html:39
 msgid "Organizer signature"
 msgstr "Organizer signature"
 
-#: templates/edit_event.html:32
+#: templates/edit_event.html:42
 msgid "Update the event"
 msgstr "Update the event"
 
-#: templates/edit_event.html:33
-msgid "Are you sure that you want to delete the event ?"
-msgstr "Are you sure that you want to delete the event?"
-
-#: templates/edit_event.html:33 templates/event.html:58
+#: templates/edit_event.html:43 templates/event.html:58
 msgid "Delete the event"
 msgstr "Delete the event"
 
@@ -407,15 +455,15 @@ msgstr "Create an editor"
 msgid "Existing users"
 msgstr "Existing users"
 
-#: templates/manage_users.html:24
+#: templates/manage_users.html:23
 msgid "Actual role"
 msgstr "Current role"
 
-#: templates/manage_users.html:25
+#: templates/manage_users.html:24
 msgid "New role"
 msgstr "New role"
 
-#: templates/manage_users.html:26
+#: templates/manage_users.html:25
 msgid "Action"
 msgstr ""
 
@@ -423,22 +471,27 @@ msgstr ""
 msgid "Editor"
 msgstr "Editor"
 
-#: templates/manage_users.html:42
+#: templates/manage_users.html:40
 #, fuzzy
-msgid "New password"
-msgstr "Password"
-
-#: templates/manage_users.html:43
-msgid "Update"
+msgid "Update Role"
 msgstr "Update"
 
-#: templates/manage_users.html:48
+#: templates/manage_users.html:47
+#, fuzzy
+msgid "Reset Password"
+msgstr "Password"
+
+#: templates/manage_users.html:50
 msgid "Are you sure you want to delete this user"
 msgstr "Are you sure you want to delete this user?"
 
 #: templates/register.html:5
 msgid "Register to the event"
 msgstr "Register for the event"
+
+#: templates/register.html:30
+msgid "Copy to Clipboard"
+msgstr ""
 
 #: templates/request_certificate.html:4
 msgid "Ask for a certificate of attendance"
@@ -458,5 +511,17 @@ msgid "Unregister from the event"
 msgstr "Register for the event"
 
 #~ msgid "Are you sure you want to delete this event ?"
+#~ msgstr "Are you sure that you want to delete the event?"
+
+#~ msgid "Registration in not available"
+#~ msgstr ""
+
+#~ msgid "Registration successfull. Your unique key is "
+#~ msgstr ""
+
+#~ msgid "Picture must be smaller than 800*600"
+#~ msgstr ""
+
+#~ msgid "Are you sure that you want to delete the event ?"
 #~ msgstr "Are you sure that you want to delete the event?"
 

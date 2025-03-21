@@ -2,31 +2,33 @@
 
 {% block content %}
 <h1>{{ _('Create a new event') }}</h1>
-<form method="POST" enctype="multipart/form-data" action="{{ url_for('create_event') }}" onsubmit="return validateForm()">
+<form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('create_event') }}" onsubmit="return validateForm()">
     <label for="title">{{ _('Title') }}*:</label>
     <input type="text" id="title" name="title" required><br>
 
     <label for="description">{{ _('Description') }}*:</label>
-    <textarea id="description" name="description" required></textarea><br>
+    <div id="description"></div>
+    <input type="hidden" name="description" required><br>
 
     <label for="photo_url">{{ _('URL of the picture') }}:</label>
     <input type="url" id="photo_url" name="photo_url"><br>
 
     <label for="program">{{ _('Program') }}*:</label>
-    <textarea id="program" name="program" required></textarea><br>
+    <div id="program"></div>
+    <input type="hidden" name="program" required><br>
 
-        <div class="form-group">
-            <label for="date">{{ _('Date of the event') }}*:</label>
-            <input type="date" id="date" name="date" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="status">{{ _('Statut') }}*:</label>
-            <select id="status" name="status" class="form-control" required>
-                <option value="hidden">{{ _('Hidden') }}</option>
-                <option value="visible">{{ _('Visible') }}</option>
-                <option value="archived">{{ _('Archived') }}</option>
-            </select>
-        </div>
+    <div class="form-group">
+        <label for="date">{{ _('Date of the event') }}*:</label>
+        <input type="date" id="date" name="date" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="status">{{ _('Statut') }}*:</label>
+        <select id="status" name="status" class="form-control" required>
+            <option value="hidden">{{ _('Hidden') }}</option>
+            <option value="visible">{{ _('Visible') }}</option>
+            <option value="archived">{{ _('Archived') }}</option>
+        </select>
+    </div>
 
     <label for="organizer">{{ _('Organizer') }}*:</label>
     <input type="text" id="organizer" name="organizer" required><br>
@@ -39,35 +41,45 @@
 
     <button type="submit">{{ _('Create the event') }}</button>
 </form>
+
+<!-- Inclure Quill CSS et JS -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+
 <script>
     document.getElementById('eventForm').addEventListener('submit', function(event) {
         const dateInput = document.getElementById('date').value;
         const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
         if (!datePattern.test(dateInput)) {
-            alert('Format de date invalide. Utilisez le format DD-MM-YYYY.');
+            alert('Format de date invalide. Utilisez le format YYYY-MM-DD.');
             event.preventDefault(); // Empêche la soumission du formulaire
         }
     });
-</script>
-<script src="{{ url_for('static', filename='tinymce/tinymce.min.js') }}"></script>
-<script>
+
     document.addEventListener('DOMContentLoaded', function() {
-        tinymce.init({
-            selector: 'textarea',
-            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-            setup: function (editor) {
-                editor.on('change', function () {
-                    editor.save();
-                });
-            }
+        // Initialiser Quill
+        var quillDescription = new Quill('#description', {
+            theme: 'snow'
+        });
+
+        var quillProgram = new Quill('#program', {
+            theme: 'snow'
+        });
+
+        // Ajouter un écouteur d'événement pour sauvegarder le contenu
+        quillDescription.on('text-change', function() {
+            document.querySelector('input[name="description"]').value = quillDescription.root.innerHTML;
+        });
+
+        quillProgram.on('text-change', function() {
+            document.querySelector('input[name="program"]').value = quillProgram.root.innerHTML;
         });
     });
 
     function validateForm() {
-        var description = tinyMCE.get('description').getContent();
-        var program = tinyMCE.get('program').getContent();
+        var description = document.querySelector('input[name="description"]').value;
+        var program = document.querySelector('input[name="program"]').value;
 
         if (description.trim() === '' || program.trim() === '') {
             alert('Veuillez remplir tous les champs obligatoires.');
@@ -82,7 +94,7 @@
             const img = new Image();
             img.onload = function() {
                 if (img.width > 800 || img.height > 600) {
-                    alert({{ _('Picture must be smaller than 800*600') }});
+                    alert('Picture must be smaller than 800*600');
                     input.value = ''; // Réinitialiser le champ de fichier
                 }
             };
