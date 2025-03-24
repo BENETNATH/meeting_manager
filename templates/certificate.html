@@ -60,7 +60,8 @@
 		<p>Cordialement</p>
 		{% if event.signature_url %}
             <p>Signature de l'organisateur</p>
-			<img src="{{ event.signature_url }}" alt="Signature de l'organisateur" class="signature-image">
+			<img src="{{ url_for('uploaded_file', filename=event.signature_url) }}" alt="Signature de l'organisateur" class="signature-image">
+
         {% endif %}
     </div>
 </div>

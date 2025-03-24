@@ -8,7 +8,7 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from PIL import Image
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, session
+from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, session, send_from_directory
 from flask_babel import Babel
 from flask_babel import _
 from flask_bcrypt import Bcrypt
@@ -261,7 +261,7 @@ def create_event():
                     return redirect(url_for('create_event'))
                 img.thumbnail((250, 250))
                 img.save(signature_path)
-            signature_url = signature_path
+            signature_url = filename  
 
         new_event = Event(
             title=title,
@@ -273,7 +273,7 @@ def create_event():
             eligible_hours=eligible_hours,
             created_by=current_user.id,
             status=status,
-            signature_url=signature_url
+            signature_url=signature_url  
         )
         db.session.add(new_event)
         db.session.commit()
@@ -282,6 +282,10 @@ def create_event():
 
     return render_template('create_event.html')
 
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory('uploads', filename)
+    
 @app.route('/admin/edit_event/<int:event_id>', methods=['GET', 'POST'])
 @login_required
 def edit_event(event_id):
@@ -303,11 +307,26 @@ def edit_event(event_id):
 
             signature = request.files.get('signature')
             if signature:
-                filename = secure_filename(signature.filename)
+                file_extension = os.path.splitext(signature.filename)[1]
+                filename = f"{uuid.uuid4()}_signature{file_extension}"
                 signature_path = os.path.join('uploads', filename)
                 os.makedirs(os.path.dirname(signature_path), exist_ok=True)
                 signature.save(signature_path)
-                event.signature_url = signature_path
+
+                with Image.open(signature_path) as img:
+                    if img.width > 800 or img.height > 600:
+                        flash(_('Signature must be smaller than 800*600'), 'danger')
+                        return redirect(url_for('edit_event', event_id=event_id))
+                    img.thumbnail((250, 250))
+                    img.save(signature_path)
+
+                # Supprimer l'ancienne signature si elle existe
+                if event.signature_url:
+                    old_signature_path = os.path.join('uploads', event.signature_url)
+                    if os.path.exists(old_signature_path):
+                        os.remove(old_signature_path)
+
+                event.signature_url = filename  # Enregistrez uniquement le nom du fichier
 
             db.session.commit()
             flash(_('Event successfully updated'), 'success')
