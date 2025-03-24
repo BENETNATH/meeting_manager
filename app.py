@@ -210,17 +210,26 @@ def delete_event(event_id):
     event = Event.query.get_or_404(event_id)
 
     if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id):
+        # Supprimer les inscriptions associées à l'événement
         registrations = Registration.query.filter_by(event_id=event_id).all()
         for registration in registrations:
             db.session.delete(registration)
+
+        # Supprimer le fichier de signature s'il existe
         if event.signature_url:
-            os.remove(event.signature_url)
+            signature_path = os.path.join('uploads', event.signature_url)
+            if os.path.exists(signature_path):
+                os.remove(signature_path)
+
+        # Supprimer l'événement
         db.session.delete(event)
         db.session.commit()
-        flash(_('Event and registrees successfully deleted !'), 'success')
+
+        flash(_('Event and registrations successfully deleted!'), 'success')
         return redirect(url_for('index'))
     else:
         abort(403)
+
         
 @app.route('/event/<int:event_id>')
 def event(event_id):
