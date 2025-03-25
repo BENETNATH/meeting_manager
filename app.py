@@ -645,8 +645,12 @@ def request_certificate():
         registration = Registration.query.filter_by(email=email, unique_key=unique_key).first()
         if registration and registration.attended:
             event = Event.query.filter_by(id=registration.event_id).first()
-            pdf = generate_certificate_pdf(registration, event)
-            return send_file(pdf, mimetype='application/pdf', as_attachment=True, download_name='certificate.pdf')
+            pdf = generate_certificate_pdf(registration, event)            
+            event_title_safe = "".join(c if c.isalnum() else "_" for c in event.title)
+            event_date_safe = event.date.strftime('%Y-%m-%d')
+            filename = f"{event_date_safe}_certificate_{event_title_safe}.pdf"
+
+            return send_file(pdf, mimetype='application/pdf', as_attachment=True, download_name=filename)
         else:
             flash(_('Sorry, Your presence was not confirmed by the organizer.'), 'danger')
     return render_template('request_certificate.html')
