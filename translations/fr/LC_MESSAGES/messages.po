@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-21 17:45+0100\n"
+"POT-Creation-Date: 2025-03-25 10:40+0100\n"
 "PO-Revision-Date: 2025-03-04 17:07+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -18,140 +18,196 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:84 controllers.py:59 templates/attendance.html:36
-#: templates/register.html:9
+#: app.py:129 templates/attendance.html:36 templates/register.html:9
 msgid "First Name"
 msgstr "Prénom"
 
-#: app.py:84 controllers.py:59 templates/attendance.html:35
-#: templates/register.html:13
+#: app.py:129 templates/attendance.html:35 templates/register.html:13
 msgid "Last Name"
 msgstr "Nom de famille"
 
-#: app.py:84 controllers.py:59 templates/attendance.html:37
-#: templates/create_editor.html:8 templates/manage_users.html:11
-#: templates/manage_users.html:22 templates/register.html:17
-#: templates/request_certificate.html:7 templates/unregister.html:10
+#: app.py:129 templates/attendance.html:37 templates/create_editor.html:8
+#: templates/manage_users.html:11 templates/manage_users.html:22
+#: templates/register.html:17 templates/request_certificate.html:7
+#: templates/unregister.html:10
 msgid "Email"
 msgstr "Email"
 
-#: app.py:84 controllers.py:59 templates/attendance.html:38
+#: app.py:129 templates/attendance.html:38
 msgid "Unique Key"
 msgstr "Clé unique"
 
-#: app.py:84 controllers.py:59
+#: app.py:129
 msgid "Presence"
 msgstr "Présent"
 
-#: app.py:140 controllers.py:78
+#: app.py:148
 msgid "Wrong credentials"
 msgstr "Identifiants incorrects"
 
-#: app.py:197 controllers.py:124
+#: app.py:204
 msgid "Status updated successfully !"
 msgstr "Statut mis à jour avec succès"
 
-#: app.py:199 controllers.py:126
+#: app.py:206
 msgid "Invalid status"
 msgstr "Status invalide"
 
-#: app.py:224 controllers.py:143
-msgid "Event and registrees successfully deleted !"
+#: app.py:233
+msgid "Event and registrations successfully deleted!"
 msgstr "Evénement et inscrits supprimés"
 
-#: app.py:267 controllers.py:180
+#: app.py:274 app.py:332
 msgid "Signature must be smaller than 800*600"
 msgstr "L'image doit être inférieure à 800*600"
 
-#: app.py:290 controllers.py:199
+#: app.py:294
 msgid "Event successfully created"
 msgstr "Evénement crée avec succès"
 
-#: app.py:327 controllers.py:227
+#: app.py:346
 msgid "Event successfully updated"
 msgstr "Evénement mis à jour avec succés"
 
-#: app.py:360 controllers.py:256
+#: app.py:379
 msgid "Modifications saved !"
 msgstr "Modifications sauvegardées"
 
-#: app.py:376 controllers.py:270
+#: app.py:395
 msgid "You have been unregistered."
 msgstr "Vous avez été désinscrit."
 
-#: app.py:445
+#: app.py:460
 msgid "Cannot delete the only super-admin user."
 msgstr "Impossible de supprimer le seul utilisateur super-admin."
 
-#: app.py:457 controllers.py:326
+#: app.py:471
 msgid "User successfully deleted"
 msgstr "Utilisateur supprimé"
 
-#: app.py:471 controllers.py:339
+#: app.py:483
 msgid "User successfully updated."
 msgstr "Utilisateur mis à jour"
 
-#: app.py:491
+#: app.py:500
 msgid "Password has been reset and sent to the user's email."
 msgstr "Le mot de passe a été réinitialisé et envoyé à l'email de l'utilisateur."
 
-#: app.py:496
+#: app.py:505
 msgid "Password Reset"
 msgstr "Réinitialisation du mot de passe"
 
-#: app.py:497
+#: app.py:506
+#, python-format
+msgid ""
+"Hello,\n"
+"\n"
+"Your password has been reset. Your new password is: %(password)s\n"
+"\n"
+"Please login and change your password as soon as possible.\n"
+"\n"
+"Thank you!"
+msgstr ""
+
+#: app.py:518
+msgid "Password updated."
 msgstr ""
 "Bonjour,\n"
 "\n"
-"Votre mot de passe a été réinitialisé. Votre nouveau mot de passe est : %(password)s\n"
+"Votre mot de passe a été réinitialisé. Votre nouveau mot de passe est : "
+"%(password)s\n"
 "\n"
 "Veuillez vous connecter et changer votre mot de passe dès que possible.\n"
 "\n"
 "Merci !"
 
-#: app.py:509 controllers.py:352
-msgid "Password updated."
-msgstr "Mot de passe mis à jour."
-
-#: app.py:523 controllers.py:365
+#: app.py:531
 msgid "Registration Confirmation"
 msgstr "Confirmation d'inscription"
 
-#: app.py:524 controllers.py:366
+#: app.py:532
+#, python-format
+msgid ""
+"Hello %(name)s,\n"
+"\n"
+"You have successfully registered for the event: %(event)s that will take "
+"place on %(date)s.\n"
+"Your unique key is: %(key)s\n"
+"\n"
+"Thank you!"
+msgstr ""
+
+#: app.py:541
+msgid "Registration is not available"
 msgstr ""
 "Bonjour %(name)s,\n"
 "\n"
-"Vous vous êtes inscrit avec succès à l'événement : %(event)s qui aura lieu le "
-"%(date)s.\n"
+"Vous vous êtes inscrit avec succès à l'événement : \n"
+"%(event)s \n"
+"qui aura lieu le %(date)s.\n"
 "Votre clé unique est : %(key)s\n"
 "\n"
 "Merci !"
 
-#: app.py:535 controllers.py:374
-msgid "Registration is not available"
-msgstr "L'inscription n'est pas disponible"
-
-#: app.py:542 controllers.py:379
+#: app.py:546
 msgid "Email already registered"
 msgstr "Email déjà inscrit"
 
-#: app.py:560 controllers.py:393
+#: app.py:561
 msgid "Registration successful. Your unique key is "
 msgstr "Inscription réussie. Votre clé unique est "
 
-#: app.py:563 controllers.py:395
+#: app.py:563
 msgid "Email notifications are not configured. Please note down your unique key: "
-msgstr "Les notifications par email ne sont pas configurées. Veuillez noter votre clé unique : "
+msgstr ""
+"Les notifications par email ne sont pas configurées. \n"
+"Veuillez noter votre clé unique : "
 
-#: app.py:584 controllers.py:413
+#: app.py:582
 msgid "Successful unregistration"
 msgstr "Désenregistrement réussi"
 
-#: app.py:586 controllers.py:415
+#: app.py:584
 msgid "No registration for this email and unique key on this event"
 msgstr "Pas d'inscription pour cet e-mail et clé unique sur cet événement"
 
-#: app.py:600 controllers.py:428
+#: app.py:606
+msgid "Certificate of Attendance"
+msgstr "Certificat de présence"
+
+#: app.py:610
+msgid "This certifies that:"
+msgstr "Ce document atteste que :"
+
+#: app.py:611
+msgid "Name:"
+msgstr "Nom :"
+
+#: app.py:612
+msgid "Has attended the event:"
+msgstr "a assisté à l'événement :"
+
+#: app.py:613
+msgid "Held on:"
+msgstr "Tenu le :"
+
+#: app.py:614
+msgid "Organized by:"
+msgstr "Organisé par : "
+
+#: app.py:617
+msgid "Event Description:"
+msgstr "Description :"
+
+#: app.py:619
+msgid "Event Program:"
+msgstr "Programme :"
+
+#: app.py:622
+msgid "Eligible Hours:"
+msgstr "Heures éligibles à la formation réglementaire continue :"
+
+#: app.py:648
 msgid "Sorry, Your presence was not confirmed by the organizer."
 msgstr "Désolé, Votre présence n'a pas été confirmée par l'organisateur."
 
@@ -173,12 +229,16 @@ msgid "Presents"
 msgstr "Présents"
 
 #: templates/attendance.html:21
+msgid ""
+"Extract emails and check those present (paste emails separated by commas "
+"or lines)"
 msgstr ""
-"Extraire les emails et vérifier les présents (collez les emails séparés par des virgules ou des lignes)"
 
 #: templates/attendance.html:24
 msgid "Extract emails and check present"
-msgstr "Extrayez les e-mails et vérifiez le présent"
+msgstr ""
+"Extraire les emails et vérifier les présents (collez les emails séparés "
+"par des virgules ou des lignes)"
 
 #: templates/attendance.html:39
 msgid "Present?"
@@ -210,12 +270,14 @@ msgid "Not matching email found"
 msgstr "Aucun email correspondant"
 
 #: templates/attendance.html:89
+msgid "updated cell(s). Click \"Update Presence\" to save."
 msgstr ""
-"Cellule(s) mise(s) à jour. Cliquez sur \"Mettre à jour la présence\" pour enregistrer."
 
 #: templates/attendance.html:91
 msgid "No matching email found"
-msgstr "Aucun email correspondant"
+msgstr ""
+"Cellule(s) mise(s) à jour. Cliquez sur \"Mettre à jour la présence\" pour"
+" enregistrer."
 
 #: templates/base.html:19
 msgid "Meeting Manager"
@@ -478,3 +540,15 @@ msgstr "Obtenir votre certificat"
 #: templates/unregister.html:6
 msgid "Unregister from the event"
 msgstr "Se désinscrire de l'événement"
+
+#~ msgid ""
+#~ "Hello %(name)s,\n"
+#~ "\n"
+#~ "You have successfully registered for the event: \n"
+#~ "%(event)s \n"
+#~ "that will take place on %(date)s.\n"
+#~ "Your unique key is: %(key)s\n"
+#~ "\n"
+#~ "Thank you!"
+#~ msgstr ""
+

@@ -4,11 +4,17 @@ import os
 import re
 import uuid
 import logging
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, PageBreak
+from io import BytesIO
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from PIL import Image
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, session, send_from_directory
+from flask import Flask, render_template, request, redirect, Response, url_for, flash, abort, session, send_from_directory, send_file
 from flask_babel import Babel
 from flask_babel import _
 from flask_bcrypt import Bcrypt
@@ -580,6 +586,57 @@ def unregister(event_id):
 
     return redirect(url_for('event', event_id=event_id))
     
+def generate_certificate_pdf(registration, event):
+    packet = BytesIO()
+    doc = SimpleDocTemplate(packet, pagesize=letter)
+    story = []
+    styles = getSampleStyleSheet()
+
+    # Titre du certificat
+    story.append(Paragraph(_(u"Certificate of Attendance"), styles['Title']))
+    story.append(Spacer(1, 24))
+
+    # Informations de l'utilisateur
+    story.append(Paragraph(_(u"This certifies that:"), styles['BodyText']))
+    story.append(Paragraph(f"{_(u'Name:')} {registration.first_name} {registration.last_name}", styles['BodyText']))
+    story.append(Paragraph(_(u"Has attended the event:") + f" {event.title}", styles['BodyText']))
+    story.append(Paragraph(_(u"Held on:") + f" {event.date.strftime('%Y-%m-%d')}", styles['BodyText']))
+    story.append(Paragraph(_(u"Organized by:") + f" {event.organizer}", styles['BodyText']))
+    story.append(Spacer(1, 12))
+
+    # Description et programme de l'événement
+    story.append(Paragraph(_(u"Event Description:"), styles['BodyText']))
+    story.append(Paragraph(strip_html(event.description), styles['BodyText']))
+    story.append(Spacer(1, 12))
+    story.append(Paragraph(_(u"Event Program:"), styles['BodyText']))
+    story.append(Paragraph(strip_html(event.program), styles['BodyText']))
+    story.append(Spacer(1, 12))
+
+    # Heures éligibles
+    story.append(Paragraph(_(u"Eligible Hours:") + f" {event.eligible_hours}", styles['BodyText']))
+    story.append(Spacer(1, 24))
+
+    # Date de génération
+    generation_date = datetime.now().strftime('%Y-%m-%d')
+    story.append(Spacer(1, 24))
+    story.append(Paragraph(_(u"Date:") + f" {generation_date}", styles['BodyText']))
+    
+    # Signature
+    if event.signature_url:
+        signature_path = f"uploads/{event.signature_url}"
+        story.append(Spacer(1, 24))
+        story.append(Paragraph(_(u"Signature:"), styles['BodyText']))
+        story.append(Spacer(1, 12))
+        story.append(Paragraph(f'<img src="{signature_path}" width="200" height="50" valign="top"/>', styles['BodyText']))
+
+
+
+    # Construire le PDF
+    doc.build(story)
+
+    packet.seek(0)
+    return packet
+    
 @app.route('/certificate', methods=['GET', 'POST'])
 def request_certificate():
     if request.method == 'POST':
@@ -588,12 +645,13 @@ def request_certificate():
         registration = Registration.query.filter_by(email=email, unique_key=unique_key).first()
         if registration and registration.attended:
             event = Event.query.filter_by(id=registration.event_id).first()
-            return render_template('certificate.html', registration=registration, event=event)
+            pdf = generate_certificate_pdf(registration, event)
+            return send_file(pdf, mimetype='application/pdf', as_attachment=True, download_name='certificate.pdf')
         else:
             flash(_('Sorry, Your presence was not confirmed by the organizer.'), 'danger')
     return render_template('request_certificate.html')
-
-
+    
+    
 #########
 
 if __name__ == '__main__':
