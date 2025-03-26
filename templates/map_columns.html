@@ -1,0 +1,24 @@
+<form action="/map_columns" method="post">
+  <table>
+    <tr>
+      <th>CSV/XLSX Column</th>
+      <th>Map to User Field</th>
+    </tr>
+    {% for header in headers %}
+    <tr>
+      <td>{{ header }}</td>
+      <td>
+        <select name="mapping[{{ header }}]">
+          <option value="first_name">First Name</option>
+          <option value="last_name">Last Name</option>
+          <option value="email">Email</option>
+          <option value="present">Present</option>
+          <option value="na">N/A</option>
+        </select>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <input type="hidden" name="data" value='{{ data | tojson }}'>
+  <button type="submit">Submit</button>
+</form>

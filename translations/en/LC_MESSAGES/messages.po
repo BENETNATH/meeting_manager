@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-25 10:40+0100\n"
+"POT-Creation-Date: 2025-03-26 09:45+0100\n"
 "PO-Revision-Date: 2025-03-04 17:07+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,91 +18,93 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:129 templates/attendance.html:36 templates/register.html:9
+#: app.py:123 controllers.py:59 templates/attendance.html:40
+#: templates/register.html:9
 #, fuzzy
 msgid "First Name"
 msgstr "First Name"
 
-#: app.py:129 templates/attendance.html:35 templates/register.html:13
+#: app.py:123 controllers.py:59 templates/attendance.html:39
+#: templates/register.html:13
 msgid "Last Name"
 msgstr "Last Name"
 
-#: app.py:129 templates/attendance.html:37 templates/create_editor.html:8
-#: templates/manage_users.html:11 templates/manage_users.html:22
-#: templates/register.html:17 templates/request_certificate.html:7
-#: templates/unregister.html:10
+#: app.py:123 controllers.py:59 templates/attendance.html:41
+#: templates/create_editor.html:8 templates/manage_users.html:11
+#: templates/manage_users.html:22 templates/register.html:17
+#: templates/request_certificate.html:7 templates/unregister.html:10
 msgid "Email"
 msgstr ""
 
-#: app.py:129 templates/attendance.html:38
+#: app.py:123 controllers.py:59 templates/attendance.html:42
 #, fuzzy
 msgid "Unique Key"
 msgstr "Unique key"
 
-#: app.py:129
+#: app.py:123 controllers.py:59
 #, fuzzy
 msgid "Presence"
 msgstr "Present"
 
-#: app.py:148
+#: app.py:142 controllers.py:78
 msgid "Wrong credentials"
 msgstr "Wrong credentials"
 
-#: app.py:204
-msgid "Status updated successfully !"
+#: app.py:188
+msgid "Status updated successfully!"
 msgstr ""
 
-#: app.py:206
+#: app.py:190 controllers.py:126
 msgid "Invalid status"
 msgstr ""
 
-#: app.py:233
+#: app.py:209
 msgid "Event and registrations successfully deleted!"
 msgstr ""
 
-#: app.py:274 app.py:332
+#: app.py:246 app.py:298 controllers.py:180
 msgid "Signature must be smaller than 800*600"
 msgstr ""
 
-#: app.py:294
+#: app.py:265 controllers.py:199
 msgid "Event successfully created"
 msgstr ""
 
-#: app.py:346
+#: app.py:308 controllers.py:227
 msgid "Event successfully updated"
 msgstr ""
 
-#: app.py:379
-msgid "Modifications saved !"
+#: app.py:357
+msgid "Modifications saved!"
 msgstr ""
 
-#: app.py:395
+#: app.py:371 controllers.py:270
 #, fuzzy
 msgid "You have been unregistered."
 msgstr "See registered"
 
-#: app.py:460
+#: app.py:427
 msgid "Cannot delete the only super-admin user."
 msgstr ""
 
-#: app.py:471
+#: app.py:435 controllers.py:326
 msgid "User successfully deleted"
 msgstr ""
 
-#: app.py:483
+#: app.py:447 controllers.py:339
 msgid "User successfully updated."
 msgstr ""
 
-#: app.py:500
+#: app.py:462
 msgid "Password has been reset and sent to the user's email."
 msgstr ""
 
-#: app.py:505
+#: app.py:467
 #, fuzzy
 msgid "Password Reset"
 msgstr "Password"
 
-#: app.py:506
+#: app.py:468
 #, python-format
 msgid ""
 "Hello,\n"
@@ -114,16 +116,16 @@ msgid ""
 "Thank you!"
 msgstr ""
 
-#: app.py:518
+#: app.py:480 controllers.py:352
 #, fuzzy
 msgid "Password updated."
 msgstr "Password"
 
-#: app.py:531
+#: app.py:493 controllers.py:365
 msgid "Registration Confirmation"
 msgstr ""
 
-#: app.py:532
+#: app.py:494 controllers.py:366
 #, python-format
 msgid ""
 "Hello %(name)s,\n"
@@ -135,76 +137,98 @@ msgid ""
 "Thank you!"
 msgstr ""
 
-#: app.py:541
+#: app.py:502 controllers.py:374
 #, fuzzy
 msgid "Registration is not available"
 msgstr "Registration management"
 
-#: app.py:546
+#: app.py:507 controllers.py:379
 #, fuzzy
 msgid "Email already registered"
 msgstr "See registered"
 
-#: app.py:561
+#: app.py:521 controllers.py:393
 msgid "Registration successful. Your unique key is "
 msgstr ""
 
-#: app.py:563
+#: app.py:523 controllers.py:395
 msgid "Email notifications are not configured. Please note down your unique key: "
 msgstr ""
 
-#: app.py:582
+#: app.py:541 controllers.py:413
 msgid "Successful unregistration"
 msgstr ""
 
-#: app.py:584
+#: app.py:543 controllers.py:415
 msgid "No registration for this email and unique key on this event"
 msgstr ""
 
-#: app.py:606
+#: app.py:551
 #, fuzzy
 msgid "Certificate of Attendance"
 msgstr "Ask for a certificate of attendance"
 
-#: app.py:610
+#: app.py:553
 msgid "This certifies that:"
 msgstr ""
 
-#: app.py:611
+#: app.py:554
 #, fuzzy
 msgid "Name:"
 msgstr "Username"
 
-#: app.py:612
+#: app.py:555
 #, fuzzy
 msgid "Has attended the event:"
 msgstr "Update the event"
 
-#: app.py:613
+#: app.py:556
 msgid "Held on:"
 msgstr ""
 
-#: app.py:614
+#: app.py:557
 #, fuzzy
 msgid "Organized by:"
 msgstr "Organizer"
 
-#: app.py:617
+#: app.py:559
 #, fuzzy
 msgid "Event Description:"
 msgstr "Description"
 
-#: app.py:619
+#: app.py:562
 #, fuzzy
 msgid "Event Program:"
 msgstr "Program"
 
-#: app.py:622
+#: app.py:565
 msgid "Eligible Hours:"
 msgstr ""
 
-#: app.py:648
+#: app.py:569
+#, fuzzy
+msgid "Date:"
+msgstr "Date"
+
+#: app.py:573
+#, fuzzy
+msgid "Signature:"
+msgstr "Organizer signature"
+
+#: app.py:594 controllers.py:428
 msgid "Sorry, Your presence was not confirmed by the organizer."
+msgstr ""
+
+#: controllers.py:124
+msgid "Status updated successfully !"
+msgstr ""
+
+#: controllers.py:143
+msgid "Event and registrees successfully deleted !"
+msgstr ""
+
+#: controllers.py:256
+msgid "Modifications saved !"
 msgstr ""
 
 #: templates/attendance.html:7
@@ -235,43 +259,52 @@ msgstr ""
 msgid "Extract emails and check present"
 msgstr ""
 
-#: templates/attendance.html:39
+#: templates/attendance.html:32
+msgid "Import from CSV/XLSX"
+msgstr ""
+
+#: templates/attendance.html:43
 #, fuzzy
 msgid "Present?"
 msgstr "Present"
 
-#: templates/attendance.html:40
+#: templates/attendance.html:44
 msgid "Actions"
 msgstr ""
 
-#: templates/attendance.html:54 templates/index.html:28
+#: templates/attendance.html:58 templates/index.html:28
 #: templates/manage_users.html:50
 msgid "Delete"
 msgstr "Delete"
 
-#: templates/attendance.html:61
+#: templates/attendance.html:65
 msgid "Mark all as present"
 msgstr ""
 
-#: templates/attendance.html:62
+#: templates/attendance.html:66
 #, fuzzy
 msgid "Update presence"
 msgstr "Present"
 
-#: templates/attendance.html:63
+#: templates/attendance.html:67
+#, fuzzy
+msgid "Save New Registrations"
+msgstr "See registered"
+
+#: templates/attendance.html:68
 #, fuzzy
 msgid "Extract registrees in csv"
 msgstr "Extract registered"
 
-#: templates/attendance.html:84
+#: templates/attendance.html:101
 msgid "Not matching email found"
 msgstr ""
 
-#: templates/attendance.html:89
+#: templates/attendance.html:106
 msgid "updated cell(s). Click \"Update Presence\" to save."
 msgstr ""
 
-#: templates/attendance.html:91
+#: templates/attendance.html:108
 msgid "No matching email found"
 msgstr ""
 
@@ -566,5 +599,20 @@ msgstr "Register for the event"
 #~ msgstr "Are you sure that you want to delete the event?"
 
 #~ msgid "Event and registrees successfully deleted !"
+#~ msgstr ""
+
+#~ msgid "Not matching email found"
+#~ msgstr ""
+
+#~ msgid "email1@example.com, email2@example.com"
+#~ msgstr ""
+
+#~ msgid "Map columns"
+#~ msgstr ""
+
+#~ msgid "Map Columns"
+#~ msgstr ""
+
+#~ msgid "Map"
 #~ msgstr ""
 
