@@ -40,6 +40,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['BABEL_DEFAULT_LOCALE'] = os.getenv('BABEL_DEFAULT_LOCALE')
 app.config['BABEL_DEFAULT_TIMEZONE'] = os.getenv('BABEL_DEFAULT_TIMEZONE')
+port = os.getenv('FLASK_PORT')
 admin_password = os.getenv('ADMIN_PASSWORD')
 admin_email = os.getenv('ADMIN_EMAIL')
 
@@ -606,4 +607,4 @@ if __name__ == '__main__':
             db.session.add(admin_user)
             db.session.commit()
     logger.info('Server is starting on port 8000...')
-    serve(app, host="0.0.0.0", port=8000)
+    serve(app, host="0.0.0.0", port=port)
