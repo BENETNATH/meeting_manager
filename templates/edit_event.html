@@ -22,7 +22,15 @@
         <input type="date" id="date" name="date" class="form-control" value="{{ event.date.strftime('%Y-%m-%d') }}" required>
     </div>
     <div class="form-group">
-        <label for="status">{{ _('Statut') }}*:</label>
+        <label for="start_time">{{ _('Start Time') }}:</label>
+        <input type="time" id="start_time" name="start_time" class="form-control" value="{{ event.start_time.strftime('%H:%M') if event.start_time else '' }}">
+    </div>
+    <div class="form-group">
+        <label for="end_time">{{ _('End Time') }}:</label>
+        <input type="time" id="end_time" name="end_time" class="form-control" value="{{ event.end_time.strftime('%H:%M') if event.end_time else '' }}">
+    </div>
+    <div class="form-group">
+        <label for="status">{{ _('Status') }}*:</label>
         <select id="status" name="status" class="form-control" required>
             <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
             <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>

@@ -83,7 +83,9 @@ class Event(db.Model):
     description = db.Column(db.Text, nullable=False)
     photo_url = db.Column(db.String(200), nullable=True)
     program = db.Column(db.Text, nullable=False)
-    date = db.Column(db.DateTime, default=datetime.now)
+    date = db.Column(db.Date, nullable=False) # Changed to Date
+    start_time = db.Column(db.Time, nullable=True) # Added start_time
+    end_time = db.Column(db.Time, nullable=True) # Added end_time
     organizer = db.Column(db.String(100), nullable=True)
     eligible_hours = db.Column(db.Float, nullable=True)
     status = db.Column(db.String(50), nullable=False, default='hidden')
@@ -228,7 +230,11 @@ def create_event():
         photo_url = request.form['photo_url']
         program = request.form['program']
         date_str = request.form['date']
-        date = datetime.strptime(date_str, '%Y-%m-%d')
+        date = datetime.strptime(date_str, '%Y-%m-%d').date() # Get date object
+        start_time_str = request.form.get('start_time')
+        end_time_str = request.form.get('end_time')
+        start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None # Parse time
+        end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None # Parse time
         organizer = request.form.get('organizer', '')
         status = request.form['status']
         eligible_hours = request.form.get('eligible_hours', 0)
@@ -255,6 +261,8 @@ def create_event():
             photo_url=photo_url,
             program=program,
             date=date,
+            start_time=start_time, # Add start_time
+            end_time=end_time, # Add end_time
             organizer=organizer,
             eligible_hours=eligible_hours,
             created_by=current_user.id,
@@ -281,7 +289,11 @@ def edit_event(event_id):
             event.description = request.form['description']
             event.photo_url = request.form['photo_url']
             event.program = request.form['program']
-            event.date = datetime.strptime(request.form['date'], '%Y-%m-%d')
+            event.date = datetime.strptime(request.form['date'], '%Y-%m-%d').date() # Get date object
+            start_time_str = request.form.get('start_time')
+            end_time_str = request.form.get('end_time')
+            event.start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None # Parse time
+            event.end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None # Parse time
             event.organizer = request.form.get('organizer', '')
             event.eligible_hours = request.form.get('eligible_hours', 0)
             event.status = request.form['status']
