@@ -3,54 +3,57 @@
 {% block content %}
 <h1>{{ _('Create a new event') }}</h1>
 <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('create_event') }}" onsubmit="return validateForm()">
+    {# Use form_data if available (validation failed), otherwise empty string #}
     <label for="title">{{ _('Title') }}*:</label>
-    <input type="text" id="title" name="title" required><br>
+    <input type="text" id="title" name="title" value="{{ form_data.get('title', '') }}" required><br>
 
     <label for="description">{{ _('Description') }}*:</label>
-    <div id="description"></div>
-    <input type="hidden" name="description" required><br>
+    <div id="description">{{ form_data.get('description', '') | safe }}</div> {# Populate Quill from form_data if available #}
+    <input type="hidden" name="description" value="{{ form_data.get('description', '') }}" required><br>
 
     <label for="photo_url">{{ _('URL of the picture') }}:</label>
-    <input type="url" id="photo_url" name="photo_url"><br>
+    <input type="url" id="photo_url" name="photo_url" value="{{ form_data.get('photo_url', '') }}"><br>
 
     <label for="program">{{ _('Program') }}*:</label>
-    <div id="program"></div>
-    <input type="hidden" name="program" required><br>
+    <div id="program">{{ form_data.get('program', '') | safe }}</div> {# Populate Quill from form_data if available #}
+    <input type="hidden" name="program" value="{{ form_data.get('program', '') }}" required><br>
 
     <div class="form-group">
         <label for="date">{{ _('Date of the event') }}*:</label>
-        <input type="date" id="date" name="date" class="form-control" required>
+        <input type="date" id="date" name="date" class="form-control" value="{{ form_data.get('date', '') }}" required>
     </div>
     <div class="form-group">
         <label for="start_time">{{ _('Start Time') }}:</label>
-        <input type="time" id="start_time" name="start_time" class="form-control">
+        <input type="time" id="start_time" name="start_time" class="form-control" value="{{ form_data.get('start_time', '') }}">
     </div>
     <div class="form-group">
         <label for="end_time">{{ _('End Time') }}:</label>
-        <input type="time" id="end_time" name="end_time" class="form-control">
+        <input type="time" id="end_time" name="end_time" class="form-control" value="{{ form_data.get('end_time', '') }}">
     </div>
     <div class="form-group">
         <label for="timezone">{{ _('Timezone') }}*:</label>
-        <select id="timezone" name="timezone" class="form-control" required>
+        {# Default to UTC only if form_data is empty (initial load) #}
+        <input type="text" id="timezone" name="timezone" class="form-control" list="timezone-list" value="{{ form_data.get('timezone', 'UTC') }}" required autocomplete="off">
+        <datalist id="timezone-list">
             {% for tz in timezones %}
-                <option value="{{ tz }}" {% if tz == 'UTC' %}selected{% endif %}>{{ tz }}</option>
+                <option value="{{ tz }}">
             {% endfor %}
-        </select>
+        </datalist>
     </div>
     <div class="form-group">
         <label for="status">{{ _('Status') }}*:</label>
         <select id="status" name="status" class="form-control" required>
-            <option value="hidden">{{ _('Hidden') }}</option>
-            <option value="visible">{{ _('Visible') }}</option>
-            <option value="archived">{{ _('Archived') }}</option>
+            <option value="hidden" {% if form_data.get('status') == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
+            <option value="visible" {% if form_data.get('status') == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
+            <option value="archived" {% if form_data.get('status') == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
         </select>
     </div>
 
     <label for="organizer">{{ _('Organizer') }}*:</label>
-    <input type="text" id="organizer" name="organizer" required><br>
+    <input type="text" id="organizer" name="organizer" value="{{ form_data.get('organizer', '') }}" required><br>
 
     <label for="eligible_hours">{{ _('Number of training hours') }}*:</label>
-    <input type="number" step="0.1" id="eligible_hours" name="eligible_hours" value="0" required><br>
+    <input type="number" step="0.1" id="eligible_hours" name="eligible_hours" value="{{ form_data.get('eligible_hours', '0') }}" required><br>
 
     <label for="signature">{{ _('Signature of the organizer') }} :</label>
     <input type="file" id="signature" name="signature" accept="image/*" onchange="validateImageSize(this)"><br>
@@ -82,6 +85,11 @@
         var quillProgram = new Quill('#program', {
             theme: 'snow'
         });
+
+        // Set initial content for Quill editors from hidden inputs (which are populated by form_data)
+        quillDescription.clipboard.dangerouslyPasteHTML(document.querySelector('input[name="description"]').value);
+        quillProgram.clipboard.dangerouslyPasteHTML(document.querySelector('input[name="program"]').value);
+
 
         // Ajouter un écouteur d'événement pour sauvegarder le contenu
         quillDescription.on('text-change', function() {

@@ -31,11 +31,12 @@
     </div>
     <div class="form-group">
         <label for="timezone">{{ _('Timezone') }}*:</label>
-        <select id="timezone" name="timezone" class="form-control" required>
+        <input type="text" id="timezone" name="timezone" class="form-control" list="timezone-list" value="{{ event.timezone }}" required autocomplete="off">
+        <datalist id="timezone-list">
             {% for tz in timezones %}
-                <option value="{{ tz }}" {% if tz == event.timezone %}selected{% endif %}>{{ tz }}</option>
+                <option value="{{ tz }}">
             {% endfor %}
-        </select>
+        </datalist>
     </div>
     <div class="form-group">
         <label for="status">{{ _('Status') }}*:</label>

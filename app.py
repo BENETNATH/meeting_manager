@@ -245,6 +245,16 @@ def create_event():
         end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None # Parse time
         organizer = request.form.get('organizer', '')
         timezone = request.form.get('timezone', 'UTC') # Get timezone from form
+
+        # --- Validate Timezone ---
+        if timezone not in pytz.common_timezones:
+            flash(_('Invalid timezone selected. Please choose from the list.'), 'danger')
+            # Re-render the form with submitted data (excluding invalid timezone)
+            # We need to pass the form data back to the template
+            form_data = request.form.to_dict()
+            return render_template('create_event.html', form_data=form_data)
+        # --- End Validate Timezone ---
+
         status = request.form['status']
         eligible_hours = request.form.get('eligible_hours', 0)
         if eligible_hours == '':
@@ -283,7 +293,8 @@ def create_event():
         db.session.commit()
         flash(_('Event successfully created'), 'success')
         return redirect(url_for('index'))
-    return render_template('create_event.html')
+    # Pass empty dict if GET request
+    return render_template('create_event.html', form_data=request.form if request.method == 'POST' else {})
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -339,7 +350,17 @@ def edit_event(event_id):
             new_start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None
             new_end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None
             event.organizer = request.form.get('organizer', '')
-            event.timezone = request.form.get('timezone', event.timezone) # Update timezone
+            new_timezone = request.form.get('timezone', event.timezone) # Get submitted timezone
+
+            # --- Validate Timezone ---
+            if new_timezone not in pytz.common_timezones:
+                 flash(_('Invalid timezone selected. Please choose from the list.'), 'danger')
+                 # Re-render edit form, keeping original event data + submitted form data
+                 # Note: We don't update the event object with invalid data
+                 return render_template('edit_event.html', event=event, form_data=request.form)
+            # --- End Validate Timezone ---
+
+            event.timezone = new_timezone # Update timezone only if valid
             event.eligible_hours = request.form.get('eligible_hours', 0)
             event.status = request.form['status']
             if event.eligible_hours == '':
@@ -392,7 +413,8 @@ def edit_event(event_id):
 
 
             return redirect(url_for('index'))
-        return render_template('edit_event.html', event=event)
+        # Pass empty dict for form_data on GET request
+        return render_template('edit_event.html', event=event, form_data={})
     else:
         abort(403)
 

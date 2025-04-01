@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-26 09:45+0100\n"
+"POT-Creation-Date: 2025-04-01 12:12+0000\n"
 "PO-Revision-Date: 2025-03-04 17:07+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -16,95 +16,126 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Generated-By: Babel 2.10.3\n"
 
-#: app.py:123 controllers.py:59 templates/attendance.html:40
-#: templates/register.html:9
+#: app.py:129 templates/attendance.html:41 templates/register.html:9
 #, fuzzy
 msgid "First Name"
 msgstr "First Name"
 
-#: app.py:123 controllers.py:59 templates/attendance.html:39
-#: templates/register.html:13
+#: app.py:129 templates/attendance.html:40 templates/register.html:13
 msgid "Last Name"
 msgstr "Last Name"
 
-#: app.py:123 controllers.py:59 templates/attendance.html:41
-#: templates/create_editor.html:8 templates/manage_users.html:11
-#: templates/manage_users.html:22 templates/register.html:17
-#: templates/request_certificate.html:7 templates/unregister.html:10
+#: app.py:129 templates/attendance.html:42 templates/create_editor.html:8
+#: templates/manage_users.html:11 templates/manage_users.html:22
+#: templates/register.html:17 templates/request_certificate.html:7
+#: templates/unregister.html:10
 msgid "Email"
 msgstr ""
 
-#: app.py:123 controllers.py:59 templates/attendance.html:42
+#: app.py:129 templates/attendance.html:43
 #, fuzzy
 msgid "Unique Key"
 msgstr "Unique key"
 
-#: app.py:123 controllers.py:59
+#: app.py:129
 #, fuzzy
 msgid "Presence"
 msgstr "Present"
 
-#: app.py:142 controllers.py:78
+#: app.py:148
 msgid "Wrong credentials"
 msgstr "Wrong credentials"
 
-#: app.py:188
+#: app.py:194
 msgid "Status updated successfully!"
 msgstr ""
 
-#: app.py:190 controllers.py:126
+#: app.py:196
 msgid "Invalid status"
 msgstr ""
 
-#: app.py:209
+#: app.py:215
 msgid "Event and registrations successfully deleted!"
 msgstr ""
 
-#: app.py:246 app.py:298 controllers.py:180
+#: app.py:262 app.py:368
 msgid "Signature must be smaller than 800*600"
 msgstr ""
 
-#: app.py:265 controllers.py:199
+#: app.py:284
 msgid "Event successfully created"
 msgstr ""
 
-#: app.py:308 controllers.py:227
+#: app.py:295
+#, python-format
+msgid "Event Update Notification: %(title)s"
+msgstr ""
+
+#: app.py:300
+#, python-format
+msgid ""
+"Hello %(name)s,\n"
+"\n"
+"Please note that the event \"%(event_title)s\" has been updated.\n"
+"New Date: %(date)s\n"
+"New Start Time: %(start_time)s\n"
+"New End Time: %(end_time)s\n"
+"\n"
+"Please find the updated calendar details attached.\n"
+"\n"
+"Thank you!"
+msgstr ""
+
+#: app.py:300 app.py:301
+msgid "N/A"
+msgstr ""
+
+#: app.py:380
 msgid "Event successfully updated"
 msgstr ""
 
-#: app.py:357
+#: app.py:387
+#, python-format
+msgid "Sending update notifications to %(count)d registered users..."
+msgstr ""
+
+#: app.py:391
+msgid "Time changed and notification requested, but no users are registered."
+msgstr ""
+
+#: app.py:442
 msgid "Modifications saved!"
 msgstr ""
 
-#: app.py:371 controllers.py:270
+#: app.py:456
 #, fuzzy
 msgid "You have been unregistered."
 msgstr "See registered"
 
-#: app.py:427
+#: app.py:512
 msgid "Cannot delete the only super-admin user."
 msgstr ""
 
-#: app.py:435 controllers.py:326
+#: app.py:520
 msgid "User successfully deleted"
 msgstr ""
 
-#: app.py:447 controllers.py:339
+#: app.py:532
 msgid "User successfully updated."
 msgstr ""
 
-#: app.py:462
+#: app.py:547
 msgid "Password has been reset and sent to the user's email."
 msgstr ""
 
-#: app.py:467
+#: app.py:552
 #, fuzzy
 msgid "Password Reset"
 msgstr "Password"
 
-#: app.py:468
+#: app.py:553
 #, python-format
 msgid ""
 "Hello,\n"
@@ -116,16 +147,16 @@ msgid ""
 "Thank you!"
 msgstr ""
 
-#: app.py:480 controllers.py:352
+#: app.py:565
 #, fuzzy
 msgid "Password updated."
 msgstr "Password"
 
-#: app.py:493 controllers.py:365
+#: app.py:578
 msgid "Registration Confirmation"
 msgstr ""
 
-#: app.py:494 controllers.py:366
+#: app.py:579
 #, python-format
 msgid ""
 "Hello %(name)s,\n"
@@ -137,174 +168,498 @@ msgid ""
 "Thank you!"
 msgstr ""
 
-#: app.py:502 controllers.py:374
+#: app.py:598
 #, fuzzy
 msgid "Registration is not available"
 msgstr "Registration management"
 
-#: app.py:507 controllers.py:379
+#: app.py:603
 #, fuzzy
 msgid "Email already registered"
 msgstr "See registered"
 
-#: app.py:521 controllers.py:393
+#: app.py:618
 msgid "Registration successful. Your unique key is "
 msgstr ""
 
-#: app.py:523 controllers.py:395
-msgid "Email notifications are not configured. Please note down your unique key: "
+#: app.py:621
+msgid ""
+"Email notifications are not configured or failed to send. Please note "
+"down your unique key: "
 msgstr ""
 
-#: app.py:541 controllers.py:413
+#: app.py:639
 msgid "Successful unregistration"
 msgstr ""
 
-#: app.py:543 controllers.py:415
+#: app.py:641
 msgid "No registration for this email and unique key on this event"
 msgstr ""
 
-#: app.py:551
+#: app.py:649
 #, fuzzy
 msgid "Certificate of Attendance"
 msgstr "Ask for a certificate of attendance"
 
-#: app.py:553
+#: app.py:651
 msgid "This certifies that:"
 msgstr ""
 
-#: app.py:554
+#: app.py:652
 #, fuzzy
 msgid "Name:"
 msgstr "Username"
 
-#: app.py:555
+#: app.py:653
 #, fuzzy
 msgid "Has attended the event:"
 msgstr "Update the event"
 
-#: app.py:556
+#: app.py:654
 msgid "Held on:"
 msgstr ""
 
-#: app.py:557
+#: app.py:655
 #, fuzzy
 msgid "Organized by:"
 msgstr "Organizer"
 
-#: app.py:559
+#: app.py:657
 #, fuzzy
 msgid "Event Description:"
 msgstr "Description"
 
-#: app.py:562
+#: app.py:660
 #, fuzzy
 msgid "Event Program:"
 msgstr "Program"
 
-#: app.py:565
+#: app.py:663
 msgid "Eligible Hours:"
 msgstr ""
 
-#: app.py:569
+#: app.py:667
 #, fuzzy
 msgid "Date:"
 msgstr "Date"
 
-#: app.py:573
+#: app.py:671
 #, fuzzy
 msgid "Signature:"
 msgstr "Organizer signature"
 
-#: app.py:594 controllers.py:428
+#: app.py:692
 msgid "Sorry, Your presence was not confirmed by the organizer."
 msgstr ""
 
-#: controllers.py:124
-msgid "Status updated successfully !"
+#: app.py:701
+#, fuzzy
+msgid "Program:"
+msgstr "Program"
+
+#: .venv/lib/python3.12/site-packages/click/_termui_impl.py:556
+#: venv/lib/python3.12/site-packages/click/_termui_impl.py:556
+msgid "{editor}: Editing failed"
 msgstr ""
 
-#: controllers.py:143
-msgid "Event and registrees successfully deleted !"
+#: .venv/lib/python3.12/site-packages/click/_termui_impl.py:560
+#: venv/lib/python3.12/site-packages/click/_termui_impl.py:560
+msgid "{editor}: Editing failed: {e}"
 msgstr ""
 
-#: controllers.py:256
-msgid "Modifications saved !"
+#: .venv/lib/python3.12/site-packages/click/core.py:1124
+#: venv/lib/python3.12/site-packages/click/core.py:1124
+msgid "Aborted!"
 msgstr ""
 
-#: templates/attendance.html:7
+#: .venv/lib/python3.12/site-packages/click/core.py:1349
+#: .venv/lib/python3.12/site-packages/click/core.py:1379
+#: venv/lib/python3.12/site-packages/click/core.py:1349
+#: venv/lib/python3.12/site-packages/click/core.py:1379
+msgid "(Deprecated) {text}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:1396
+#: venv/lib/python3.12/site-packages/click/core.py:1396
+msgid "Options"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:1424
+#: venv/lib/python3.12/site-packages/click/core.py:1424
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:1437
+#: venv/lib/python3.12/site-packages/click/core.py:1437
+msgid "DeprecationWarning: The command {name!r} is deprecated."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:1645
+#: venv/lib/python3.12/site-packages/click/core.py:1645
+msgid "Commands"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:1677
+#: venv/lib/python3.12/site-packages/click/core.py:1677
+msgid "Missing command."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:1755
+#: venv/lib/python3.12/site-packages/click/core.py:1755
+msgid "No such command {name!r}."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:2313
+#: venv/lib/python3.12/site-packages/click/core.py:2313
+msgid "Value must be an iterable."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:2336
+#: venv/lib/python3.12/site-packages/click/core.py:2336
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:2783
+#: venv/lib/python3.12/site-packages/click/core.py:2783
+msgid "env var: {var}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:2813
+#: venv/lib/python3.12/site-packages/click/core.py:2813
+msgid "(dynamic)"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:2828
+#: venv/lib/python3.12/site-packages/click/core.py:2828
+msgid "default: {default}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/core.py:2841
+#: venv/lib/python3.12/site-packages/click/core.py:2841
+msgid "required"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/decorators.py:457
+#: venv/lib/python3.12/site-packages/click/decorators.py:457
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/decorators.py:520
+#: venv/lib/python3.12/site-packages/click/decorators.py:520
+msgid "Show the version and exit."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/decorators.py:541
+#: venv/lib/python3.12/site-packages/click/decorators.py:541
+msgid "Show this message and exit."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:49
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:88
+#: venv/lib/python3.12/site-packages/click/exceptions.py:49
+#: venv/lib/python3.12/site-packages/click/exceptions.py:88
+msgid "Error: {message}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:80
+#: venv/lib/python3.12/site-packages/click/exceptions.py:80
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:129
+#: venv/lib/python3.12/site-packages/click/exceptions.py:129
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:131
+#: venv/lib/python3.12/site-packages/click/exceptions.py:131
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:187
+#: venv/lib/python3.12/site-packages/click/exceptions.py:187
+msgid "Missing argument"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:189
+#: venv/lib/python3.12/site-packages/click/exceptions.py:189
+msgid "Missing option"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:191
+#: venv/lib/python3.12/site-packages/click/exceptions.py:191
+msgid "Missing parameter"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:193
+#: venv/lib/python3.12/site-packages/click/exceptions.py:193
+msgid "Missing {param_type}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:200
+#: venv/lib/python3.12/site-packages/click/exceptions.py:200
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:220
+#: venv/lib/python3.12/site-packages/click/exceptions.py:220
+msgid "No such option: {name}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:234
+#: venv/lib/python3.12/site-packages/click/exceptions.py:234
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:270
+#: venv/lib/python3.12/site-packages/click/exceptions.py:270
+msgid "unknown error"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/exceptions.py:277
+#: venv/lib/python3.12/site-packages/click/exceptions.py:277
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/formatting.py:156
+#: venv/lib/python3.12/site-packages/click/formatting.py:156
+msgid "Usage:"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/parser.py:233
+#: venv/lib/python3.12/site-packages/click/parser.py:233
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/parser.py:415
+#: venv/lib/python3.12/site-packages/click/parser.py:415
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/parser.py:475
+#: venv/lib/python3.12/site-packages/click/parser.py:475
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .venv/lib/python3.12/site-packages/click/shell_completion.py:325
+#: venv/lib/python3.12/site-packages/click/shell_completion.py:325
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/shell_completion.py:333
+#: venv/lib/python3.12/site-packages/click/shell_completion.py:333
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/termui.py:158
+#: venv/lib/python3.12/site-packages/click/termui.py:158
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/termui.py:174
+#: venv/lib/python3.12/site-packages/click/termui.py:174
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/termui.py:176
+#: venv/lib/python3.12/site-packages/click/termui.py:176
+msgid "Error: {e.message}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/termui.py:187
+#: venv/lib/python3.12/site-packages/click/termui.py:187
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/termui.py:243
+#: venv/lib/python3.12/site-packages/click/termui.py:243
+msgid "Error: invalid input"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/termui.py:773
+#: venv/lib/python3.12/site-packages/click/termui.py:773
+msgid "Press any key to continue..."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:267
+#: venv/lib/python3.12/site-packages/click/types.py:267
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:301
+#: venv/lib/python3.12/site-packages/click/types.py:301
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:395
+#: venv/lib/python3.12/site-packages/click/types.py:395
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:415
+#: venv/lib/python3.12/site-packages/click/types.py:415
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:471
+#: venv/lib/python3.12/site-packages/click/types.py:471
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:612
+#: venv/lib/python3.12/site-packages/click/types.py:612
+msgid "{value!r} is not a valid boolean."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:636
+#: venv/lib/python3.12/site-packages/click/types.py:636
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:826
+#: venv/lib/python3.12/site-packages/click/types.py:826
+#, fuzzy
+msgid "file"
+msgstr "Title"
+
+#: .venv/lib/python3.12/site-packages/click/types.py:828
+#: venv/lib/python3.12/site-packages/click/types.py:828
+#, fuzzy
+msgid "directory"
+msgstr "Editor"
+
+#: .venv/lib/python3.12/site-packages/click/types.py:830
+#: venv/lib/python3.12/site-packages/click/types.py:830
+#, fuzzy
+msgid "path"
+msgstr "Update"
+
+#: .venv/lib/python3.12/site-packages/click/types.py:881
+#: venv/lib/python3.12/site-packages/click/types.py:881
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:890
+#: venv/lib/python3.12/site-packages/click/types.py:890
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:898
+#: venv/lib/python3.12/site-packages/click/types.py:898
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:907
+#: venv/lib/python3.12/site-packages/click/types.py:907
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:916
+#: venv/lib/python3.12/site-packages/click/types.py:916
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:925
+#: venv/lib/python3.12/site-packages/click/types.py:925
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: .venv/lib/python3.12/site-packages/click/types.py:991
+#: venv/lib/python3.12/site-packages/click/types.py:991
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/attendance.html:8
 msgid "Registration management"
 msgstr "Registration management"
 
-#: templates/attendance.html:8 templates/register.html:6
+#: templates/attendance.html:9 templates/register.html:6
 #: templates/unregister.html:7
 msgid "Back to the event"
 msgstr "Back to the event"
 
-#: templates/attendance.html:13 templates/index.html:25
+#: templates/attendance.html:14 templates/index.html:25
 msgid "Registered"
 msgstr "Registered"
 
-#: templates/attendance.html:14
+#: templates/attendance.html:15
 #, fuzzy
 msgid "Presents"
 msgstr "Present"
 
-#: templates/attendance.html:21
+#: templates/attendance.html:22
 msgid ""
 "Extract emails and check those present (paste emails separated by commas "
 "or lines)"
 msgstr ""
 
-#: templates/attendance.html:24
+#: templates/attendance.html:25
 msgid "Extract emails and check present"
 msgstr ""
 
-#: templates/attendance.html:32
+#: templates/attendance.html:33
 msgid "Import from CSV/XLSX"
 msgstr ""
 
-#: templates/attendance.html:43
+#: templates/attendance.html:44
 #, fuzzy
 msgid "Present?"
 msgstr "Present"
 
-#: templates/attendance.html:44
+#: templates/attendance.html:45
 msgid "Actions"
 msgstr ""
 
-#: templates/attendance.html:58 templates/index.html:28
+#: templates/attendance.html:59 templates/index.html:28
 #: templates/manage_users.html:50
 msgid "Delete"
 msgstr "Delete"
 
-#: templates/attendance.html:65
+#: templates/attendance.html:66
 msgid "Mark all as present"
 msgstr ""
 
-#: templates/attendance.html:66
+#: templates/attendance.html:67
 #, fuzzy
 msgid "Update presence"
 msgstr "Present"
 
-#: templates/attendance.html:67
+#: templates/attendance.html:68
 #, fuzzy
 msgid "Save New Registrations"
 msgstr "See registered"
 
-#: templates/attendance.html:68
+#: templates/attendance.html:69
 #, fuzzy
 msgid "Extract registrees in csv"
 msgstr "Extract registered"
 
-#: templates/attendance.html:101
+#: templates/attendance.html:102
 msgid "Not matching email found"
 msgstr ""
 
-#: templates/attendance.html:106
+#: templates/attendance.html:107
 msgid "updated cell(s). Click \"Update Presence\" to save."
 msgstr ""
 
-#: templates/attendance.html:108
+#: templates/attendance.html:109
 msgid "No matching email found"
 msgstr ""
 
@@ -374,7 +729,7 @@ msgid "Title"
 msgstr "Title"
 
 #: templates/create_event.html:9 templates/edit_event.html:9
-#: templates/event.html:14
+#: templates/event.html:22
 msgid "Description"
 msgstr "Description"
 
@@ -382,7 +737,7 @@ msgstr "Description"
 msgid "URL of the picture"
 msgstr "URL of the picture"
 
-#: templates/create_event.html:16 templates/event.html:18
+#: templates/create_event.html:16 templates/event.html:26
 msgid "Program"
 msgstr "Program"
 
@@ -391,38 +746,51 @@ msgid "Date of the event"
 msgstr "Date of the event"
 
 #: templates/create_event.html:25 templates/edit_event.html:25
-msgid "Statut"
+msgid "Start Time"
+msgstr ""
+
+#: templates/create_event.html:29 templates/edit_event.html:29
+msgid "End Time"
+msgstr ""
+
+#: templates/create_event.html:33 templates/edit_event.html:33
+msgid "Timezone"
+msgstr ""
+
+#: templates/create_event.html:41 templates/edit_event.html:41
+#, fuzzy
+msgid "Status"
 msgstr "Status"
 
-#: templates/create_event.html:27 templates/edit_event.html:27
-#: templates/event.html:46 templates/index.html:32
+#: templates/create_event.html:43 templates/edit_event.html:43
+#: templates/event.html:56 templates/index.html:32
 msgid "Hidden"
 msgstr "Hidden"
 
-#: templates/create_event.html:28 templates/edit_event.html:28
-#: templates/event.html:47 templates/index.html:33
+#: templates/create_event.html:44 templates/edit_event.html:44
+#: templates/event.html:57 templates/index.html:33
 msgid "Visible"
 msgstr "Visible"
 
-#: templates/create_event.html:29 templates/edit_event.html:29
-#: templates/event.html:48 templates/index.html:34
+#: templates/create_event.html:45 templates/edit_event.html:45
+#: templates/event.html:58 templates/index.html:34
 msgid "Archived"
 msgstr "Archived"
 
-#: templates/create_event.html:33 templates/edit_event.html:33
-#: templates/event.html:28
+#: templates/create_event.html:49 templates/edit_event.html:49
+#: templates/event.html:36
 msgid "Organizer"
 msgstr "Organizer"
 
-#: templates/create_event.html:36 templates/edit_event.html:36
+#: templates/create_event.html:52 templates/edit_event.html:52
 msgid "Number of training hours"
 msgstr "Number of training hours"
 
-#: templates/create_event.html:39
+#: templates/create_event.html:55
 msgid "Signature of the organizer"
 msgstr "Signature of the organizer"
 
-#: templates/create_event.html:42
+#: templates/create_event.html:58
 msgid "Create the event"
 msgstr "Create the event"
 
@@ -434,15 +802,19 @@ msgstr "Modify the event"
 msgid "Programme"
 msgstr "Program"
 
-#: templates/edit_event.html:39
+#: templates/edit_event.html:55
 msgid "Organizer signature"
 msgstr "Organizer signature"
 
-#: templates/edit_event.html:42
+#: templates/edit_event.html:61
+msgid "Notify registered users of date/time change"
+msgstr ""
+
+#: templates/edit_event.html:65
 msgid "Update the event"
 msgstr "Update the event"
 
-#: templates/edit_event.html:43 templates/event.html:58
+#: templates/edit_event.html:66 templates/event.html:70
 msgid "Delete the event"
 msgstr "Delete the event"
 
@@ -450,39 +822,51 @@ msgstr "Delete the event"
 msgid "Date"
 msgstr "Date"
 
-#: templates/event.html:31
+#: templates/event.html:10
+msgid "from"
+msgstr ""
+
+#: templates/event.html:13
+msgid "to"
+msgstr ""
+
+#: templates/event.html:39
 #, fuzzy
 msgid "Training hours"
 msgstr "Number of training hours"
 
-#: templates/event.html:36 templates/register.html:20
+#: templates/event.html:44 templates/register.html:20
 msgid "Register"
 msgstr "Register"
 
-#: templates/event.html:37 templates/unregister.html:17
+#: templates/event.html:45 templates/unregister.html:17
 #, fuzzy
 msgid "Unregister"
 msgstr "Register"
 
-#: templates/event.html:40
+#: templates/event.html:48
+msgid "Download Calendar (.ics)"
+msgstr ""
+
+#: templates/event.html:50
 #, fuzzy
 msgid "Ask a certificate of attendance"
 msgstr "Ask for a certificate of attendance"
 
-#: templates/event.html:51
+#: templates/event.html:61
 #, fuzzy
 msgid "Modify event"
 msgstr "Modify the event"
 
-#: templates/event.html:52 templates/index.html:23
+#: templates/event.html:62 templates/index.html:23
 msgid "See registered"
 msgstr "See registered"
 
-#: templates/event.html:56
+#: templates/event.html:66
 msgid "Extract registered"
 msgstr "Extract registered"
 
-#: templates/event.html:58
+#: templates/event.html:69
 msgid "Are you sure to delete this event ?"
 msgstr "Are you sure you want to delete this event?"
 
@@ -614,5 +998,16 @@ msgstr "Register for the event"
 #~ msgstr ""
 
 #~ msgid "Map"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Email notifications are not configured. "
+#~ "Please note down your unique key: "
+#~ msgstr ""
+
+#~ msgid "Status updated successfully !"
+#~ msgstr ""
+
+#~ msgid "Modifications saved !"
 #~ msgstr ""
 
