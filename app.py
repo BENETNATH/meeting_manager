@@ -4,9 +4,10 @@ import os
 import re
 import uuid
 import logging
-
+import pytz # Added for timezone handling
+from ics import Calendar, Event
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timedelta # Added timedelta
 from logging.handlers import RotatingFileHandler
 from PIL import Image
 from dotenv import load_dotenv
@@ -23,6 +24,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, PageBreak
 from waitress import serve
 from werkzeug.utils import secure_filename
+from ics import Calendar, Event as ICSEvent # Added for ICS generation
 
 
 # Initialisation de l'application Flask
@@ -91,6 +93,7 @@ class Event(db.Model):
     status = db.Column(db.String(50), nullable=False, default='hidden')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     signature_url = db.Column(db.String(200), nullable=True)
+    timezone = db.Column(db.String(50), nullable=False, default='UTC') # Added timezone field
 
 class Registration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -219,6 +222,11 @@ def event(event_id):
     event = Event.query.get_or_404(event_id)
     return render_template('event.html', event=event)
 
+# Add pytz timezones to the context for templates
+@app.context_processor
+def inject_timezones():
+    return dict(timezones=pytz.common_timezones)
+
 @app.route('/admin/create_event', methods=['GET', 'POST'])
 @login_required
 def create_event():
@@ -236,6 +244,7 @@ def create_event():
         start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None # Parse time
         end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None # Parse time
         organizer = request.form.get('organizer', '')
+        timezone = request.form.get('timezone', 'UTC') # Get timezone from form
         status = request.form['status']
         eligible_hours = request.form.get('eligible_hours', 0)
         if eligible_hours == '':
@@ -267,7 +276,8 @@ def create_event():
             eligible_hours=eligible_hours,
             created_by=current_user.id,
             status=status,
-            signature_url=signature_url
+            signature_url=signature_url,
+            timezone=timezone # Save timezone
         )
         db.session.add(new_event)
         db.session.commit()
@@ -279,26 +289,73 @@ def create_event():
 def uploaded_file(filename):
     return send_from_directory('uploads', filename)
 
+# --- Function to send event update emails ---
+def send_update_email(registration, event):
+    with app.app_context():
+        subject = _('Event Update Notification: %(title)s', title=event.title)
+        body = _('Hello %(name)s,\n\nPlease note that the event "%(event_title)s" has been updated.\nNew Date: %(date)s\nNew Start Time: %(start_time)s\nNew End Time: %(end_time)s\n\nPlease find the updated calendar details attached.\n\nThank you!',
+                 name=registration.first_name,
+                 event_title=event.title,
+                 date=event.date.strftime('%Y-%m-%d'),
+                 start_time=event.start_time.strftime('%H:%M') if event.start_time else _('N/A'),
+                 end_time=event.end_time.strftime('%H:%M') if event.end_time else _('N/A'))
+        msg = Message(subject=subject, recipients=[registration.email], body=body)
+
+        # Generate and attach updated ICS file
+        try:
+            ics_content = generate_ics(event)
+            event_title_safe = "".join(c if c.isalnum() else "_" for c in event.title)
+            filename = f"{event.date.strftime('%Y-%m-%d')}_{event_title_safe}_updated.ics"
+            msg.attach(filename, "text/calendar", ics_content)
+        except Exception as e:
+            logger.error(f"Error generating or attaching updated ICS for event {event.id} for user {registration.email}: {e}")
+            # Optionally notify admin or handle the error
+
+        try:
+            mail.send(msg)
+        except Exception as e:
+            logger.error(f"Failed to send update email to {registration.email} for event {event.id}: {e}")
+
+
 @app.route('/admin/edit_event/<int:event_id>', methods=['GET', 'POST'])
 @login_required
 def edit_event(event_id):
     event = Event.query.get_or_404(event_id)
     if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id):
         if request.method == 'POST':
+            # Store original time details to check for changes
+            original_date = event.date
+            original_start_time = event.start_time
+            original_end_time = event.end_time
+
+            # Update event details from form
             event.title = request.form['title']
             event.description = request.form['description']
             event.photo_url = request.form['photo_url']
             event.program = request.form['program']
-            event.date = datetime.strptime(request.form['date'], '%Y-%m-%d').date() # Get date object
+            new_date = datetime.strptime(request.form['date'], '%Y-%m-%d').date()
             start_time_str = request.form.get('start_time')
             end_time_str = request.form.get('end_time')
-            event.start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None # Parse time
-            event.end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None # Parse time
+            new_start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None
+            new_end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None
             event.organizer = request.form.get('organizer', '')
+            event.timezone = request.form.get('timezone', event.timezone) # Update timezone
             event.eligible_hours = request.form.get('eligible_hours', 0)
             event.status = request.form['status']
             if event.eligible_hours == '':
                 event.eligible_hours = 0
+
+            # Check if time has changed
+            time_changed = (new_date != original_date or
+                            new_start_time != original_start_time or
+                            new_end_time != original_end_time)
+
+            # Update event times
+            event.date = new_date
+            event.start_time = new_start_time
+            event.end_time = new_end_time
+
+            # Handle signature upload
             signature = request.files.get('signature')
             if signature:
                 file_extension = os.path.splitext(signature.filename)[1]
@@ -317,8 +374,23 @@ def edit_event(event_id):
                     if os.path.exists(old_signature_path):
                         os.remove(old_signature_path)
                 event.signature_url = filename
+
+            # Commit changes before sending emails
             db.session.commit()
             flash(_('Event successfully updated'), 'success')
+
+            # Check if notification should be sent
+            notify_users = request.form.get('notify_time_change') == 'true'
+            if time_changed and notify_users:
+                registrations = Registration.query.filter_by(event_id=event.id).all()
+                if registrations:
+                    flash(_('Sending update notifications to %(count)d registered users...', count=len(registrations)), 'info')
+                    for reg in registrations:
+                        send_update_email(reg, event) # Pass the updated event object
+                else:
+                     flash(_('Time changed and notification requested, but no users are registered.'), 'info')
+
+
             return redirect(url_for('index'))
         return render_template('edit_event.html', event=event)
     else:
@@ -501,11 +573,22 @@ def register_page(event_id):
         return register(event_id)
     return render_template('register.html', event=event)
 
-def send_registration_email(email, first_name, event_title, event_date, unique_key):
+def send_registration_email(email, first_name, event, unique_key): # Changed parameters to pass the whole event object
     with app.app_context():
         subject = _('Registration Confirmation')
-        body = _('Hello %(name)s,\n\nYou have successfully registered for the event: %(event)s that will take place on %(date)s.\nYour unique key is: %(key)s\n\nThank you!', name=first_name, event=event_title, date=event_date, key=unique_key)
+        body = _('Hello %(name)s,\n\nYou have successfully registered for the event: %(event)s that will take place on %(date)s.\nYour unique key is: %(key)s\n\nThank you!', name=first_name, event=event.title, date=event.date.strftime('%Y-%m-%d'), key=unique_key)
         msg = Message(subject=subject, recipients=[email], body=body)
+
+        # Generate and attach ICS file
+        try:
+            ics_content = generate_ics(event)
+            event_title_safe = "".join(c if c.isalnum() else "_" for c in event.title)
+            filename = f"{event.date.strftime('%Y-%m-%d')}_{event_title_safe}.ics"
+            msg.attach(filename, "text/calendar", ics_content)
+        except Exception as e:
+            logger.error(f"Error generating or attaching ICS for event {event.id}: {e}")
+            # Optionally notify admin or handle the error
+
         mail.send(msg)
 
 @app.route('/register/<int:event_id>', methods=['POST'])
@@ -530,10 +613,12 @@ def register(event_id):
     db.session.add(new_registration)
     db.session.commit()
     try:
-        send_registration_email(email, request.form.get('first_name'), event.title, event.date, unique_key)
+        # Pass the event object instead of individual fields
+        send_registration_email(email, request.form.get('first_name'), event, unique_key)
         flash(_('Registration successful. Your unique key is ') + unique_key, 'success')
     except Exception as e:
-        flash(_('Email notifications are not configured. Please note down your unique key: ') + unique_key, 'warning')
+        logger.error(f"Failed to send registration email for {email} for event {event.id}: {e}")
+        flash(_('Email notifications are not configured or failed to send. Please note down your unique key: ') + unique_key, 'warning')
     return redirect(url_for('event', event_id=event_id))
 
 @app.route('/unregister_page/<int:event_id>', methods=['GET', 'POST'])
@@ -606,6 +691,59 @@ def request_certificate():
         else:
             flash(_('Sorry, Your presence was not confirmed by the organizer.'), 'danger')
     return render_template('request_certificate.html')
+
+# --- ICS Generation Function ---
+def generate_ics(event):
+    """Generates an ICS Calendar object for a given event."""
+    c = Calendar()
+    e = ICSEvent()
+    e.name = event.title
+    e.description = strip_html(event.description) + "\n\n" + _("Program:") + "\n" + strip_html(event.program)
+    e.location = event.organizer # Assuming organizer might imply location, adjust if needed
+
+    # Combine date and time, handle potential None values
+    if event.date and event.start_time:
+        # Use the event's specific timezone
+        try:
+            tz = pytz.timezone(event.timezone)
+        except pytz.UnknownTimeZoneError:
+            logger.warning(f"Unknown timezone '{event.timezone}' for event {event.id}. Falling back to UTC.")
+            tz = pytz.utc # Fallback to UTC if timezone is invalid
+
+        start_dt_naive = datetime.combine(event.date, event.start_time)
+        e.begin = tz.localize(start_dt_naive)
+
+        if event.end_time:
+            end_dt_naive = datetime.combine(event.date, event.end_time)
+            # Handle overnight events if necessary
+            if end_dt_naive <= start_dt_naive:
+                end_dt_naive += timedelta(days=1)
+            e.end = tz.localize(end_dt_naive)
+        else:
+            # Default duration if no end time (e.g., 1 hour) - start time is already localized
+            e.duration = timedelta(hours=1)
+    else:
+        # Handle all-day event if no time specified
+        e.begin = event.date
+        e.make_all_day()
+
+    e.uid = f"{event.id}-{event.date.strftime('%Y%m%d')}@meeting-manager.com" # Unique ID for the event
+    e.created = datetime.utcnow() # Use UTC time for creation timestamp
+    c.events.add(e)
+    return str(c) # Return ICS content as string
+
+# --- Route for ICS Download ---
+@app.route('/event/<int:event_id>/download_ics')
+def download_ics(event_id):
+    event = Event.query.get_or_404(event_id)
+    ics_content = generate_ics(event)
+    event_title_safe = "".join(c if c.isalnum() else "_" for c in event.title)
+    filename = f"{event.date.strftime('%Y-%m-%d')}_{event_title_safe}.ics"
+    return Response(
+        ics_content,
+        mimetype="text/calendar",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 if __name__ == '__main__':
     with app.app_context():

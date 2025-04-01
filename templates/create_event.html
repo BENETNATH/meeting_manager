@@ -30,6 +30,14 @@
         <input type="time" id="end_time" name="end_time" class="form-control">
     </div>
     <div class="form-group">
+        <label for="timezone">{{ _('Timezone') }}*:</label>
+        <select id="timezone" name="timezone" class="form-control" required>
+            {% for tz in timezones %}
+                <option value="{{ tz }}" {% if tz == 'UTC' %}selected{% endif %}>{{ tz }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
         <label for="status">{{ _('Status') }}*:</label>
         <select id="status" name="status" class="form-control" required>
             <option value="hidden">{{ _('Hidden') }}</option>

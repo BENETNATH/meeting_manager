@@ -12,6 +12,7 @@
                 {% if event.end_time %}
                     {{ _('to') }} {{ event.end_time.strftime('%H:%M') }}
                 {% endif %}
+                ({{ event.timezone }}) {# Display Timezone #}
             </p></h2>
         </div>
     </div>
@@ -43,6 +44,8 @@
 			    <a href="{{ url_for('register_page', event_id=event.id) }}" class="btn btn-primary">{{ _('Register') }}</a>
 				<a href="{{ url_for('unregister_page', event_id=event.id) }}" class="btn btn-danger">{{ _('Unregister') }}</a>
             {% endif %}
+
+                <a href="{{ url_for('download_ics', event_id=event.id) }}" class="btn btn-info">{{ _('Download Calendar (.ics)') }}</a>
 				
 				<a href="{{ url_for('request_certificate') }}" class="btn btn-secondary btn-success">{{ _('Ask a certificate of attendance') }}</a>
 				

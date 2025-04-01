@@ -38,47 +38,24 @@ Meeting Manager is a web application designed to manage events and generate cert
    ```
 
 4. **Set Up Environment Variables**:
-   Rename '.env-example' as `.env` file in the root directory of the project and edit the following environment variables:
-   ```plaintext
-   MAIL_SERVER=smtp.example.com
-   MAIL_PORT=587
-   MAIL_USE_TLS=True
-   MAIL_USERNAME=your-email@example.com
-   MAIL_PASSWORD=your-email-password
-   MAIL_DEFAULT_SENDER=your-email@example.com
-   SECRET_KEY=your-secret-key
-   SQLALCHEMY_DATABASE_URI=sqlite:///database.db
-   ADMIN_EMAIL='admin@email.com'
-   ADMIN_PASSWORD='password'
-   ```
+   Rename '.env-example' as `.env` file in the root directory of the project and edit the environment variables:
 
 5. **Run the Application ONCE to initialize database**:
    ```bash
    python app.py
    ```
-   
-6. **Close the running script**: 
-   ```bash
-   Press Ctrl+C twice
-   ```
-
-7. **Run the Application in production**:
-   ```bash
-   waitress-serve --port=8000 app:app
-   ```
-   
+    
 8. **Reach your webapp and start to worl**: 
    ```bash
-   http://localhost:8000
+   http://localhost:PORT
    ```  
-Default credentials  are defined in .env
+Default credentials and PORT are defined in .env
 
 
 
 ## Related ressources
 
-This project was mostly developped with Mistral.ai
-This project is using TinyMCE for text edition
+This project was mostly developped with Mistral.ai and Gemini
 
 ## Contributing
 
