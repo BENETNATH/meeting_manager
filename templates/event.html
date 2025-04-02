@@ -41,36 +41,37 @@
 			<div class="event-actions mt-3">
 				
             {% if event.status == 'visible' %}
-			    <a href="{{ url_for('register_page', event_id=event.id) }}" class="btn btn-primary">{{ _('Register') }}</a>
-				<a href="{{ url_for('unregister_page', event_id=event.id) }}" class="btn btn-danger">{{ _('Unregister') }}</a>
-            {% endif %}
+			    <div class="mb-2">
+					<a href="{{ url_for('register_page', event_id=event.id) }}" class="btn btn-primary btn-block">{{ _('Register') }}</a>
+					<a href="{{ url_for('unregister_page', event_id=event.id) }}" class="btn btn-danger btn-block">{{ _('Unregister') }}</a>
+				</div>
 
-                <a href="{{ url_for('download_ics', event_id=event.id) }}" class="btn btn-info">{{ _('Download Calendar (.ics)') }}</a>
+                <a href="{{ url_for('download_ics', event_id=event.id) }}" class="btn btn-info btn-block mb-2">{{ _('Download Calendar (.ics)') }}</a>
 				
-				<a href="{{ url_for('request_certificate') }}" class="btn btn-secondary btn-success">{{ _('Ask a certificate of attendance') }}</a>
+				<a href="{{ url_for('request_certificate') }}" class="btn btn-secondary btn-success btn-block mb-2">{{ _('Ask a certificate of attendance') }}</a>
 				
 				{% if current_user.is_authenticated %}
 					{% if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id) %}
-                                <form method="POST" action="{{ url_for('update_status', event_id=event.id) }}" style="display:inline;">
-                                    <select name="status" class="form-control-sm" onchange="this.form.submit()">
-                                        <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
-                                        <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
-                                        <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
-                                    </select>
-                                </form>
+                        <form method="POST" action="{{ url_for('update_status', event_id=event.id) }}" class="mb-2">
+                            <select name="status" class="form-control" onchange="this.form.submit()">
+                                <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
+                                <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
+                                <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
+                            </select>
+                        </form>
 						<a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-warning btn-block mb-2">{{ _('Modify event') }}</a>
-						<a href="{{ url_for('mark_attendance', event_id=event.id) }}" class="btn btn-info btn-block">{{ _('See registered') }}</a>
+						<a href="{{ url_for('mark_attendance', event_id=event.id) }}" class="btn btn-info btn-block mb-2">{{ _('See registered') }}</a>
 					{% endif %}
 				{% endif %}
 				{% if current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id) %}
-    <a href="{{ url_for('extract_attendance', event_id=event.id) }}" class="btn btn-secondary btn-block mb-3">{{ _('Extract registered') }}</a>
-	<form id="deleteForm" method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" style="display:inline;">
-                    <button type="button" class="btn btn-danger"
-                            data-confirm-message="{{ _('Are you sure to delete this event ?') }}"
-                            onclick="confirmDelete(this)">{{ _('Delete the event') }}</button>
-                </form>
-{% endif %}
-                </div>
+					<a href="{{ url_for('extract_attendance', event_id=event.id) }}" class="btn btn-secondary btn-block mb-2">{{ _('Extract registered') }}</a>
+					<form id="deleteForm" method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
+						<button type="button" class="btn btn-danger btn-block"
+								data-confirm-message="{{ _('Are you sure to delete this event ?') }}"
+								onclick="confirmDelete(this)">{{ _('Delete the event') }}</button>
+					</form>
+				{% endif %}
+				{% endif %}
             </div>
         </div>
     </div>
