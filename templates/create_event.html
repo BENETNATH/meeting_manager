@@ -52,6 +52,9 @@
     <label for="organizer">{{ _('Organizer') }}*:</label>
     <input type="text" id="organizer" name="organizer" value="{{ form_data.get('organizer', '') }}" required><br>
 
+    <label for="location">{{ _('Location') }}:</label>
+    <input type="text" id="location" name="location" value="{{ form_data.get('location', '') }}"><br>
+
     <label for="eligible_hours">{{ _('Number of training hours') }}*:</label>
     <input type="number" step="0.1" id="eligible_hours" name="eligible_hours" value="{{ form_data.get('eligible_hours', '0') }}" required><br>
 

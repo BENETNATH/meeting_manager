@@ -35,6 +35,9 @@
 			{% if event.organizer %}
 				<p><strong>{{ _('Organizer') }} :</strong> {{ event.organizer }}</p>
 			{% endif %}
+			{% if event.location %}
+				<p><strong>{{ _('Location') }} :</strong> {{ event.location }}</p>
+			{% endif %}
 			{% if event.eligible_hours %}
 				<p><strong>{{ _('Training hours') }}:</strong> {{ event.eligible_hours }}</p>
 			{% endif %}

@@ -89,6 +89,7 @@ class Event(db.Model):
     start_time = db.Column(db.Time, nullable=True) # Added start_time
     end_time = db.Column(db.Time, nullable=True) # Added end_time
     organizer = db.Column(db.String(100), nullable=True)
+    location = db.Column(db.String(200), nullable=True)
     eligible_hours = db.Column(db.Float, nullable=True)
     status = db.Column(db.String(50), nullable=False, default='hidden')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -283,6 +284,7 @@ def create_event():
             start_time=start_time, # Add start_time
             end_time=end_time, # Add end_time
             organizer=organizer,
+            location=request.form.get('location', ''),
             eligible_hours=eligible_hours,
             created_by=current_user.id,
             status=status,
@@ -350,6 +352,7 @@ def edit_event(event_id):
             new_start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else None
             new_end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None
             event.organizer = request.form.get('organizer', '')
+            event.location = request.form.get('location', '')
             new_timezone = request.form.get('timezone', event.timezone) # Get submitted timezone
 
             # --- Validate Timezone ---
@@ -721,7 +724,7 @@ def generate_ics(event):
     e = ICSEvent()
     e.name = event.title
     e.description = strip_html(event.description) + "\n\n" + _("Program:") + "\n" + strip_html(event.program)
-    e.location = event.organizer # Assuming organizer might imply location, adjust if needed
+    e.location = event.location or event.organizer # Use location if available, otherwise organizer
 
     # Combine date and time, handle potential None values
     if event.date and event.start_time:
