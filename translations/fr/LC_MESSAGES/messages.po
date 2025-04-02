@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-01 12:12+0000\n"
+"POT-Creation-Date: 2025-04-02 16:23+0000\n"
 "PO-Revision-Date: 2025-03-04 17:07+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -18,59 +18,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.3\n"
 
-#: app.py:129 templates/attendance.html:41 templates/register.html:9
+#: app.py:140 templates/attendance.html:41 templates/register.html:9
 msgid "First Name"
 msgstr "Prénom"
 
-#: app.py:129 templates/attendance.html:40 templates/register.html:13
+#: app.py:140 templates/attendance.html:40 templates/register.html:13
 msgid "Last Name"
 msgstr "Nom de famille"
 
-#: app.py:129 templates/attendance.html:42 templates/create_editor.html:8
-#: templates/manage_users.html:11 templates/manage_users.html:22
+#: app.py:140 templates/attendance.html:42 templates/create_editor.html:8
+#: templates/manage_users.html:14 templates/manage_users.html:26
 #: templates/register.html:17 templates/request_certificate.html:7
 #: templates/unregister.html:10
 msgid "Email"
 msgstr "Email"
 
-#: app.py:129 templates/attendance.html:43
+#: app.py:140 templates/attendance.html:43
 msgid "Unique Key"
 msgstr "Clé unique"
 
-#: app.py:129
+#: app.py:140
 msgid "Presence"
 msgstr "Présent"
 
-#: app.py:148
+#: app.py:159
 msgid "Wrong credentials"
 msgstr "Identifiants incorrects"
 
-#: app.py:194
+#: app.py:205
 msgid "Status updated successfully!"
 msgstr "Statut mis à jour avec succès"
 
-#: app.py:196
+#: app.py:207
 msgid "Invalid status"
 msgstr "Status invalide"
 
-#: app.py:215
+#: app.py:226
 msgid "Event and registrations successfully deleted!"
 msgstr "Evénement et inscrits supprimés"
 
-#: app.py:262 app.py:368
+#: app.py:262 app.py:375
+msgid "Invalid timezone selected. Please choose from the list."
+msgstr Fuseau horaire invalide. Merci de sélectionner dans la liste"
+
+#: app.py:283 app.py:411
 msgid "Signature must be smaller than 800*600"
 msgstr "L'image doit être inférieure à 800*600"
 
-#: app.py:284
+#: app.py:306 app.py:388
+msgid "Eligible hours must be within the event duration."
+msgstr "Les heures éligibles à la formation doivent être contenues dans la durée de l'évenement."
+
+#: app.py:311
 msgid "Event successfully created"
 msgstr "Evénement crée avec succès"
 
-#: app.py:295
+#: app.py:323
 #, python-format
 msgid "Event Update Notification: %(title)s"
-msgstr ""
+msgstr "Mise à jour de l'événement : %(title)s"
 
-#: app.py:300
+#: app.py:328
 #, python-format
 msgid ""
 "Hello %(name)s,\n"
@@ -85,52 +93,52 @@ msgid ""
 "Thank you!"
 msgstr ""
 
-#: app.py:300 app.py:301
+#: app.py:328 app.py:329
 msgid "N/A"
-msgstr ""
+msgstr "N/A"
 
-#: app.py:380
+#: app.py:423
 msgid "Event successfully updated"
 msgstr "Evénement mis à jour avec succés"
 
-#: app.py:387
+#: app.py:430
 #, python-format
 msgid "Sending update notifications to %(count)d registered users..."
-msgstr ""
+msgstr "Envoi de la notification de mise à jour à %(count)d utilisateur(s)"
 
-#: app.py:391
+#: app.py:434
 msgid "Time changed and notification requested, but no users are registered."
-msgstr ""
+msgstr "Evenement modifié mais aucun inscrit à notifier"
 
-#: app.py:442
+#: app.py:486
 msgid "Modifications saved!"
 msgstr "Modifications sauvegardées"
 
-#: app.py:456
+#: app.py:500
 msgid "You have been unregistered."
 msgstr "Vous avez été désinscrit."
 
-#: app.py:512
+#: app.py:556
 msgid "Cannot delete the only super-admin user."
 msgstr "Impossible de supprimer le seul utilisateur super-admin."
 
-#: app.py:520
+#: app.py:564
 msgid "User successfully deleted"
 msgstr "Utilisateur supprimé"
 
-#: app.py:532
+#: app.py:576
 msgid "User successfully updated."
 msgstr "Utilisateur mis à jour"
 
-#: app.py:547
+#: app.py:591
 msgid "Password has been reset and sent to the user's email."
 msgstr "Le mot de passe a été réinitialisé et envoyé à l'email de l'utilisateur."
 
-#: app.py:552
+#: app.py:596
 msgid "Password Reset"
 msgstr "Réinitialisation du mot de passe"
 
-#: app.py:553
+#: app.py:597
 #, python-format
 msgid ""
 "Hello,\n"
@@ -150,15 +158,15 @@ msgstr ""
 "\n"
 "Merci !"
 
-#: app.py:565
+#: app.py:609
 msgid "Password updated."
 msgstr "Mot de passe mis à jour"
 
-#: app.py:578
+#: app.py:622
 msgid "Registration Confirmation"
 msgstr "Confirmation d'inscription"
 
-#: app.py:579
+#: app.py:623
 #, python-format
 msgid ""
 "Hello %(name)s,\n"
@@ -169,10 +177,6 @@ msgid ""
 "\n"
 "Thank you!"
 msgstr ""
-
-#: app.py:598
-msgid "Registration is not available"
-msgstr ""
 "Bonjour %(name)s,\n"
 "\n"
 "Vous vous êtes inscrit avec succès à l'événement : \n"
@@ -182,15 +186,19 @@ msgstr ""
 "\n"
 "Merci !"
 
-#: app.py:603
+#: app.py:642
+msgid "Registration is not available"
+msgstr "L'enregistrement n'est pas possible."
+
+#: app.py:647
 msgid "Email already registered"
 msgstr "Email déjà inscrit"
 
-#: app.py:618
+#: app.py:662
 msgid "Registration successful. Your unique key is "
 msgstr "Inscription réussie. Votre clé unique est "
 
-#: app.py:621
+#: app.py:665
 msgid ""
 "Email notifications are not configured or failed to send. Please note "
 "down your unique key: "
@@ -198,63 +206,63 @@ msgstr ""
 "Les notifications par email ne sont pas configurées. \n"
 "Veuillez noter votre clé unique : "
 
-#: app.py:639
+#: app.py:683
 msgid "Successful unregistration"
 msgstr "Désenregistrement réussi"
 
-#: app.py:641
+#: app.py:685
 msgid "No registration for this email and unique key on this event"
 msgstr "Pas d'inscription pour cet e-mail et clé unique sur cet événement"
 
-#: app.py:649
+#: app.py:693
 msgid "Certificate of Attendance"
 msgstr "Certificat de présence"
 
-#: app.py:651
+#: app.py:695
 msgid "This certifies that:"
 msgstr "Ce document atteste que :"
 
-#: app.py:652
+#: app.py:696
 msgid "Name:"
 msgstr "Nom :"
 
-#: app.py:653
+#: app.py:697
 msgid "Has attended the event:"
 msgstr "a assisté à l'événement :"
 
-#: app.py:654
+#: app.py:698
 msgid "Held on:"
 msgstr "Tenu le :"
 
-#: app.py:655
+#: app.py:699
 msgid "Organized by:"
 msgstr "Organisé par : "
 
-#: app.py:657
+#: app.py:701
 msgid "Event Description:"
 msgstr "Description :"
 
-#: app.py:660
+#: app.py:704
 msgid "Event Program:"
 msgstr "Programme :"
 
-#: app.py:663
+#: app.py:707
 msgid "Eligible Hours:"
 msgstr "Heures éligibles à la formation réglementaire continue :"
 
-#: app.py:667
+#: app.py:711
 msgid "Date:"
 msgstr "Date"
 
-#: app.py:671
+#: app.py:715
 msgid "Signature:"
 msgstr "Signature de l'organisateur"
 
-#: app.py:692
+#: app.py:736
 msgid "Sorry, Your presence was not confirmed by the organizer."
 msgstr "Désolé, Votre présence n'a pas été confirmée par l'organisateur."
 
-#: app.py:701
+#: app.py:745
 msgid "Program:"
 msgstr "Programme :"
 
@@ -289,7 +297,7 @@ msgstr "Extraire les emails et cocher les présents "
 
 #: templates/attendance.html:33
 msgid "Import from CSV/XLSX"
-msgstr ""
+msgstr "Importer un CSV/XLSX"
 
 #: templates/attendance.html:44
 msgid "Present?"
@@ -300,7 +308,7 @@ msgid "Actions"
 msgstr "Actions"
 
 #: templates/attendance.html:59 templates/index.html:28
-#: templates/manage_users.html:50
+#: templates/manage_users.html:54
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -336,35 +344,35 @@ msgstr ""
 "Cellule(s) mise(s) à jour. Cliquez sur \"Mettre à jour la présence\" pour"
 " enregistrer."
 
-#: templates/base.html:19
+#: templates/base.html:29
 msgid "Meeting Manager"
 msgstr "Gestionnaire de Réunions"
 
-#: templates/base.html:26
+#: templates/base.html:36
 msgid "Home"
 msgstr "Accueil"
 
-#: templates/base.html:29
+#: templates/base.html:39
 msgid "English"
 msgstr "Anglais"
 
-#: templates/base.html:30
+#: templates/base.html:40
 msgid "French"
 msgstr "Français"
 
-#: templates/base.html:34
+#: templates/base.html:44
 msgid "Log out"
 msgstr "Déconnexion"
 
-#: templates/base.html:37
+#: templates/base.html:47
 msgid "Change password"
 msgstr "Changer le mot de passe"
 
-#: templates/base.html:41
+#: templates/base.html:51
 msgid "Manage users"
 msgstr "Gérer les utilisateurs"
 
-#: templates/base.html:46 templates/login.html:10
+#: templates/base.html:56 templates/login.html:10
 msgid "Login"
 msgstr "Connexion"
 
@@ -385,105 +393,109 @@ msgid "Create editor"
 msgstr "Créer un éditeur"
 
 #: templates/create_editor.html:6 templates/login.html:6
-#: templates/manage_users.html:9 templates/manage_users.html:21
+#: templates/manage_users.html:10 templates/manage_users.html:25
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: templates/create_event.html:4 templates/index.html:48
+#: templates/create_event.html:13 templates/index.html:48
 msgid "Create a new event"
 msgstr "Créer un nouvel événement"
 
-#: templates/create_event.html:6 templates/edit_event.html:6
+#: templates/create_event.html:16 templates/edit_event.html:15
 msgid "Title"
 msgstr "Titre"
 
-#: templates/create_event.html:9 templates/edit_event.html:9
+#: templates/create_event.html:19 templates/edit_event.html:18
 #: templates/event.html:22
 msgid "Description"
 msgstr "Description"
 
-#: templates/create_event.html:13 templates/edit_event.html:13
+#: templates/create_event.html:23 templates/edit_event.html:22
 msgid "URL of the picture"
 msgstr "URL de l'image"
 
-#: templates/create_event.html:16 templates/event.html:26
+#: templates/create_event.html:26 templates/event.html:26
 msgid "Program"
 msgstr "Programme"
 
-#: templates/create_event.html:21 templates/edit_event.html:21
+#: templates/create_event.html:32 templates/edit_event.html:31
 msgid "Date of the event"
 msgstr "Date de l'événement"
 
-#: templates/create_event.html:25 templates/edit_event.html:25
+#: templates/create_event.html:36 templates/edit_event.html:35
 msgid "Start Time"
-msgstr ""
+msgstr "Heure de début"
 
-#: templates/create_event.html:29 templates/edit_event.html:29
+#: templates/create_event.html:40 templates/edit_event.html:39
 msgid "End Time"
-msgstr ""
+msgstr "Heure de fin"
 
-#: templates/create_event.html:33 templates/edit_event.html:33
+#: templates/create_event.html:45 templates/edit_event.html:44
 msgid "Timezone"
-msgstr ""
+msgstr "Fuseau horaire"
 
-#: templates/create_event.html:41 templates/edit_event.html:41
-#, fuzzy
+#: templates/create_event.html:55 templates/edit_event.html:53
 msgid "Status"
 msgstr "Statut"
 
-#: templates/create_event.html:43 templates/edit_event.html:43
-#: templates/event.html:56 templates/index.html:32
+#: templates/create_event.html:57 templates/edit_event.html:55
+#: templates/event.html:69 templates/event.html:87 templates/index.html:32
 msgid "Hidden"
 msgstr "Masqué"
 
-#: templates/create_event.html:44 templates/edit_event.html:44
-#: templates/event.html:57 templates/index.html:33
+#: templates/create_event.html:58 templates/edit_event.html:56
+#: templates/event.html:70 templates/event.html:88 templates/index.html:33
 msgid "Visible"
 msgstr "Visible"
 
-#: templates/create_event.html:45 templates/edit_event.html:45
-#: templates/event.html:58 templates/index.html:34
+#: templates/create_event.html:59 templates/edit_event.html:57
+#: templates/event.html:71 templates/event.html:89 templates/index.html:34
 msgid "Archived"
 msgstr "Archivé"
 
-#: templates/create_event.html:49 templates/edit_event.html:49
+#: templates/create_event.html:63 templates/edit_event.html:61
 #: templates/event.html:36
 msgid "Organizer"
 msgstr "Organisateur"
 
-#: templates/create_event.html:52 templates/edit_event.html:52
+#: templates/create_event.html:66 templates/edit_event.html:64
+#: templates/event.html:39
+msgid "Location"
+msgstr "Lieu"
+
+#: templates/create_event.html:69 templates/edit_event.html:67
 msgid "Number of training hours"
 msgstr "Nombre d'heures de formation"
 
-#: templates/create_event.html:55
+#: templates/create_event.html:72
 msgid "Signature of the organizer"
 msgstr "Signature de l'organisateur"
 
-#: templates/create_event.html:58
+#: templates/create_event.html:75
 msgid "Create the event"
 msgstr "Créer l'événement"
 
-#: templates/edit_event.html:4
+#: templates/edit_event.html:13
 msgid "Modify the event"
 msgstr "Modifier l'événement"
 
-#: templates/edit_event.html:16
+#: templates/edit_event.html:25
 msgid "Programme"
 msgstr "Programme"
 
-#: templates/edit_event.html:55
+#: templates/edit_event.html:70
 msgid "Organizer signature"
 msgstr "Signature de l'organisateur"
 
-#: templates/edit_event.html:61
+#: templates/edit_event.html:76
 msgid "Notify registered users of date/time change"
-msgstr ""
+msgstr "Avertir les inscrits de la modification"
 
-#: templates/edit_event.html:65
+#: templates/edit_event.html:80
 msgid "Update the event"
 msgstr "Mettre à jour l'événement"
 
-#: templates/edit_event.html:66 templates/event.html:70
+#: templates/edit_event.html:81 templates/event.html:52 templates/event.html:98
 msgid "Delete the event"
 msgstr "Supprimer l'événement"
 
@@ -493,47 +505,47 @@ msgstr "Date"
 
 #: templates/event.html:10
 msgid "from"
-msgstr ""
+msgstr "de"
 
 #: templates/event.html:13
 msgid "to"
-msgstr ""
+msgstr "à"
 
-#: templates/event.html:39
+#: templates/event.html:42
 msgid "Training hours"
 msgstr "Nombre d'heures de formation"
 
-#: templates/event.html:44 templates/register.html:20
-msgid "Register"
-msgstr "Inscription"
-
-#: templates/event.html:45 templates/unregister.html:17
-msgid "Unregister"
-msgstr "Désinscription"
-
-#: templates/event.html:48
-msgid "Download Calendar (.ics)"
-msgstr ""
-
-#: templates/event.html:50
-msgid "Ask a certificate of attendance"
-msgstr "Demander un certificat de présence"
-
-#: templates/event.html:61
+#: templates/event.html:48 templates/event.html:74 templates/event.html:92
 msgid "Modify event"
 msgstr "Modifier l'événement"
 
-#: templates/event.html:62 templates/index.html:23
+#: templates/event.html:51 templates/event.html:97
+msgid "Are you sure to delete this event ?"
+msgstr "Êtes-vous sûr de vouloir supprimer cet événement ?"
+
+#: templates/event.html:57 templates/register.html:20
+msgid "Register"
+msgstr "Inscription"
+
+#: templates/event.html:58 templates/unregister.html:17
+msgid "Unregister"
+msgstr "Désinscription"
+
+#: templates/event.html:61
+msgid "Download Calendar (.ics)"
+msgstr "Télécharger le rendez-vous (.ics)"
+
+#: templates/event.html:63 templates/event.html:82
+msgid "Ask a certificate of attendance"
+msgstr "Demander un certificat de présence"
+
+#: templates/event.html:75 templates/event.html:93 templates/index.html:23
 msgid "See registered"
 msgstr "Voir les inscrits"
 
-#: templates/event.html:66
+#: templates/event.html:79 templates/event.html:94
 msgid "Extract registered"
 msgstr "Extraire les inscrits"
-
-#: templates/event.html:69
-msgid "Are you sure to delete this event ?"
-msgstr "Êtes-vous sûr de vouloir supprimer cet événement ?"
 
 #: templates/index.html:5
 msgid "Events"
@@ -567,41 +579,41 @@ msgstr "Gérer les utilisateurs"
 msgid "Add a new editor"
 msgstr "Créer un éditeur"
 
-#: templates/manage_users.html:13
+#: templates/manage_users.html:17
 msgid "Create an editor"
 msgstr "Créer un éditeur"
 
-#: templates/manage_users.html:17
+#: templates/manage_users.html:21
 msgid "Existing users"
 msgstr "Utilisateurs existants"
 
-#: templates/manage_users.html:23
+#: templates/manage_users.html:22
+msgid "Are you sure you want to delete this user?"
+msgstr "Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+
+#: templates/manage_users.html:27
 msgid "Actual role"
 msgstr "Rôle actuel"
 
-#: templates/manage_users.html:24
+#: templates/manage_users.html:28
 msgid "New role"
 msgstr "Nouveau rôle"
 
-#: templates/manage_users.html:25
+#: templates/manage_users.html:29
 msgid "Action"
 msgstr "Actions"
 
-#: templates/manage_users.html:37
+#: templates/manage_users.html:41
 msgid "Editor"
 msgstr "Éditeur"
 
-#: templates/manage_users.html:40
+#: templates/manage_users.html:44
 msgid "Update Role"
 msgstr "Mettre à jour le rôle"
 
-#: templates/manage_users.html:47
+#: templates/manage_users.html:51
 msgid "Reset Password"
 msgstr "Réinitialiser le mot de passe"
-
-#: templates/manage_users.html:50
-msgid "Are you sure you want to delete this user"
-msgstr "Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
 
 #: templates/register.html:5
 msgid "Register to the event"
@@ -642,16 +654,16 @@ msgstr "Se désinscrire de l'événement"
 #~ msgstr "Aucun email correspondant"
 
 #~ msgid "email1@example.com, email2@example.com"
-#~ msgstr ""
+#~ msgstr "email1@example.com, email2@example.com"
 
 #~ msgid "Map columns"
-#~ msgstr ""
+#~ msgstr "Assigner les colonnes"
 
 #~ msgid "Map Columns"
-#~ msgstr ""
+#~ msgstr "Assigner les colonnes"
 
 #~ msgid "Map"
-#~ msgstr ""
+#~ msgstr "Attribuer"
 
 #~ msgid "Status updated successfully !"
 #~ msgstr "Statut mis à jour avec succès"
