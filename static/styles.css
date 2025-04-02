@@ -25,3 +25,15 @@ body {
 .btn:hover {
     background-color: #0056b3;
 }
+
+.d-flex > div {
+    margin-right: 10px; /* Adjust as needed */
+}
+
+.date-input {
+    width: 150px; /* Adjust as needed */
+}
+
+.time-input {
+    width: 100px; /* Adjust as needed */
+}

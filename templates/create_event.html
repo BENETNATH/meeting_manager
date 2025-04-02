@@ -18,17 +18,19 @@
     <div id="program">{{ form_data.get('program', '') | safe }}</div> {# Populate Quill from form_data if available #}
     <input type="hidden" name="program" value="{{ form_data.get('program', '') }}" required><br>
 
-    <div class="form-group">
-        <label for="date">{{ _('Date of the event') }}*:</label>
-        <input type="date" id="date" name="date" class="form-control" value="{{ form_data.get('date', '') }}" required>
-    </div>
-    <div class="form-group">
-        <label for="start_time">{{ _('Start Time') }}:</label>
-        <input type="time" id="start_time" name="start_time" class="form-control" value="{{ form_data.get('start_time', '') }}">
-    </div>
-    <div class="form-group">
-        <label for="end_time">{{ _('End Time') }}:</label>
-        <input type="time" id="end_time" name="end_time" class="form-control" value="{{ form_data.get('end_time', '') }}">
+    <div class="form-group d-flex">
+        <div>
+            <label for="date">{{ _('Date of the event') }}*:</label>
+            <input type="date" id="date" name="date" class="form-control date-input" value="{{ form_data.get('date', '') }}" required>
+        </div>
+        <div>
+            <label for="start_time">{{ _('Start Time') }}:</label>
+            <input type="time" id="start_time" name="start_time" class="form-control time-input" value="{{ form_data.get('start_time', '') }}">
+        </div>
+        <div>
+            <label for="end_time">{{ _('End Time') }}:</label>
+            <input type="time" id="end_time" name="end_time" class="form-control time-input" value="{{ form_data.get('end_time', '') }}">
+        </div>
     </div>
     <div class="form-group">
         <label for="timezone">{{ _('Timezone') }}*:</label>
