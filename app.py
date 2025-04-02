@@ -7,7 +7,7 @@ import logging
 import pytz # Added for timezone handling
 from ics import Calendar, Event
 from io import BytesIO
-from datetime import datetime, timedelta # Added timedelta
+from datetime import datetime, timedelta, timezone # Added timedelta
 from logging.handlers import RotatingFileHandler
 from PIL import Image
 from dotenv import load_dotenv
@@ -750,9 +750,9 @@ def generate_ics(event):
         e.make_all_day()
 
     e.uid = f"{event.id}-{event.date.strftime('%Y%m%d')}@meeting-manager.com" # Unique ID for the event
-    e.created = datetime.utcnow() # Use UTC time for creation timestamp
+    e.created = datetime.now(timezone.utc) # Use UTC time for creation timestamp
     c.events.add(e)
-    return str(c) # Return ICS content as string
+    return c.serialize() # Return ICS content as string
 
 # --- Route for ICS Download ---
 @app.route('/event/<int:event_id>/download_ics')
