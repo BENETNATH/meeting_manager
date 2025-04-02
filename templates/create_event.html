@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 <h1>{{ _('Create a new event') }}</h1>
 <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('create_event') }}" onsubmit="return validateForm()">
     {# Use form_data if available (validation failed), otherwise empty string #}

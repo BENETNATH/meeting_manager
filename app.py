@@ -26,6 +26,16 @@ from waitress import serve
 from werkzeug.utils import secure_filename
 from ics import Calendar, Event as ICSEvent # Added for ICS generation
 
+def validate_eligible_hours(start_time, end_time, eligible_hours):
+    """
+    Validates that the eligible hours count fits within the duration between start and end time.
+    """
+    if not start_time or not end_time or not eligible_hours:
+        return True  # Skip validation if any of the values are missing
+
+    duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).total_seconds() / 3600
+    return eligible_hours <= duration
+
 
 # Initialisation de l'application Flask
 app = Flask(__name__)
@@ -291,6 +301,11 @@ def create_event():
             signature_url=signature_url,
             timezone=timezone # Save timezone
         )
+
+        if not validate_eligible_hours(start_time, end_time, float(eligible_hours)):
+            flash(_('Eligible hours must be within the event duration.'), 'danger')
+            return render_template('create_event.html', form_data=request.form)
+
         db.session.add(new_event)
         db.session.commit()
         flash(_('Event successfully created'), 'success')
@@ -368,6 +383,10 @@ def edit_event(event_id):
             event.status = request.form['status']
             if event.eligible_hours == '':
                 event.eligible_hours = 0
+
+            if not validate_eligible_hours(new_start_time, new_end_time, float(event.eligible_hours)):
+                flash(_('Eligible hours must be within the event duration.'), 'danger')
+                return render_template('edit_event.html', event=event, form_data=request.form)
 
             # Check if time has changed
             time_changed = (new_date != original_date or
