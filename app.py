@@ -792,8 +792,6 @@ def download_ics(event_id):
 if __name__ == '__main__':
     with app.app_context():
         db_path = 'instance/database.db'
-        if os.path.exists(db_path):
-            os.remove(db_path)
         db.create_all()
         if not User.query.filter_by(username='admin').first():
             admin_user = User(username='admin', email=admin_email, role='super-admin')
