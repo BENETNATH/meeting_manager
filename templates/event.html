@@ -34,6 +34,7 @@
                 <div class="d-flex gap-2">
                     {% if event.status == 'visible' %}
                         <a href="{{ url_for('events.register_page', event_id=event.id) }}" class="btn btn-primary">{{ _('Register') }}</a>
+                        <a href="{{ url_for('events.unregister_page', event_id=event.id) }}" class="btn btn-outline-danger" title="{{ _('Unregister') }}"><i class="fas fa-user-minus me-1"></i> {{ _('Unregister') }}</a>
                     {% endif %}
                     <a href="{{ url_for('events.download_ics', event_id=event.id) }}" class="btn btn-outline-primary" title="{{ _('Calendar') }}"><i class="fas fa-calendar-plus"></i></a>
                 </div>
@@ -83,6 +84,17 @@
                     </tr>
                     {% endif %}
                 </table>
+            </div>
+
+            <div class="detail-section mb-3">
+                <div class="section-title-compact">{{ _('Actions') }}</div>
+                <div class="d-grid gap-2">
+                    {% if event.status == 'visible' or event.status == 'archived' %}
+                        <a href="{{ url_for('events.request_certificate', event_id=event.id if event.status == 'archived' else None) }}" class="btn btn-outline-success w-100 justify-content-start">
+                            <i class="fas fa-certificate me-2"></i> {{ _('Get Certificate') }}
+                        </a>
+                    {% endif %}
+                </div>
             </div>
 
             {% if current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id)) %}

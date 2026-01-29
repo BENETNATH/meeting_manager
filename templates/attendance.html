@@ -1,89 +1,117 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-     <div class="col-md-12">
-	<div class="row mb-4">
-        <div class="col-md-12">
-            <h1>{{ _('Registration management') }} : {{ event.title }}</h1>
-            <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <p><strong>{{ _('Registered') }} :</strong> {{ registrations|length }}</p>
-            <p><strong>{{ _('Presents') }} :</strong> {{ registrations|selectattr('attended')|list|length }}</p>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <form id="bulk-attendance-form">
-                <div class="form-group">
-                    <label for="bulk-emails">{{ _('Extract emails and check those present (paste emails separated by commas or lines)') }} :</label>
-                    <textarea class="form-control" id="bulk-emails" rows="3" placeholder="email1@example.com, email2@example.com"></textarea>
+<header class="header-compact">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1>{{ _('Attendance Management') }}</h1>
+                <div class="header-meta">
+                    <span><i class="fas fa-calendar-check text-primary"></i> {{ event.title }}</span>
+                    <span><i class="fas fa-users"></i> {{ registrations|length }} {{ _('Registered') }}</span>
+                    <span class="text-success"><i class="fas fa-user-check"></i> {{ registrations|selectattr('attended')|list|length }} {{ _('Present') }}</span>
                 </div>
-                <button type="button" class="btn btn-success" onclick="extractAndMarkAttendance()">{{ _('Extract emails and check present') }}</button>
-            </form>
+            </div>
+            <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-outline-primary shadow-sm">
+                <i class="fas fa-arrow-left me-1"></i> {{ _('Back to Event') }}
+            </a>
         </div>
     </div>
-</div>
-    <div class="col-md-12">
-        <form id="upload-form" enctype="multipart/form-data">
-            <input type="file" id="file-input" accept=".csv, .xlsx">
-            <button type="submit" class="btn btn-info mt-3">{{ _('Import from CSV/XLSX') }}</button>
-        </form>
-        <form method="POST" id="attendance-form">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>{{ _('Last Name') }}</th>
-                            <th>{{ _('First Name') }}</th>
-                            <th>{{ _('Email') }}</th>
-                            <th>{{ _('Unique Key') }}</th>
-                            <th>{{ _('Present?') }}</th>
-                            <th>{{ _('Actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for registration in registrations %}
-                            <tr>
-                                <td>{{ registration.last_name }}</td>
-                                <td>{{ registration.first_name }}</td>
-                                <td>{{ registration.email|safe }}</td>
-                                <td>{{ registration.unique_key }}</td>
-                                <td>
-                                    <input type="checkbox" name="attended_{{ registration.id }}" {% if registration.attended %}checked{% endif %} data-email="{{ registration.email|strip_html }}">
-                                </td>
-                                <td>
-                                    <button type="button" onclick="deleteRegistration({{ registration.id }})" class="btn btn-danger btn-sm">{{ _('Delete') }}</button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+</header>
+
+<div class="container-fluid py-3">
+    <div class="row g-3">
+        <!-- Sidebar Tools -->
+        <div class="col-lg-3">
+            <div class="detail-section mb-3">
+                <div class="section-title-compact">{{ _('Bulk Check-in') }}</div>
+                <p class="x-small text-muted mb-2">{{ _('Paste emails here (comma/newline separated) to mark multiple attendees as present.') }}</p>
+                <textarea class="form-control-compact mb-2" id="bulk-emails" rows="4" placeholder="email1@example.com, email2@example.com"></textarea>
+                <button type="button" class="btn btn-primary w-100 py-1 shadow-sm" onclick="extractAndMarkAttendance()">
+                    <i class="fas fa-magic me-1"></i> {{ _('Bulk Check') }}
+                </button>
             </div>
-            <button type="submit" name="action" value="check_all" class="btn btn-primary mt-3">{{ _('Mark all as present') }}</button>
-            <button type="submit" name="action" value="update_attendance" class="btn btn-success mt-3">{{ _('Update presence') }}</button>
-            <button type="submit" name="action" value="save_new_registrations" class="btn btn-success mt-3">{{ _('Save New Registrations') }}</button>
-            <a href="{{ url_for('events.extract_attendance', event_id=event.id) }}" class="btn btn-secondary mt-3">{{ _('Extract registrees in csv') }}</a>
-        </form>
+
+            <div class="detail-section mb-3">
+                <div class="section-title-compact">{{ _('Import List') }}</div>
+                <form id="upload-form" enctype="multipart/form-data">
+                    <input type="file" id="file-input" class="form-control-compact mb-2" accept=".csv, .xlsx">
+                    <button type="submit" class="btn btn-outline-primary w-100 py-1">
+                        <i class="fas fa-upload me-1"></i> {{ _('Import CSV/XLSX') }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="detail-section">
+                <div class="section-title-compact">{{ _('Export') }}</div>
+                <a href="{{ url_for('events.extract_attendance', event_id=event.id) }}" class="btn btn-outline-secondary w-100 py-1">
+                    <i class="fas fa-download me-1"></i> {{ _('Export to CSV') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Main List -->
+        <div class="col-lg-9">
+            <div class="detail-section p-0 overflow-hidden">
+                <form method="POST" id="attendance-form">
+                    <div class="table-responsive">
+                        <table class="table-compact table-hover w-100">
+                            <thead>
+                                <tr>
+                                    <th>{{ _('Attendee') }}</th>
+                                    <th>{{ _('Email') }}</th>
+                                    <th>{{ _('Registration Key') }}</th>
+                                    <th class="text-center">{{ _('Present') }}</th>
+                                    <th class="text-end">{{ _('Actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for registration in registrations %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-slate-900">{{ registration.first_name }} {{ registration.last_name }}</div>
+                                        </td>
+                                        <td><span class="x-small text-slate-500">{{ registration.email|safe }}</span></td>
+                                        <td><code class="x-small text-primary">{{ registration.unique_key }}</code></td>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input" name="attended_{{ registration.id }}" {% if registration.attended %}checked{% endif %} data-email="{{ registration.email|strip_html }}">
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" onclick="deleteRegistration({{ registration.id }})" class="btn-icon text-danger" title="{{ _('Delete') }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="p-2 bg-slate-50 border-top d-flex gap-2 justify-content-end">
+                        <button type="submit" name="action" value="check_all" class="btn btn-sm btn-outline-primary">{{ _('Check All') }}</button>
+                        <button type="submit" name="action" value="update_attendance" class="btn btn-sm btn-success px-4">{{ _('Update Presence') }}</button>
+                        <button type="submit" name="action" value="save_new_registrations" class="btn btn-sm btn-info text-white">{{ _('Save Imports') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Modal Structure -->
 <div id="mappingModal" class="modal">
-  <div class="modal-content">
-    <span id="closeModal" class="close">&times;</span>
-    <h4>Mapper les colonnes :</h4>
-    <div id="mapping-container"></div>
-    <button id="mapColumnsButton">Map Columns</button>
+  <div class="modal-content border-0 shadow-lg rounded-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">{{ _('Map Columns') }}</h5>
+        <span id="closeModal" class="close text-slate-400">&times;</span>
+    </div>
+    <div id="mapping-container" class="mb-4"></div>
+    <div class="d-grid">
+        <button id="mapColumnsButton" class="btn btn-primary">{{ _('Import and Map') }}</button>
+    </div>
   </div>
 </div>
 
-<!-- JS Libs + css -->
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
@@ -98,28 +126,25 @@
             if (checkbox) {
                 checkbox.checked = true;
                 countChecked++;
-            } else {
-                console.log("{{ _('Not matching email found') }}:", cleanEmail);
             }
         });
 
         if (countChecked > 0) {
-            alert(`${countChecked} {{ _('updated cell(s). Click "Update Presence" to save.') }}`);
+            alert(`${countChecked} {{ _('attendees checked. Click "Update Presence" to save changes.') }}`);
         } else {
-            alert('{{ _('No matching email found') }}');
+            alert('{{ _('No matching emails found in list.') }}');
         }
     }
 
     function deleteRegistration(registrationId) {
+        if (!confirm('{{ _('Are you sure you want to delete this registration?') }}')) return;
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/admin/delete_registration/${registrationId}`;
-
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'action';
         input.value = 'delete_' + registrationId;
-
         form.appendChild(input);
         document.body.appendChild(form);
         form.submit();
@@ -129,181 +154,89 @@
         event.preventDefault();
         const fileInput = document.getElementById('file-input');
         const file = fileInput.files[0];
-
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = e.target.result;
                 let parsedData;
-
                 if (file.name.endsWith('.csv')) {
                     parsedData = Papa.parse(data, { header: true }).data;
                 } else if (file.name.endsWith('.xlsx')) {
                     const workbook = XLSX.read(data, { type: 'binary' });
-                    const sheetName = workbook.SheetNames[0];
-                    const sheet = workbook.Sheets[sheetName];
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
                     parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
                 }
-
-                // Afficher les colonnes pour attribution dans la pop-up
                 const columns = Object.keys(parsedData[0]);
                 displayColumnsForMapping(columns, parsedData);
                 document.getElementById('mappingModal').style.display = 'block';
             };
-
-            if (file.name.endsWith('.xlsx')) {
-                reader.readAsBinaryString(file);
-            } else {
-                reader.readAsText(file);
-            }
+            if (file.name.endsWith('.xlsx')) reader.readAsBinaryString(file);
+            else reader.readAsText(file);
         }
     });
 
     function displayColumnsForMapping(columns, parsedData) {
         const mappingContainer = document.getElementById('mapping-container');
         mappingContainer.innerHTML = '';
+        const fields = ['last_name', 'first_name', 'email', 'present'];
+        const selects = {};
 
-        const tableColumns = ['last_name', 'first_name', 'email', 'present'];
-        const selectElements = {};
-
-        tableColumns.forEach(column => {
-            const label = document.createElement('label');
-            label.textContent = `Map ${column}: `;
+        fields.forEach(field => {
+            const div = document.createElement('div');
+            div.className = 'mb-2';
+            div.innerHTML = `<label class="form-label-compact d-block">Map ${field.replace('_', ' ')}:</label>`;
             const select = document.createElement('select');
-            select.id = `mapping-${column}`;
-
+            select.className = 'form-control-compact';
             columns.forEach(col => {
-                const option = document.createElement('option');
-                option.value = col;
-                option.textContent = col;
-                select.appendChild(option);
+                const opt = document.createElement('option');
+                opt.value = col; opt.textContent = col;
+                select.appendChild(opt);
             });
-
-            mappingContainer.appendChild(label);
-            mappingContainer.appendChild(select);
-            mappingContainer.appendChild(document.createElement('br'));
-            selectElements[column] = select;
+            div.appendChild(select);
+            mappingContainer.appendChild(div);
+            selects[field] = select;
         });
 
-        document.getElementById('mapColumnsButton').addEventListener('click', function() {
-            const columnMapping = {};
-            tableColumns.forEach(column => {
-                columnMapping[column] = selectElements[column].value;
-            });
-            addDataToTable(parsedData, columnMapping);
+        document.getElementById('mapColumnsButton').onclick = function() {
+            const mapping = {};
+            fields.forEach(f => mapping[f] = selects[f].value);
+            addDataToTable(parsedData, mapping);
             document.getElementById('mappingModal').style.display = 'none';
-        });
-
-        document.getElementById('closeModal').addEventListener('click', function() {
-            document.getElementById('mappingModal').style.display = 'none';
-        });
+        };
+        document.getElementById('closeModal').onclick = () => document.getElementById('mappingModal').style.display = 'none';
     }
 
-    function addDataToTable(parsedData, columnMapping) {
+    function addDataToTable(parsedData, mapping) {
         const tableBody = document.querySelector('#attendance-form tbody');
         const form = document.getElementById('attendance-form');
-
         parsedData.forEach((row, index) => {
-            if (row[columnMapping['last_name']] || row[columnMapping['first_name']] || row[columnMapping['email']]) {
+            if (row[mapping['email']]) {
                 const newRow = document.createElement('tr');
-
-                const lastNameCell = document.createElement('td');
-                lastNameCell.textContent = row[columnMapping['last_name']] || '';
-                newRow.appendChild(lastNameCell);
-
-                const firstNameCell = document.createElement('td');
-                firstNameCell.textContent = row[columnMapping['first_name']] || '';
-                newRow.appendChild(firstNameCell);
-
-                const emailCell = document.createElement('td');
-                emailCell.textContent = row[columnMapping['email']] || '';
-                newRow.appendChild(emailCell);
-
-                const uniqueKeyCell = document.createElement('td');
-                uniqueKeyCell.textContent = `new_${index}`; // Générez une clé unique si nécessaire
-                newRow.appendChild(uniqueKeyCell);
-
-                const presentCell = document.createElement('td');
-                const presentCheckbox = document.createElement('input');
-                presentCheckbox.type = 'checkbox';
-                presentCheckbox.name = `attended_new_${index}`;
-                presentCheckbox.checked = row[columnMapping['present']] === 'true' || row[columnMapping['present']] === true;
-                presentCell.appendChild(presentCheckbox);
-                newRow.appendChild(presentCell);
-
-                const actionsCell = document.createElement('td');
-                const deleteButton = document.createElement('button');
-                deleteButton.type = 'button';
-                deleteButton.className = 'btn btn-danger btn-sm';
-                deleteButton.textContent = 'Delete';
-                deleteButton.onclick = function() {
-                    newRow.remove();
-                    // Supprimer également les champs cachés associés
-                    document.getElementById(`last_name_new_${index}`).remove();
-                    document.getElementById(`first_name_new_${index}`).remove();
-                    document.getElementById(`email_new_${index}`).remove();
-                };
-                actionsCell.appendChild(deleteButton);
-                newRow.appendChild(actionsCell);
-
+                newRow.innerHTML = `
+                    <td><div class="fw-bold text-primary">${row[mapping['first_name']] || ''} ${row[mapping['last_name']] || ''}</div></td>
+                    <td><span class="x-small text-slate-500">${row[mapping['email']]}</span></td>
+                    <td><code class="x-small text-muted">NEW</code></td>
+                    <td class="text-center"><input type="checkbox" class="form-check-input" name="attended_new_${index}" ${row[mapping['present']] === true ? 'checked' : ''}></td>
+                    <td class="text-end"><button type="button" class="btn-icon text-danger" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
+                `;
                 tableBody.appendChild(newRow);
-
-                // Ajouter des champs cachés pour les nouvelles inscriptions
-                const lastNameInput = document.createElement('input');
-                lastNameInput.type = 'hidden';
-                lastNameInput.name = `last_name_new_${index}`;
-                lastNameInput.id = `last_name_new_${index}`;
-                lastNameInput.value = row[columnMapping['last_name']] || '';
-                form.appendChild(lastNameInput);
-
-                const firstNameInput = document.createElement('input');
-                firstNameInput.type = 'hidden';
-                firstNameInput.name = `first_name_new_${index}`;
-                firstNameInput.id = `first_name_new_${index}`;
-                firstNameInput.value = row[columnMapping['first_name']] || '';
-                form.appendChild(firstNameInput);
-
-                const emailInput = document.createElement('input');
-                emailInput.type = 'hidden';
-                emailInput.name = `email_new_${index}`;
-                emailInput.id = `email_new_${index}`;
-                emailInput.value = row[columnMapping['email']] || '';
-                form.appendChild(emailInput);
+                ['last_name', 'first_name', 'email'].forEach(field => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `${field}_new_${index}`;
+                    input.value = row[mapping[field]] || '';
+                    form.appendChild(input);
+                });
             }
         });
     }
 </script>
+
 <style>
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
-  }
-  .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-  }
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-  .close:hover,
-  .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); }
+.modal-content { background: white; margin: 10% auto; padding: 1.5rem; width: 90%; max-width: 400px; }
+.close { font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+.btn-icon { background: none; border: none; padding: 4px; transition: var(--transition); }
+.btn-icon:hover { background: var(--slate-100); border-radius: 4px; }
 </style>
 {% endblock %}

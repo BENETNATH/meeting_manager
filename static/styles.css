@@ -381,3 +381,162 @@ h6 {
     font-size: 0.7rem;
     font-weight: 700;
 }
+
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--slate-100);
+    color: var(--slate-600);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.stat-pill-link {
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.stat-pill-link:hover {
+    background: var(--primary-light);
+    color: white !important;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* Modern Tables */
+.table-compact {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.8125rem;
+}
+
+.table-compact th {
+    background: var(--slate-50);
+    padding: 8px 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    border-bottom: 1px solid var(--slate-200);
+    text-align: left;
+}
+
+.table-compact td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: middle;
+}
+
+.table-compact tr:last-child td {
+    border-bottom: none;
+}
+
+.table-compact tr:hover td {
+    background: var(--slate-50);
+}
+
+/* User Avatar / Initials */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--primary-light);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+/* Modern Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.badge-primary {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-warning {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Role Specific Badges */
+.badge-role-super-admin {
+    background: #fae8ff;
+    color: #86198f;
+}
+
+.badge-role-editor {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+/* Action Group */
+.action-group {
+    display: flex;
+    gap: 4px;
+}
+
+/* Utility for text truncation */
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.x-small {
+    font-size: 0.65rem;
+}
+
+.text-slate-400 {
+    color: var(--slate-400);
+}
+
+.text-slate-500 {
+    color: var(--slate-500);
+}
+
+.text-slate-600 {
+    color: var(--slate-600);
+}
+
+.text-slate-900 {
+    color: var(--slate-800);
+}
+
+.text-slate-950 {
+    color: var(--slate-950);
+}

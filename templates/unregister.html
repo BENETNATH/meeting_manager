@@ -1,20 +1,38 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-<div class="container mt-4">
-    <h1>{{ _('Unregister from the event') }}: {{ event.title }}</h1>
-            <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
-        <form method="POST" action="{{ url_for('events.unregister', event_id=event.id) }}">
-        <div class="form-group">
-            <label for="email">{{ _('Email') }}*:</label>
-            <input type="email" id="email" name="email" class="form-control" required>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-4 col-lg-6">
+            <div class="detail-section">
+                <div class="section-title-compact">{{ _('Unregister from Event') }}</div>
+                <h5 class="fw-bold mb-3">{{ event.title }}</h5>
+                
+                <form method="POST" action="{{ url_for('events.unregister', event_id=event.id) }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label-compact">{{ _('Email Address') }}</label>
+                        <input type="email" id="email" name="email" class="form-control-compact" required placeholder="john@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="unique_key" class="form-label-compact">{{ _('Unique Key') }}</label>
+                        <input type="text" id="unique_key" name="unique_key" class="form-control-compact" required placeholder="Enter your key">
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-danger py-2">
+                            <i class="fas fa-user-minus me-2"></i> {{ _('Cancel My Registration') }}
+                        </button>
+                        <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-outline-primary py-2">
+                            {{ _('Back to Event') }}
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+            <p class="text-center mt-3 text-muted x-small">
+                <i class="fas fa-info-circle me-1"></i> {{ _('Note: This action cannot be undone.') }}
+            </p>
         </div>
-        <div class="form-group">
-            <label for="unique_key">{{ _('Unique key') }}*:</label>
-            <input type="text" id="unique_key" name="unique_key" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-danger">{{ _('Unregister') }}</button>
-    </form>
+    </div>
 </div>
 {% endblock %}

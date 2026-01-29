@@ -18,7 +18,7 @@
     <div class="event-grid">
         {% for event in events %}
             {% if event.status != 'hidden' or (current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))) %}
-                <div class="compact-event-card">
+                <div class="compact-event-card position-relative" onclick="if(!event.target.closest('a') && !event.target.closest('button') && !event.target.closest('.stat-pill-link')) window.location='{{ url_for('events.event', event_id=event.id) }}'" style="cursor: pointer;">
                     <div class="card-image-wrapper">
                         {% if event.photo_filename %}
                             <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" alt="{{ event.title }}">
@@ -57,7 +57,9 @@
                             {% if current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id)) %}
                                 <div class="d-flex align-items-center gap-1">
                                     <div class="d-flex gap-1 me-1">
-                                        <span class="stat-pill" title="{{ _('Registered') }}"><i class="fas fa-users"></i> {{ event.total_registered }}</span>
+                                        <a href="{{ url_for('events.mark_attendance', event_id=event.id) }}" class="stat-pill stat-pill-link text-decoration-none" title="{{ _('Attendance Management') }}">
+                                            <i class="fas fa-users"></i> {{ event.total_registered }}
+                                        </a>
                                     </div>
                                     <a href="{{ url_for('events.edit_event', event_id=event.id) }}" class="btn-icon" title="{{ _('Edit') }}">
                                         <i class="fas fa-edit"></i>
