@@ -1,170 +1,173 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-    {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-<h1>{{ _('Modify the event') }} : {{ event.title }}</h1>
-<form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('edit_event', event_id=event.id) }}" onsubmit="return validateForm()">
-    <label for="title">{{ _('Title') }}*:</label>
-    <input type="text" id="title" name="title" value="{{ event.title }}" required><br>
+<div class="container-fluid py-3">
+    <div class="row justify-content-center">
+        <div class="col-xl-9 col-lg-11">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h1 class="h5 fw-bold mb-0"><i class="fas fa-edit me-2 text-primary"></i>{{ _('Edit Event') }}</h1>
+                    <p class="text-muted small mb-0">{{ event.title }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-outline-primary">{{ _('Cancel') }}</a>
+                    <button type="submit" form="eventForm" class="btn btn-primary px-3">{{ _('Save Changes') }}</button>
+                </div>
+            </div>
 
-    <label for="description">{{ _('Description') }}*:</label>
-    <div id="description">{{ event.description | safe }}</div>
-    <input type="hidden" id="hiddenDescription" name="description" value="{{ event.description | safe }}" required><br>
+            <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('events.edit_event', event_id=event.id) }}" onsubmit="return validateForm()">
+                <div class="row g-2">
+                    <!-- Core Info -->
+                    <div class="col-md-7">
+                        <div class="detail-section h-100">
+                            <div class="section-title-compact">{{ _('General') }}</div>
+                            <div class="mb-2">
+                                <label class="form-label-compact">{{ _('Event Title') }}</label>
+                                <input type="text" id="title" name="title" class="form-control-compact" value="{{ event.title }}" required>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label-compact">{{ _('Organizer') }}</label>
+                                    <input type="text" id="organizer" name="organizer" class="form-control-compact" value="{{ event.organizer }}" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label-compact">{{ _('Location') }}</label>
+                                    <input type="text" id="location" name="location" class="form-control-compact" value="{{ event.location }}">
+                                </div>
+                            </div>
 
-    <label for="photo_url">{{ _('URL of the picture') }}:</label>
-    <input type="url" id="photo_url" name="photo_url" value="{{ event.photo_url }}"><br>
+                            <div class="section-title-compact mt-3">{{ _('Schedule') }}</div>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <label class="form-label-compact">{{ _('Date') }}</label>
+                                    <input type="date" id="date" name="date" class="form-control-compact" value="{{ event.date.strftime('%Y-%m-%d') }}" required>
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label-compact">{{ _('Start') }}</label>
+                                    <input type="time" name="start_time" class="form-control-compact" value="{{ event.start_time.strftime('%H:%M') if event.start_time else '' }}">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label-compact">{{ _('End') }}</label>
+                                    <input type="time" name="end_time" class="form-control-compact" value="{{ event.end_time.strftime('%H:%M') if event.end_time else '' }}">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label-compact">{{ _('Timezone') }}</label>
+                                    <input type="text" name="timezone" class="form-control-compact" list="timezone-list" value="{{ event.timezone }}" required>
+                                    <datalist id="timezone-list">
+                                        {% for tz in timezones %}<option value="{{ tz }}">{% endfor %}
+                                    </datalist>
+                                </div>
+                                <div class="col-3">
+                                    <label class="form-label-compact">{{ _('Hrs') }}</label>
+                                    <input type="number" step="0.1" name="eligible_hours" class="form-control-compact" value="{{ event.eligible_hours }}">
+                                </div>
+                                <div class="col-3">
+                                    <label class="form-label-compact">{{ _('Status') }}</label>
+                                    <select name="status" class="form-control-compact">
+                                        <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
+                                        <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
+                                        <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <label for="program">{{ _('Programme') }}*:</label>
-    <div id="program">{{ event.program | safe }}</div>
-    <input type="hidden" id="hiddenProgram" name="program" value="{{ event.program | safe }}" required><br>
+                    <!-- Media & Sidebar -->
+                    <div class="col-md-5">
+                        <div class="detail-section mb-2">
+                            <div class="section-title-compact">{{ _('Media') }}</div>
+                            <div class="d-flex gap-2 mb-2 align-items-center">
+                                <div style="width: 48px; height: 48px; border-radius: 4px; overflow: hidden; background: #f1f5f9; flex-shrink: 0;">
+                                    {% if event.photo_filename %}
+                                        <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" class="w-100 h-100 object-fit-cover">
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <input type="file" name="picture" class="form-control-compact" accept="image/*">
+                                </div>
+                            </div>
+                            <input type="url" name="photo_url" class="form-control-compact" placeholder="External URL" value="{{ event.photo_url }}">
+                        </div>
 
-    <div class="form-group d-flex">
-        <div>
-            <label for="date">{{ _('Date of the event') }}*:</label>
-            <input type="date" id="date" name="date" class="form-control date-input" value="{{ event.date.strftime('%Y-%m-%d') }}" required>
+                        <div class="detail-section">
+                            <div class="section-title-compact">{{ _('Documents') }}</div>
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <label class="form-label-compact">Signature (IMG)</label>
+                                    <input type="file" name="signature" class="form-control-compact" accept="image/*">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label-compact">Registry / Program (PDF)</label>
+                                    <div class="d-flex gap-1">
+                                        <input type="file" name="registry_form" class="form-control-compact">
+                                        <input type="file" name="pdf_program" class="form-control-compact">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label-compact">Others</label>
+                                    <input type="file" name="additional_files" class="form-control-compact" multiple>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editors -->
+                    <div class="col-12">
+                        <div class="detail-section">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="section-title-compact">{{ _('Description') }}</div>
+                                    <div id="description_editor" style="height: 120px; background: white;">{{ event.description | safe }}</div>
+                                    <input type="hidden" name="description" value="{{ event.description | safe }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="section-title-compact">{{ _('Program') }}</div>
+                                    <div id="program_editor" style="height: 120px; background: white;">{{ event.program | safe }}</div>
+                                    <input type="hidden" name="program" value="{{ event.program | safe }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="detail-section bg-light border-0 py-2">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" name="notify_time_change" id="notify" value="true">
+                                <label class="form-check-label small fw-bold" for="notify">{{ _('Notify attendees') }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div>
-            <label for="start_time">{{ _('Start Time') }}:</label>
-            <input type="time" id="start_time" name="start_time" class="form-control time-input" value="{{ event.start_time.strftime('%H:%M') if event.start_time else '' }}">
-        </div>
-        <div>
-            <label for="end_time">{{ _('End Time') }}:</label>
-            <input type="time" id="end_time" name="end_time" class="form-control time-input" value="{{ event.end_time.strftime('%H:%M') if event.end_time else '' }}">
-        </div>
     </div>
-    <div class="form-group">
-        <label for="timezone">{{ _('Timezone') }}*:</label>
-        <input type="text" id="timezone" name="timezone" class="form-control" list="timezone-list" value="{{ event.timezone }}" required autocomplete="off">
-        <datalist id="timezone-list">
-            {% for tz in timezones %}
-                <option value="{{ tz }}">
-            {% endfor %}
-        </datalist>
-    </div>
-    <div class="form-group">
-        <label for="status">{{ _('Status') }}*:</label>
-        <select id="status" name="status" class="form-control" required>
-            <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
-            <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
-            <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
-        </select>
-    </div>
+</div>
 
-    <label for="organizer">{{ _('Organizer') }}*:</label>
-    <input type="text" id="organizer" name="organizer" value="{{ event.organizer }}" required><br>
-
-    <label for="location">{{ _('Location') }}:</label>
-    <input type="text" id="location" name="location" value="{{ event.location }}"><br>
-
-    <label for="eligible_hours">{{ _('Number of training hours') }}*:</label>
-    <input type="number" step="0.1" id="eligible_hours" name="eligible_hours" value="{{ event.eligible_hours }}" required><br>
-
-    <label for="signature">{{ _('Organizer signature') }} :</label>
-    <input type="file" id="signature" name="signature" accept="image/*" onchange="validateImageSize(this)"><br>
-
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" value="true" id="notify_time_change" name="notify_time_change">
-        <label class="form-check-label" for="notify_time_change">
-            {{ _('Notify registered users of date/time change') }}
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-success">{{ _('Update the event') }}</button>
-    <button type="button" class="btn btn-danger" onclick="deleteEvent()">{{ _('Delete the event') }}</button>
-</form>
-
-<!-- Inclure Quill CSS et JS -->
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Vérifiez que les éléments existent avant d'initialiser Quill
-        var descriptionElement = document.getElementById('description');
-        var programElement = document.getElementById('program');
+        var quillDesc = new Quill('#description_editor', { theme: 'snow' });
+        var quillProg = new Quill('#program_editor', { theme: 'snow' });
 
-        console.log('Description Element:', descriptionElement);
-        console.log('Program Element:', programElement);
-
-        if (descriptionElement && programElement) {
-            try {
-                var quillDescription = new Quill('#description', {
-                    theme: 'snow'
-                });
-
-                var quillProgram = new Quill('#program', {
-                    theme: 'snow'
-                });
-
-                // Ajouter un écouteur d'événement pour sauvegarder le contenu
-                quillDescription.on('text-change', function() {
-                    document.querySelector('input[name="description"]').value = quillDescription.root.innerHTML;
-                });
-
-                quillProgram.on('text-change', function() {
-                    document.querySelector('input[name="program"]').value = quillProgram.root.innerHTML;
-                });
-
-                // Set initial values for Quill editors
-                quillDescription.clipboard.dangerouslyPasteHTML(document.querySelector('input[name="description"]').value);
-                quillProgram.clipboard.dangerouslyPasteHTML(document.querySelector('input[name="program"]').value);
-            } catch (error) {
-                console.error('Erreur lors de l\'initialisation de Quill:', error);
-            }
-        } else {
-            console.error('Les éléments cibles pour Quill ne sont pas trouvés dans le DOM.');
-        }
+        quillDesc.on('text-change', function() {
+            document.querySelector('input[name="description"]').value = quillDesc.root.innerHTML;
+        });
+        quillProg.on('text-change', function() {
+            document.querySelector('input[name="program"]').value = quillProg.root.innerHTML;
+        });
     });
 
     function validateForm() {
-        var description = document.querySelector('input[name="description"]').value;
-        var program = document.querySelector('input[name="program"]').value;
-        var title = document.getElementById('title').value;
-        var date = document.getElementById('date').value;
-        var organizer = document.getElementById('organizer').value;
-
-        console.log('Description:', description);
-        console.log('Program:', program);
-        console.log('Title:', title);
-        console.log('Date:', date);
-        console.log('Organizer:', organizer);
-
-        if (title.trim() === '' || date.trim() === '' || organizer.trim() === '') {
-            alert('Veuillez remplir tous les champs obligatoires.');
+        const title = document.getElementById('title').value;
+        const date = document.getElementById('date').value;
+        if (!title.trim() || !date) {
+            alert('Required fields missing');
             return false;
         }
         return true;
     }
-
-    function validateImageSize(input) {
-        const file = input.files[0];
-        if (file) {
-            const img = new Image();
-            img.onload = function() {
-                if (img.width > 800 || img.height > 600) {
-                    alert('La photo doit être plus petite que 800x600.');
-                    input.value = '';
-                }
-            };
-            img.src = URL.createObjectURL(file);
-        }
-    }
-
-    function deleteEvent() {
-        if (confirm('Êtes-vous sûr de vouloir supprimer l\'événement ?')) {
-            const form = document.getElementById('eventForm');
-            form.action = "{{ url_for('delete_event', event_id=event.id) }}";
-            form.submit();
-        }
-    }
 </script>
-
 {% endblock %}

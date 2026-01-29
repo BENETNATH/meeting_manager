@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>{{ _('Create editor') }}</h1>
-<form method="POST">
+<form method="POST" action="{{ url_for('auth.create_editor') }}">
     <label for="username">{{ _('Username') }}:</label>
     <input type="text" id="username" name="username" required><br>
     <label for="email">{{ _('Email') }}:</label>

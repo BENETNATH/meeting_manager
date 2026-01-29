@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-8 col-md-10">
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('events.index') }}">{{ _('Home') }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('events.event', event_id=event.id) }}">{{ _('Event') }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ _('Registration Confirmation') }}</li>
+                </ol>
+            </nav>
+
+            <!-- Success Header -->
+            <div class="text-center mb-5">
+                <div class="mb-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                </div>
+                <h1 class="h2 fw-bold text-dark mb-2">{{ _('Registration Confirmed!') }}</h1>
+                <p class="text-muted fs-5">{{ _('You have successfully registered for') }} <strong>{{ event.title }}</strong></p>
+            </div>
+
+            <!-- Confirmation Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="vr bg-primary me-3" style="height: 24px;"></div>
+                                <h5 class="mb-0 fw-semibold text-dark">{{ _('Registration Details') }}</h5>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold mb-1">{{ _('Attendee') }}</label>
+                            <p class="fs-5 mb-0 text-dark">{{ first_name }} {{ last_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold mb-1">{{ _('Email Address') }}</label>
+                            <p class="fs-5 mb-0 text-dark">{{ email }}</p>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="bg-light rounded-4 p-4 border border-info border-opacity-25">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 mt-1">
+                                        <i class="fas fa-key fa-lg text-info"></i>
+                                    </div>
+                                    <div class="w-100">
+                                        <h6 class="fw-bold text-dark mb-1">{{ _('Your Unique Registration Key') }}</h6>
+                                        <p class="text-muted small mb-3">{{ _('Please save this key. You will need it to unregister or to request your attendance certificate later.') }}</p>
+                                        
+                                        <div class="input-group">
+                                            <input type="text" id="uniqueKeyInput" class="form-control form-control-lg bg-white border-0 text-center fw-mono" value="{{ unique_key }}" readonly>
+                                            <button class="btn btn-info text-white px-4" type="button" onclick="copyUniqueKey()">
+                                                <i class="fas fa-copy me-2"></i>{{ _('Copy') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event info & Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-calendar-alt text-muted me-3 fa-lg"></i>
+                        <div>
+                            <h6 class="mb-0 text-dark fw-bold">{{ event.date.strftime('%A, %d %B %Y') }}</h6>
+                            <p class="text-muted small mb-0">
+                                {% if event.start_time %}
+                                    {{ event.start_time.strftime('%H:%M') }}
+                                    {% if event.end_time %} - {{ event.end_time.strftime('%H:%M') }}{% endif %}
+                                    ({{ event.timezone }})
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('events.download_ics', event_id=event.id) }}" class="btn btn-outline-primary rounded-3 px-4">
+                            <i class="fas fa-calendar-plus me-2"></i>{{ _('Add to Calendar') }}
+                        </a>
+                        <a href="{{ url_for('events.index') }}" class="btn btn-primary rounded-3 px-4">
+                            <i class="fas fa-home me-2"></i>{{ _('Back to Home') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p class="text-muted small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    {{ _('A confirmation email has been sent to your inbox (please check your spam folder).') }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-mono {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        letter-spacing: 0.05em;
+    }
+</style>
+
+<script>
+    function copyUniqueKey() {
+        const copyText = document.getElementById("uniqueKeyInput");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        
+        // Show success feedback
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+        btn.classList.remove('btn-info');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-info');
+        }, 2000);
+    }
+</script>
+{% endblock %}

@@ -1,12 +1,43 @@
-Flask
-Flask-SQLAlchemy
-Flask-Login
-Flask-Bcrypt
-Flask-Mail
-Werkzeug
-Pillow
-python-dotenv
-Flask-Babel
-waitress
-reportlab
-ics
+# Core Flask Framework
+Flask>=2.3.0
+Werkzeug>=2.3.0
+
+# Database and ORM
+Flask-SQLAlchemy>=3.0.0
+Flask-Migrate>=4.0.0
+
+# Authentication and Security
+Flask-Login>=0.6.0
+Flask-Bcrypt>=1.0.1
+
+# Email Support
+Flask-Mail>=0.9.1
+
+# Internationalization
+Flask-Babel>=3.0.0
+
+# File Handling and Image Processing
+Pillow>=10.0.0
+
+# PDF Generation
+reportlab>=4.0.0
+
+# Calendar and Scheduling
+ics>=0.7.0
+
+# Timezone Support
+pytz>=2023.3
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# WSGI Server (OS-specific)
+# Windows production server
+waitress>=2.1.0; sys_platform == "win32"
+
+# Linux/Unix production server (includes Docker)
+gunicorn>=21.2.0; sys_platform != "win32"
+
+# Development and Testing
+pytest>=7.4.0
+pytest-flask>=1.2.0

@@ -6,7 +6,7 @@
 	<div class="row mb-4">
         <div class="col-md-12">
             <h1>{{ _('Registration management') }} : {{ event.title }}</h1>
-            <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
+            <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-secondary mb-3">{{ _('Back to the event') }}</a>
         </div>
     </div>
     <div class="row mb-3">
@@ -66,7 +66,7 @@
             <button type="submit" name="action" value="check_all" class="btn btn-primary mt-3">{{ _('Mark all as present') }}</button>
             <button type="submit" name="action" value="update_attendance" class="btn btn-success mt-3">{{ _('Update presence') }}</button>
             <button type="submit" name="action" value="save_new_registrations" class="btn btn-success mt-3">{{ _('Save New Registrations') }}</button>
-            <a href="{{ url_for('extract_attendance', event_id=event.id) }}" class="btn btn-secondary mt-3">{{ _('Extract registrees in csv') }}</a>
+            <a href="{{ url_for('events.extract_attendance', event_id=event.id) }}" class="btn btn-secondary mt-3">{{ _('Extract registrees in csv') }}</a>
         </form>
     </div>
 </div>
@@ -113,7 +113,7 @@
     function deleteRegistration(registrationId) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = "{{ url_for('mark_attendance', event_id=event.id) }}";
+        form.action = `/admin/delete_registration/${registrationId}`;
 
         const input = document.createElement('input');
         input.type = 'hidden';
