@@ -5,7 +5,7 @@
     <div class="container-fluid">
         <div class="row align-items-center g-3">
             <div class="col-md-auto">
-                <div style="width: 120px; height: 120px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
+                <div style="width: 100px; height: 100px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
                     {% if event.photo_filename %}
                         <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" class="w-100 h-100 object-fit-cover">
                     {% elif event.photo_url %}
@@ -18,16 +18,21 @@
                 </div>
             </div>
             <div class="col">
-                <div class="mb-1">
+                <div class="mb-1 header-badge-wrapper">
                     <span class="badge status-{{ event.status }} rounded-1 small py-1 px-2">{{ _(event.status|capitalize) }}</span>
                 </div>
                 <h1 class="hero-title mb-2" style="font-size: 1.5rem;">{{ event.title }}</h1>
                 <div class="header-meta">
                     <div class="info-item"><i class="far fa-calendar-alt"></i>{{ event.date.strftime('%d %b %Y') }}</div>
                     {% if event.start_time %}
-                        <div class="info-item"><i class="far fa-clock"></i>{{ event.start_time.strftime('%H:%M') }}{% if event.end_time %} - {{ event.end_time.strftime('%H:%M') }}{% endif %}</div>
+                        <div class="info-item">
+                            <i class="far fa-clock"></i>{{ event.start_time.strftime('%H:%M') }}{% if event.end_time %} - {{ event.end_time.strftime('%H:%M') }}{% endif %}
+                            <small class="ms-1 text-slate-400">({{ event.timezone }})</small>
+                        </div>
                     {% endif %}
-                    <div class="info-item"><i class="fas fa-globe"></i>{{ event.timezone }}</div>
+                    {% if event.location %}
+                        <div class="info-item"><i class="fas fa-map-marker-alt"></i>{{ event.location }}</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-md-auto">
@@ -43,7 +48,7 @@
     </div>
 </div>
 
-<div class="container-fluid py-2">
+<div class="container-fluid py-2 event-main-content">
     <div class="row g-3">
         <div class="col-lg-8">
             <div class="detail-section">
@@ -97,6 +102,20 @@
                 </div>
             </div>
 
+            {% if event.attachments %}
+            <div class="detail-section mb-3">
+                <div class="section-title-compact">{{ _('Attachments') }}</div>
+                <div class="d-grid gap-2">
+                    {% for attachment in event.attachments %}
+                        <a href="{{ url_for('events.uploaded_file', filename=attachment.filename) }}" class="btn btn-outline-primary w-100 justify-content-start text-truncate" target="_blank">
+                            <i class="fas fa-file-download me-2 text-primary"></i> <span class="text-dark">{{ attachment.original_filename }}</span>
+                            <span class="badge bg-light text-dark ms-auto border small">{{ _(attachment.file_type|capitalize) }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             {% if current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id)) %}
             <div class="detail-section">
                 <div class="section-title-compact">{{ _('Management') }}</div>
@@ -122,6 +141,7 @@
 </div>
 
 <script>
+
 function confirmDelete(button) {
     const message = button.getAttribute('data-confirm-message');
     if (confirm(message)) {

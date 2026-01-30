@@ -143,15 +143,28 @@ def register_template_filters(app: Flask) -> None:
     import re
     
     def strip_html(value: str) -> str:
-        """Remove HTML tags from a string.
+        """Remove HTML tags from a string while preserving line breaks.
         
         Args:
             value: String containing HTML.
         
         Returns:
-            String with HTML tags removed.
+            String with HTML tags removed and line breaks preserved.
         """
-        return re.sub('<.*?>', '', value)
+        if not value:
+            return ""
+        from html import unescape
+        # Replace block tags and <br> with newlines
+        s = re.sub(r'</?(p|div|br|li|h[1-6])[^>]*>', '\n', value)
+        # Remove all other tags
+        s = re.sub(r'<[^>]+>', '', s)
+        # Decode HTML entities
+        s = unescape(s)
+        # Clean up: strip whitespace from lines and reduce multiple newlines
+        lines = [line.strip() for line in s.split('\n')]
+        s = '\n'.join(lines)
+        s = re.sub(r'\n{3,}', '\n\n', s)
+        return s.strip()
     
     app.jinja_env.filters['strip_html'] = strip_html
 

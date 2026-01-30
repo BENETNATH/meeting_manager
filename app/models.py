@@ -110,7 +110,7 @@ class Event(db.Model):
     signature_filename: Mapped[Optional[str]] = mapped_column(db.String(200), nullable=True)
     timezone: Mapped[str] = mapped_column(db.String(50), nullable=False, default='UTC')
     
-    # Relationships
+    attachments = relationship('Attachment', backref='event', lazy=True, cascade="all, delete-orphan")
     registrations = relationship('Registration', backref='event', lazy=True)
     
     # Constraints
@@ -135,6 +135,30 @@ class Event(db.Model):
     def __repr__(self) -> str:
         """String representation of the event."""
         return f'<Event {self.title}>'
+
+
+class Attachment(db.Model):
+    """Attachment model for event-related files.
+    
+    Attributes:
+        id: Primary key.
+        event_id: Foreign key to Event.
+        filename: Stored filename on disk.
+        original_filename: Original filename when uploaded.
+        file_type: Type of attachment (registry, program, other).
+    """
+    
+    __tablename__ = 'attachment'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    filename: Mapped[str] = mapped_column(db.String(200), nullable=False)
+    original_filename: Mapped[str] = mapped_column(db.String(200), nullable=False)
+    file_type: Mapped[str] = mapped_column(db.String(50), nullable=False, default='other')
+    
+    def __repr__(self) -> str:
+        """String representation of the attachment."""
+        return f'<Attachment {self.original_filename} for Event {self.event_id}>'
 
 
 class Registration(db.Model):

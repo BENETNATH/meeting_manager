@@ -20,7 +20,7 @@
                 <div class="row g-2">
                     <!-- Core Info -->
                     <div class="col-md-7">
-                        <div class="detail-section h-100">
+                        <div class="detail-section">
                             <div class="section-title-compact">{{ _('General') }}</div>
                             <div class="mb-2">
                                 <label class="form-label-compact">{{ _('Event Title') }}</label>
@@ -112,13 +112,13 @@
                             <div class="row g-2">
                                 <div class="col-md-6">
                                     <div class="section-title-compact">{{ _('Description') }}</div>
-                                    <div id="description_editor" style="height: 120px; background: white;">{{ form_data.get('description', '') | safe }}</div>
-                                    <input type="hidden" name="description" value="{{ form_data.get('description', '') }}">
+                                    <div id="description_editor">{{ form_data.get('description', '') | safe }}</div>
+                                    <input type="hidden" name="description">
                                 </div>
                                 <div class="col-md-6">
                                     <div class="section-title-compact">{{ _('Program') }}</div>
-                                    <div id="program_editor" style="height: 120px; background: white;">{{ form_data.get('program', '') | safe }}</div>
-                                    <input type="hidden" name="program" value="{{ form_data.get('program', '') }}">
+                                    <div id="program_editor">{{ form_data.get('program', '') | safe }}</div>
+                                    <input type="hidden" name="program">
                                 </div>
                             </div>
                         </div>
@@ -136,6 +136,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         var quillDesc = new Quill('#description_editor', { theme: 'snow' });
         var quillProg = new Quill('#program_editor', { theme: 'snow' });
+
+        // Initialisation des champs cachés
+        document.querySelector('input[name="description"]').value = quillDesc.root.innerHTML;
+        document.querySelector('input[name="program"]').value = quillProg.root.innerHTML;
 
         quillDesc.on('text-change', function() {
             document.querySelector('input[name="description"]').value = quillDesc.root.innerHTML;

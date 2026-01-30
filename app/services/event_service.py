@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from io import BytesIO
 from dataclasses import dataclass
 import bleach
+from bleach.css_sanitizer import CSSSanitizer
 from sqlalchemy import func, case
 
 import pytz
@@ -28,19 +29,17 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate
 
 from app.extensions import db, mail
-from app.models import Event, Registration, User
+from app.models import Event, Registration, User, Attachment
 from app.exceptions import (
     EventCreationError, EventUpdateError, RegistrationError, 
     ValidationError, MeetingManagerError
 )
 
 
-from app.models import Event, Registration, User
-
-
 # HTML sanitization constants
 ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'strong', 'em', 'br', 'span', 'div']
 ALLOWED_ATTRIBUTES = {'span': ['style'], 'div': ['style'], '*': ['class']}
+CSS_SANITIZER = CSSSanitizer()
 
 @dataclass
 class EventStats:
@@ -68,6 +67,7 @@ class SecurityService:
             content, 
             tags=ALLOWED_TAGS, 
             attributes=ALLOWED_ATTRIBUTES, 
+            css_sanitizer=CSS_SANITIZER,
             strip=True
         )
 
@@ -182,6 +182,17 @@ class EventService:
         
         try:
             db.session.add(event)
+            db.session.flush() # Get event ID
+            
+            # Handle additional attachments
+            if data.get('registry_form'):
+                EventService._save_attachment(data['registry_form'], event.id, 'registry')
+            if data.get('pdf_program'):
+                EventService._save_attachment(data['pdf_program'], event.id, 'program')
+            if data.get('additional_files'):
+                for f in data['additional_files']:
+                    EventService._save_attachment(f, event.id, 'other')
+            
             db.session.commit()
             logging.info(f'Event "{event.title}" successfully created by user {creator_id}')
             return event
@@ -273,6 +284,31 @@ class EventService:
                         os.remove(old_signature_path)
                 event.signature_filename = signature_filename
         
+        # Handle new attachments
+        if data.get('registry_form'):
+            # Replace old registry
+            old_reg = Attachment.query.filter_by(event_id=event.id, file_type='registry').first()
+            if old_reg:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_reg.filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                db.session.delete(old_reg)
+            EventService._save_attachment(data['registry_form'], event.id, 'registry')
+
+        if data.get('pdf_program'):
+            # Replace old program
+            old_prog = Attachment.query.filter_by(event_id=event.id, file_type='program').first()
+            if old_prog:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_prog.filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                db.session.delete(old_prog)
+            EventService._save_attachment(data['pdf_program'], event.id, 'program')
+
+        if data.get('additional_files'):
+            for f in data['additional_files']:
+                EventService._save_attachment(f, event.id, 'other')
+        
         try:
             db.session.commit()
             
@@ -320,6 +356,12 @@ class EventService:
                 signature_path = os.path.join(current_app.config['UPLOAD_FOLDER'], event.signature_filename)
                 if os.path.exists(signature_path):
                     os.remove(signature_path)
+            
+            # Delete attachment files
+            for attachment in event.attachments:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], attachment.filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
             
             # Delete event
             db.session.delete(event)
@@ -521,6 +563,31 @@ class EventService:
             db.session.rollback()
             logging.error(f'Error deleting registration {registration_id}: {e}')
             return False, 'Error deleting registration'
+    
+    @staticmethod
+    def delete_attachment_service(attachment_id: int) -> None:
+        """Delete an attachment.
+        
+        Args:
+            attachment_id: ID of the attachment to delete.
+            
+        Raises:
+            MeetingManagerError: If deletion fails.
+        """
+        attachment = Attachment.query.get_or_404(attachment_id)
+        
+        try:
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], attachment.filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                
+            db.session.delete(attachment)
+            db.session.commit()
+            logging.info(f'Attachment {attachment_id} deleted')
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f'Error deleting attachment {attachment_id}: {e}')
+            raise MeetingManagerError('Error deleting attachment.')
     
     @staticmethod
     def generate_certificate_service(registration_id: int) -> Optional[BytesIO]:
@@ -809,8 +876,19 @@ class EventService:
         c = Calendar()
         e = ICSEvent()
         e.name = event.title
-        e.description = (EventService._strip_html(event.description) + "\n\n" + 
-                        "Program:\n" + EventService._strip_html(event.program))
+        
+        # Plain text version (fallback)
+        plain_desc = (EventService._strip_html(event.description) + "\n\n" + 
+                     "Program:\n" + EventService._strip_html(event.program))
+        e.description = plain_desc
+        
+        # HTML version for modern clients (Outlook, Google, etc.)
+        html_content = f"<div>{event.description}</div><br><h3>Program:</h3><div>{event.program}</div>"
+        
+        # We add the X-ALT-DESC property for HTML support
+        from ics.utils import ContentLine
+        e.extra.append(ContentLine(name="X-ALT-DESC", params={'FMTTYPE': ['text/html']}, value=html_content))
+        
         e.location = event.location or event.organizer
         
         # Combine date and time with timezone
@@ -859,12 +937,58 @@ class EventService:
     
     @staticmethod
     def _strip_html(value: str) -> str:
-        """Remove HTML tags from string.
+        """Remove HTML tags from string while preserving line breaks.
         
         Args:
             value: String containing HTML.
         
         Returns:
-            String with HTML tags removed.
+            String with HTML tags removed and line breaks preserved.
         """
-        return re.sub('<.*?>', '', value)
+        if not value:
+            return ""
+        from html import unescape
+        # Replace block tags and <br> with newlines
+        s = re.sub(r'</?(p|div|br|li|h[1-6])[^>]*>', '\n', value)
+        # Remove all other tags
+        s = re.sub(r'<[^>]+>', '', s)
+        # Decode HTML entities
+        s = unescape(s)
+        # Clean up: strip whitespace from lines and reduce multiple newlines
+        lines = [line.strip() for line in s.split('\n')]
+        s = '\n'.join(lines)
+        s = re.sub(r'\n{3,}', '\n\n', s)
+        return s.strip()
+    
+    @staticmethod
+    def _save_attachment(file, event_id: int, file_type: str) -> Optional[Attachment]:
+        """Save a generic attachment file.
+        
+        Args:
+            file: Uploaded file.
+            event_id: ID of the event.
+            file_type: Type of attachment.
+            
+        Returns:
+            Attachment object if successful, None otherwise.
+        """
+        if not file or not file.filename:
+            return None
+            
+        from werkzeug.utils import secure_filename
+        original_filename = secure_filename(file.filename)
+        file_extension = os.path.splitext(original_filename)[1]
+        filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        file.save(file_path)
+        
+        attachment = Attachment(
+            event_id=event_id,
+            filename=filename,
+            original_filename=original_filename,
+            file_type=file_type
+        )
+        db.session.add(attachment)
+        return attachment

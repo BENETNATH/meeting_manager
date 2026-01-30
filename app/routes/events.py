@@ -61,7 +61,10 @@ def create_event():
             'status': request.form['status'],
             'timezone': request.form.get('timezone', 'UTC'),
             'picture': request.files.get('picture'),
-            'signature': request.files.get('signature')
+            'signature': request.files.get('signature'),
+            'registry_form': request.files.get('registry_form'),
+            'pdf_program': request.files.get('pdf_program'),
+            'additional_files': request.files.getlist('additional_files')
         }
         
         try:
@@ -107,6 +110,9 @@ def edit_event(event_id):
             'timezone': request.form.get('timezone', event.timezone),
             'picture': request.files.get('picture'),
             'signature': request.files.get('signature'),
+            'registry_form': request.files.get('registry_form'),
+            'pdf_program': request.files.get('pdf_program'),
+            'additional_files': request.files.getlist('additional_files'),
             'notify_time_change': request.form.get('notify_time_change')
         }
         
@@ -204,6 +210,28 @@ def delete_registration(registration_id):
         flash(e.message, e.category)
     
     return redirect(url_for('events.mark_attendance', event_id=event.id))
+
+
+@events_bp.route('/admin/delete_attachment/<int:attachment_id>', methods=['POST'])
+@login_required
+def delete_attachment(attachment_id):
+    """Delete a specific attachment (owner or super-admin only)."""
+    from app.models import Attachment
+    attachment = Attachment.query.get_or_404(attachment_id)
+    event = Event.query.get(attachment.event_id)
+    
+    if not (current_user.role == 'super-admin' or 
+            (current_user.role == 'editor' and event.created_by == current_user.id)):
+        flash('Access denied. You can only delete attachments from your own events.', 'danger')
+        return redirect(url_for('events.index'))
+    
+    try:
+        EventService.delete_attachment_service(attachment_id)
+        flash('Attachment successfully deleted', 'success')
+    except MeetingManagerError as e:
+        flash(e.message, e.category)
+    
+    return redirect(url_for('events.edit_event', event_id=event.id))
 
 
 @events_bp.route('/extract_attendance/<int:event_id>')

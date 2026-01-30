@@ -20,6 +20,7 @@ Flask-Babel>=3.0.0
 # File Handling and Image Processing
 Pillow>=10.0.0
 bleach>=6.0.0
+tinycss2>=1.2.1
 
 # PDF Generation
 reportlab>=4.0.0
