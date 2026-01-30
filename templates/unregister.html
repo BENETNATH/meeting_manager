@@ -9,6 +9,7 @@
                 <h5 class="fw-bold mb-3">{{ event.title }}</h5>
                 
                 <form method="POST" action="{{ url_for('events.unregister', event_id=event.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="email" class="form-label-compact">{{ _('Email Address') }}</label>
                         <input type="email" id="email" name="email" class="form-control-compact" required placeholder="john@example.com">

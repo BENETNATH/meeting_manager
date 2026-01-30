@@ -8,6 +8,11 @@ import os
 import logging
 from dotenv import load_dotenv
 
+
+# Load environment variables from .env file
+load_dotenv()
+
+
 # Configure SQLAlchemy logging BEFORE importing the app
 # This ensures the loggers are configured before SQLAlchemy creates them
 sqlalchemy_logger = logging.getLogger('sqlalchemy.engine')
@@ -22,8 +27,7 @@ sqlalchemy_base_logger.handlers.clear()   # Remove any existing handlers
 
 from app import create_app
 
-# Load environment variables from .env file
-load_dotenv()
+
 
 # Get configuration name from environment or default to production
 config_name = os.environ.get('FLASK_ENV', 'production')

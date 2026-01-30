@@ -40,6 +40,7 @@ from app import create_app
 from app.extensions import db
 from app.models import User
 from app.services.auth_service import AuthService
+from app.exceptions import ValidationError, MeetingManagerError
 
 
 def create_default_users(app: object) -> None:
@@ -57,29 +58,29 @@ def create_default_users(app: object) -> None:
             print(f"Super-admin user '{super_admin.username}' already exists.")
         else:
             # Create super-admin
-            success, password = AuthService.create_user_service(
-                username='admin',
-                email='admin@example.com',
-                role='super-admin'
-            )
-            if success:
+            try:
+                password = AuthService.create_user_service(
+                    username='admin',
+                    email='admin@example.com',
+                    role='super-admin'
+                )
                 print(f"✓ Created super-admin user 'admin' with temporary password: {password}")
-            else:
-                print(f"✗ Failed to create super-admin: {password}")
+            except (ValidationError, MeetingManagerError) as e:
+                print(f"✗ Failed to create super-admin: {e.message}")
         
         if editor:
             print(f"Editor user '{editor.username}' already exists.")
         else:
             # Create editor
-            success, password = AuthService.create_user_service(
-                username='editor',
-                email='editor@example.com',
-                role='editor'
-            )
-            if success:
+            try:
+                password = AuthService.create_user_service(
+                    username='editor',
+                    email='editor@example.com',
+                    role='editor'
+                )
                 print(f"✓ Created editor user 'editor' with temporary password: {password}")
-            else:
-                print(f"✗ Failed to create editor: {password}")
+            except (ValidationError, MeetingManagerError) as e:
+                print(f"✗ Failed to create editor: {e.message}")
 
 
 def create_user(username: str, email: str, role: str, app: object) -> None:
@@ -92,11 +93,11 @@ def create_user(username: str, email: str, role: str, app: object) -> None:
         app: Flask application instance.
     """
     with app.app_context():
-        success, result = AuthService.create_user_service(username, email, role)
-        if success:
+        try:
+            result = AuthService.create_user_service(username, email, role)
             print(f"✓ Created {role} user '{username}' with temporary password: {result}")
-        else:
-            print(f"✗ Failed to create user: {result}")
+        except (ValidationError, MeetingManagerError) as e:
+            print(f"✗ Failed to create user: {e.message}")
 
 
 def reset_password(username: str, new_password: Optional[str], app: object) -> None:
@@ -114,17 +115,17 @@ def reset_password(username: str, new_password: Optional[str], app: object) -> N
             return
         
         if new_password:
-            success, message = AuthService.change_password_service(user.id, new_password)
-            if success:
+            try:
+                AuthService.change_password_service(user.id, new_password)
                 print(f"✓ Password for user '{username}' updated successfully.")
-            else:
-                print(f"✗ Failed to update password: {message}")
+            except MeetingManagerError as e:
+                print(f"✗ Failed to update password: {e.message}")
         else:
-            success, message = AuthService.reset_password_service(user.id)
-            if success:
+            try:
+                AuthService.reset_password_service(user.id)
                 print(f"✓ Password for user '{username}' reset successfully.")
-            else:
-                print(f"✗ Failed to reset password: {message}")
+            except MeetingManagerError as e:
+                print(f"✗ Failed to reset password: {e.message}")
 
 
 def list_users(app: object) -> None:

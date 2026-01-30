@@ -8,6 +8,8 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app.services.auth_service import AuthService
+from app.decorators import admin_required
+from app.exceptions import MeetingManagerError, ValidationError
 
 # Create blueprint
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
@@ -24,21 +26,26 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        # Try login with username first, then try with email if that fails
-        success, error_message = AuthService.login_user_service(username, password)
-        
-        # If login fails and the input looks like an email, try using it as email
-        if not success and '@' in username:
-            from app.models import User
-            user = User.query.filter_by(email=username).first()
-            if user:
-                success, error_message = AuthService.login_user_service(user.username, password)
-        
-        if success:
+        try:
+            # Try login with username first
+            try:
+                AuthService.login_user_service(username, password)
+            except ValidationError:
+                # If login fails and the input looks like an email, try using it as email
+                if '@' in username:
+                    from app.models import User
+                    user = User.query.filter_by(email=username).first()
+                    if user:
+                        AuthService.login_user_service(user.username, password)
+                    else:
+                        raise ValidationError('Wrong credentials')
+                else:
+                    raise ValidationError('Wrong credentials')
+            
             flash('Login successful!', 'success')
             return redirect(url_for('events.index'))
-        else:
-            flash(error_message, 'danger')
+        except ValidationError as e:
+            flash(e.message, e.category)
     
     return render_template('login.html')
 
@@ -63,28 +70,25 @@ def change_password():
     if request.method == 'POST':
         new_password = request.form['new_password']
         
-        success, message = AuthService.change_password_service(current_user.id, new_password)
-        
-        if success:
-            flash(message, 'success')
+        try:
+            AuthService.change_password_service(current_user.id, new_password)
+            flash('Password updated successfully.', 'success')
             return redirect(url_for('events.index'))
-        else:
-            flash(message, 'danger')
+        except MeetingManagerError as e:
+            flash(e.message, e.category)
     
     return render_template('change_password.html')
 
 
 @auth_bp.route('/admin/manage_users', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def manage_users():
     """Manage users (super-admin only).
     
     GET: Display user management page.
     POST: Process user updates.
     """
-    if current_user.role != 'super-admin':
-        flash('Access denied. Super-admin privileges required.', 'danger')
-        return redirect(url_for('events.index'))
     
     from app.models import User
     users = User.query.all()
@@ -94,12 +98,11 @@ def manage_users():
         new_role = request.form['role']
         password = request.form.get('password')
         
-        success, message = AuthService.update_user_service(user_id, role=new_role, password=password)
-        
-        if success:
-            flash(message, 'success')
-        else:
-            flash(message, 'danger')
+        try:
+            AuthService.update_user_service(user_id, role=new_role, password=password)
+            flash('User updated successfully.', 'success')
+        except MeetingManagerError as e:
+            flash(e.message, e.category)
         
         return redirect(url_for('auth.manage_users'))
     
@@ -108,56 +111,47 @@ def manage_users():
 
 @auth_bp.route('/admin/create_editor', methods=['POST'])
 @login_required
+@admin_required
 def create_editor():
     """Create a new editor user (super-admin only)."""
-    if current_user.role != 'super-admin':
-        flash('Access denied. Super-admin privileges required.', 'danger')
-        return redirect(url_for('events.index'))
     
     username = request.form['username']
     email = request.form['email']
     
-    success, result = AuthService.create_user_service(username, email, role='editor')
-    
-    if success:
-        flash(f'Editor created successfully. Temporary password: {result}', 'success')
-    else:
-        flash(result, 'danger')
+    try:
+        temp_password = AuthService.create_user_service(username, email, role='editor')
+        flash(f'Editor created successfully. Temporary password: {temp_password}', 'success')
+    except (ValidationError, MeetingManagerError) as e:
+        flash(e.message, e.category)
     
     return redirect(url_for('auth.manage_users'))
 
 
 @auth_bp.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
+@admin_required
 def delete_user(user_id):
     """Delete a user (super-admin only)."""
-    if current_user.role != 'super-admin':
-        flash('Access denied. Super-admin privileges required.', 'danger')
-        return redirect(url_for('events.index'))
     
-    success, message = AuthService.delete_user_service(user_id)
-    
-    if success:
-        flash(message, 'success')
-    else:
-        flash(message, 'danger')
+    try:
+        AuthService.delete_user_service(user_id)
+        flash('User successfully deleted', 'success')
+    except (ValidationError, MeetingManagerError) as e:
+        flash(e.message, e.category)
     
     return redirect(url_for('auth.manage_users'))
 
 
 @auth_bp.route('/reset_password/<int:user_id>', methods=['POST'])
 @login_required
+@admin_required
 def reset_password(user_id):
     """Reset user password (super-admin only)."""
-    if current_user.role != 'super-admin':
-        flash('Access denied. Super-admin privileges required.', 'danger')
-        return redirect(url_for('events.index'))
     
-    success, message = AuthService.reset_password_service(user_id)
-    
-    if success:
-        flash(message, 'success')
-    else:
-        flash(message, 'danger')
+    try:
+        AuthService.reset_password_service(user_id)
+        flash('Password has been reset and sent to the user\'s email.', 'success')
+    except MeetingManagerError as e:
+        flash(e.message, e.category)
     
     return redirect(url_for('auth.manage_users'))

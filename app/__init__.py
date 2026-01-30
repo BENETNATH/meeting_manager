@@ -13,7 +13,7 @@ from flask import Flask, request
 from flask_babel import Babel
 
 from app.extensions import (
-    db, migrate, login_manager, bcrypt, mail, babel
+    db, migrate, login_manager, bcrypt, mail, babel, csrf
 )
 from app.models import User
 from config import get_config
@@ -46,22 +46,6 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     config_class = get_config(config_name)
     app.config.from_object(config_class)
     
-    # Override app config with environment variables to ensure they're properly loaded
-    app.config.update({
-        'SECRET_KEY': os.environ.get('SECRET_KEY'),
-        'SQLALCHEMY_DATABASE_URI': os.environ.get('SQLALCHEMY_DATABASE_URI'),
-        'MAIL_SERVER': os.environ.get('MAIL_SERVER'),
-        'MAIL_PORT': int(os.environ.get('MAIL_PORT', 587)),
-        'MAIL_USE_TLS': os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', '1', 'yes'],
-        'MAIL_USERNAME': os.environ.get('MAIL_USERNAME'),
-        'MAIL_PASSWORD': os.environ.get('MAIL_PASSWORD'),
-        'MAIL_DEFAULT_SENDER': os.environ.get('MAIL_DEFAULT_SENDER'),
-        'BABEL_DEFAULT_LOCALE': os.environ.get('BABEL_DEFAULT_LOCALE', 'en'),
-        'BABEL_DEFAULT_TIMEZONE': os.environ.get('BABEL_DEFAULT_TIMEZONE', 'UTC'),
-        'LOG_TO_STDOUT': os.environ.get('LOG_TO_STDOUT', 'False').lower() in ['true', '1', 'yes'],
-        'LOG_LEVEL': os.environ.get('LOG_LEVEL', 'INFO'),
-    })
-    
     # Validate required configuration
     config_class.validate_required_config()
     
@@ -89,16 +73,13 @@ def init_extensions(app: Flask) -> None:
     Args:
         app: Flask application instance.
     """
-    # Ensure database URI is properly set in app config
-    if 'SQLALCHEMY_DATABASE_URI' not in app.config:
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
-    
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
     mail.init_app(app)
     babel.init_app(app)
+    csrf.init_app(app)
 
 
 def register_blueprints(app: Flask) -> None:

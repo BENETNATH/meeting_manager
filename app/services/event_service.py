@@ -13,6 +13,9 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from io import BytesIO
+from dataclasses import dataclass
+import bleach
+from sqlalchemy import func, case
 
 import pytz
 from ics import Calendar, Event as ICSEvent
@@ -26,13 +29,85 @@ from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate
 
 from app.extensions import db, mail
 from app.models import Event, Registration, User
+from app.exceptions import (
+    EventCreationError, EventUpdateError, RegistrationError, 
+    ValidationError, MeetingManagerError
+)
 
+
+from app.models import Event, Registration, User
+
+
+# HTML sanitization constants
+ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'strong', 'em', 'br', 'span', 'div']
+ALLOWED_ATTRIBUTES = {'span': ['style'], 'div': ['style'], '*': ['class']}
+
+@dataclass
+class EventStats:
+    """DTO for event statistics."""
+    event: Event
+    total_registered: int
+    total_attended: int
+
+class SecurityService:
+    """Service for security-related operations."""
+    
+    @staticmethod
+    def sanitize_html(content: str) -> str:
+        """Sanitize HTML content to prevent XSS.
+        
+        Args:
+            content: HTML string to sanitize.
+            
+        Returns:
+            Sanitized HTML string.
+        """
+        if not content:
+            return ""
+        return bleach.clean(
+            content, 
+            tags=ALLOWED_TAGS, 
+            attributes=ALLOWED_ATTRIBUTES, 
+            strip=True
+        )
 
 class EventService:
     """Service class for event-related operations."""
     
     @staticmethod
-    def create_event_service(data: Dict[str, Any], creator_id: int) -> Tuple[bool, str]:
+    def get_events_with_stats() -> List[EventStats]:
+        """Fetch all events with their registration stats in a single optimized query.
+        
+        Resolves the N+1 problem.
+        
+        Returns:
+            List of EventStats objects.
+        """
+        # Optimized query using OUTER JOIN and aggregation
+        stmt = (
+            db.session.query(
+                Event,
+                func.count(Registration.id).label('total_registered'),
+                func.sum(case((Registration.attended == True, 1), else_=0)).label('total_attended')
+            )
+            .outerjoin(Registration, Registration.event_id == Event.id)
+            .group_by(Event.id)
+            .order_by(Event.date.desc())
+        )
+        
+        results = stmt.all()
+        
+        return [
+            EventStats(
+                event=row[0],
+                total_registered=row[1] or 0,
+                total_attended=int(row[2] or 0)
+            )
+            for row in results
+        ]
+    
+    @staticmethod
+    def create_event_service(data: Dict[str, Any], creator_id: int) -> Event:
         """Create a new event.
         
         Args:
@@ -40,47 +115,58 @@ class EventService:
             creator_id: ID of the user creating the event.
         
         Returns:
-            Tuple of (success: bool, message: str).
+            The created Event object.
+            
+        Raises:
+            ValidationError: If input validation fails.
+            EventCreationError: If the event cannot be created.
         """
         # Validate timezone
         timezone_str = data.get('timezone', 'UTC')
         if timezone_str not in pytz.common_timezones:
-            return False, 'Invalid timezone selected. Please choose from the list.'
+            raise ValidationError('Invalid timezone selected.')
         
         # Parse date and times
-        date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-        start_time = (datetime.strptime(data['start_time'], '%H:%M').time() 
-                     if data.get('start_time') else None)
-        end_time = (datetime.strptime(data['end_time'], '%H:%M').time() 
-                   if data.get('end_time') else None)
+        try:
+            date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            start_time = (datetime.strptime(data['start_time'], '%H:%M').time() 
+                         if data.get('start_time') else None)
+            end_time = (datetime.strptime(data['end_time'], '%H:%M').time() 
+                       if data.get('end_time') else None)
+        except ValueError as e:
+            raise ValidationError(f'Invalid date or time format: {str(e)}')
         
         # Validate eligible hours
         eligible_hours = float(data.get('eligible_hours', 0) or 0)
         if eligible_hours > 0:
             if not EventService._validate_eligible_hours(start_time, end_time, eligible_hours):
-                return False, 'Eligible hours must be within the event duration.'
+                raise ValidationError('Eligible hours must be within the event duration.')
         
         # Handle picture upload
         photo_filename = None
         if data.get('picture'):
             photo_filename = EventService._save_picture(data['picture'])
             if not photo_filename:
-                return False, 'Invalid picture file'
+                raise ValidationError('Invalid picture file')
         
         # Handle signature upload
         signature_filename = None
         if data.get('signature'):
             signature_filename = EventService._save_signature(data['signature'])
             if not signature_filename:
-                return False, 'Invalid signature file'
+                raise ValidationError('Invalid signature file')
+        
+        # Sanitize HTML content
+        clean_description = SecurityService.sanitize_html(data.get('description', ''))
+        clean_program = SecurityService.sanitize_html(data.get('program', ''))
         
         # Create event
         event = Event(
             title=data['title'],
-            description=data['description'],
+            description=clean_description,
             photo_url=data.get('photo_url', ''),
             photo_filename=photo_filename,
-            program=data['program'],
+            program=clean_program,
             date=date,
             start_time=start_time,
             end_time=end_time,
@@ -98,14 +184,14 @@ class EventService:
             db.session.add(event)
             db.session.commit()
             logging.info(f'Event "{event.title}" successfully created by user {creator_id}')
-            return True, 'Event successfully created'
+            return event
         except Exception as e:
             db.session.rollback()
             logging.error(f'Error creating event: {e}')
-            return False, 'Error creating event'
+            raise EventCreationError('An internal error occurred while creating the event.')
     
     @staticmethod
-    def update_event_service(event_id: int, data: Dict[str, Any]) -> Tuple[bool, str]:
+    def update_event_service(event_id: int, data: Dict[str, Any]) -> Event:
         """Update an existing event.
         
         Args:
@@ -113,7 +199,11 @@ class EventService:
             data: Event data dictionary.
         
         Returns:
-            Tuple of (success: bool, message: str).
+            The updated Event object.
+            
+        Raises:
+            ValidationError: If input validation fails.
+            EventUpdateError: If the event cannot be updated.
         """
         event = Event.query.get_or_404(event_id)
         
@@ -125,26 +215,33 @@ class EventService:
         # Validate timezone
         timezone_str = data.get('timezone', event.timezone)
         if timezone_str not in pytz.common_timezones:
-            return False, 'Invalid timezone selected. Please choose from the list.'
+            raise ValidationError('Invalid timezone selected.')
         
         # Parse date and times
-        new_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-        new_start_time = (datetime.strptime(data['start_time'], '%H:%M').time() 
-                         if data.get('start_time') else None)
-        new_end_time = (datetime.strptime(data['end_time'], '%H:%M').time() 
-                       if data.get('end_time') else None)
-        
+        try:
+            new_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            new_start_time = (datetime.strptime(data['start_time'], '%H:%M').time() 
+                             if data.get('start_time') else None)
+            new_end_time = (datetime.strptime(data['end_time'], '%H:%M').time() 
+                           if data.get('end_time') else None)
+        except ValueError as e:
+            raise ValidationError(f'Invalid date or time format: {str(e)}')
+            
         # Validate eligible hours
         eligible_hours = float(data.get('eligible_hours', 0) or 0)
         if eligible_hours > 0:
             if not EventService._validate_eligible_hours(new_start_time, new_end_time, eligible_hours):
-                return False, 'Eligible hours must be within the event duration.'
+                raise ValidationError('Eligible hours must be within the event duration.')
+        
+        # Sanitize HTML content
+        clean_description = SecurityService.sanitize_html(data.get('description', ''))
+        clean_program = SecurityService.sanitize_html(data.get('program', ''))
         
         # Update event details
         event.title = data['title']
-        event.description = data['description']
+        event.description = clean_description
         event.photo_url = data.get('photo_url', '')
-        event.program = data['program']
+        event.program = clean_program
         event.date = new_date
         event.start_time = new_start_time
         event.end_time = new_end_time
@@ -188,21 +285,21 @@ class EventService:
                 EventService._send_update_notifications(event)
             
             logging.info(f'Event "{event.title}" successfully updated')
-            return True, 'Event successfully updated'
+            return event
         except Exception as e:
             db.session.rollback()
             logging.error(f'Error updating event {event_id}: {e}')
-            return False, 'Error updating event'
-    
+            raise EventUpdateError('An internal error occurred while updating the event.')
+
     @staticmethod
-    def delete_event_service(event_id: int) -> Tuple[bool, str]:
+    def delete_event_service(event_id: int) -> None:
         """Delete an event and its registrations.
         
         Args:
             event_id: ID of the event to delete.
-        
-        Returns:
-            Tuple of (success: bool, message: str).
+            
+        Raises:
+            MeetingManagerError: If deletion fails.
         """
         event = Event.query.get_or_404(event_id)
         
@@ -229,11 +326,10 @@ class EventService:
             db.session.commit()
             
             logging.info(f'Event "{event.title}" and registrations successfully deleted')
-            return True, 'Event and registrations successfully deleted!'
         except Exception as e:
             db.session.rollback()
             logging.error(f'Error deleting event {event_id}: {e}')
-            return False, 'Error deleting event'
+            raise MeetingManagerError('Error deleting event.')
     
     @staticmethod
     def update_event_status_service(event_id: int, status: str) -> Tuple[bool, str]:
@@ -261,7 +357,7 @@ class EventService:
             return False, 'Error updating status'
     
     @staticmethod
-    def register_for_event_service(event_id: int, registration_data: Dict[str, str]) -> Tuple[bool, str]:
+    def register_for_event_service(event_id: int, registration_data: Dict[str, str]) -> Registration:
         """Register a user for an event.
         
         Args:
@@ -269,12 +365,16 @@ class EventService:
             registration_data: Registration form data.
         
         Returns:
-            Tuple of (success: bool, message: str).
+            The created Registration object.
+            
+        Raises:
+            ValidationError: If registration is not possible or mail already registered.
+            RegistrationError: If an internal error occurs.
         """
         event = Event.query.get_or_404(event_id)
         
         if event.status != 'visible':
-            return False, 'Registration is not available'
+            raise ValidationError('Registration is not available for this event.')
         
         email = registration_data['email']
         existing_registration = Registration.query.filter_by(
@@ -282,7 +382,7 @@ class EventService:
         ).first()
         
         if existing_registration:
-            return False, 'Email already registered'
+            raise ValidationError('Email already registered for this event.')
         
         unique_key = str(uuid.uuid4())
         registration = Registration(
@@ -305,56 +405,50 @@ class EventService:
             except Exception as e:
                 logging.error(f'Error sending registration email for event {event_id}: {e}')
             
-            return True, {
-                'message': 'Registration successful',
-                'unique_key': unique_key,
-                'email': email,
-                'first_name': registration_data['first_name'],
-                'last_name': registration_data['last_name']
-            }
+            return registration
         except Exception as e:
             db.session.rollback()
             logging.error(f'Error registering for event {event_id}: {e}')
-            return False, 'Error processing registration'
+            raise RegistrationError('An error occurred while processing your registration.')
     
     @staticmethod
-    def unregister_from_event_service(event_id: int, email: str, unique_key: str) -> Tuple[bool, str]:
+    def unregister_from_event_service(event_id: int, email: str, unique_key: str) -> None:
         """Unregister a user from an event.
         
         Args:
             event_id: ID of the event.
             email: User email.
             unique_key: User registration key.
-        
-        Returns:
-            Tuple of (success: bool, message: str).
+            
+        Raises:
+            ValidationError: If registration not found.
+            MeetingManagerError: If unregistration fails.
         """
         registration = Registration.query.filter_by(
             event_id=event_id, email=email, unique_key=unique_key
         ).first()
         
         if not registration:
-            return False, 'No registration found for this email and unique key on this event'
+            raise ValidationError('No registration found for this email and unique key on this event.')
         
         try:
             db.session.delete(registration)
             db.session.commit()
-            return True, 'Successful unregistration'
         except Exception as e:
             db.session.rollback()
             logging.error(f'Error unregistering from event {event_id}: {e}')
-            return False, 'Error processing unregistration'
-    
+            raise MeetingManagerError('Error processing unregistration.')
+
     @staticmethod
-    def mark_attendance_service(event_id: int, attendance_data: Dict[str, Any]) -> Tuple[bool, str]:
+    def mark_attendance_service(event_id: int, attendance_data: Dict[str, Any]) -> None:
         """Mark attendance for event registrations.
         
         Args:
             event_id: ID of the event.
             attendance_data: Attendance form data.
-        
-        Returns:
-            Tuple of (success: bool, message: str).
+            
+        Raises:
+            MeetingManagerError: If update fails.
         """
         try:
             action = attendance_data.get('action')
@@ -402,11 +496,10 @@ class EventService:
                     index += 1
             
             db.session.commit()
-            return True, 'Modifications saved!'
         except Exception as e:
             db.session.rollback()
             logging.error(f'Error updating attendance for event {event_id}: {e}')
-            return False, 'Error updating attendance'
+            raise MeetingManagerError('Error updating attendance.')
     
     @staticmethod
     def delete_registration_service(registration_id: int) -> Tuple[bool, str]:

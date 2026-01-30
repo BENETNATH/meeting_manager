@@ -9,8 +9,10 @@ from flask import Blueprint, flash, redirect, render_template, request, Response
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
-from app.services.event_service import EventService
+from app.services.event_service import EventService, SecurityService
 from app.models import Event, Registration
+from app.exceptions import MeetingManagerError, ValidationError
+from app.decorators import admin_required, event_owner_required
 
 # Create blueprint
 events_bp = Blueprint('events', __name__)
@@ -19,12 +21,9 @@ events_bp = Blueprint('events', __name__)
 @events_bp.route('/')
 def index():
     """Display all events with registration statistics."""
-    events = Event.query.all()
-    for event in events:
-        event.registrations = Registration.query.filter_by(event_id=event.id).all()
-        event.total_registered = len(event.registrations)
-        event.total_attended = sum(1 for reg in event.registrations if reg.attended)
-    return render_template('index.html', events=events)
+    # Optimized query: single SQL call instead of N+1 problem
+    events_stats = EventService.get_events_with_stats()
+    return render_template('index.html', events_stats=events_stats)
 
 
 @events_bp.route('/event/<int:event_id>')
@@ -65,21 +64,24 @@ def create_event():
             'signature': request.files.get('signature')
         }
         
-        success, message = EventService.create_event_service(data, current_user.id)
-        
-        if success:
-            flash(message, 'success')
+        try:
+            event = EventService.create_event_service(data, current_user.id)
+            flash('Event successfully created', 'success')
             return redirect(url_for('events.index'))
-        else:
-            flash(message, 'danger')
-            # Re-render form with submitted data
-            return render_template('create_event.html', form_data=request.form)
+        except (ValidationError, MeetingManagerError) as e:
+            flash(e.message, e.category)
+            # Sanitize for safe re-rendering
+            sanitized_form = request.form.to_dict()
+            sanitized_form['description'] = SecurityService.sanitize_html(sanitized_form.get('description', ''))
+            sanitized_form['program'] = SecurityService.sanitize_html(sanitized_form.get('program', ''))
+            return render_template('create_event.html', form_data=sanitized_form)
     
     return render_template('create_event.html', form_data={})
 
 
 @events_bp.route('/admin/edit_event/<int:event_id>', methods=['GET', 'POST'])
 @login_required
+@event_owner_required
 def edit_event(event_id):
     """Edit an existing event (owner or super-admin only).
     
@@ -87,12 +89,6 @@ def edit_event(event_id):
     POST: Process event edit form submission.
     """
     event = Event.query.get_or_404(event_id)
-    
-    # Check permissions
-    if not (current_user.role == 'super-admin' or 
-            (current_user.role == 'editor' and event.created_by == current_user.id)):
-        flash('Access denied. You can only edit your own events.', 'danger')
-        return redirect(url_for('events.index'))
     
     if request.method == 'POST':
         # Collect form data
@@ -114,29 +110,27 @@ def edit_event(event_id):
             'notify_time_change': request.form.get('notify_time_change')
         }
         
-        success, message = EventService.update_event_service(event_id, data)
-        
-        if success:
-            flash(message, 'success')
+        try:
+            EventService.update_event_service(event_id, data)
+            flash('Event successfully updated', 'success')
             return redirect(url_for('events.index'))
-        else:
-            flash(message, 'danger')
-            return render_template('edit_event.html', event=event, form_data=request.form)
+        except (ValidationError, MeetingManagerError) as e:
+            flash(e.message, e.category)
+            # Sanitize for safe re-rendering
+            sanitized_form = request.form.to_dict()
+            sanitized_form['description'] = SecurityService.sanitize_html(sanitized_form.get('description', ''))
+            sanitized_form['program'] = SecurityService.sanitize_html(sanitized_form.get('program', ''))
+            return render_template('edit_event.html', event=event, form_data=sanitized_form)
     
     return render_template('edit_event.html', event=event, form_data={})
 
 
 @events_bp.route('/update_status/<int:event_id>', methods=['POST'])
 @login_required
+@event_owner_required
 def update_status(event_id):
     """Update event status (owner or super-admin only)."""
     event = Event.query.get_or_404(event_id)
-    
-    # Check permissions
-    if not (current_user.role == 'super-admin' or 
-            (current_user.role == 'editor' and event.created_by == current_user.id)):
-        flash('Access denied. You can only update your own events.', 'danger')
-        return redirect(url_for('events.index'))
     
     new_status = request.form.get('status')
     success, message = EventService.update_event_status_service(event_id, new_status)
@@ -151,28 +145,23 @@ def update_status(event_id):
 
 @events_bp.route('/delete_event/<int:event_id>', methods=['POST'])
 @login_required
+@event_owner_required
 def delete_event(event_id):
     """Delete an event and its registrations (owner or super-admin only)."""
     event = Event.query.get_or_404(event_id)
     
-    # Check permissions
-    if not (current_user.role == 'super-admin' or 
-            (current_user.role == 'editor' and event.created_by == current_user.id)):
-        flash('Access denied. You can only delete your own events.', 'danger')
-        return redirect(url_for('events.index'))
-    
-    success, message = EventService.delete_event_service(event_id)
-    
-    if success:
-        flash(message, 'success')
-    else:
-        flash(message, 'danger')
+    try:
+        EventService.delete_event_service(event_id)
+        flash('Event and registrations successfully deleted!', 'success')
+    except MeetingManagerError as e:
+        flash(e.message, e.category)
     
     return redirect(url_for('events.index'))
 
 
 @events_bp.route('/admin/mark_attendance/<int:event_id>', methods=['GET', 'POST'])
 @login_required
+@event_owner_required
 def mark_attendance(event_id):
     """Mark attendance for event registrations (owner or super-admin only).
     
@@ -181,21 +170,14 @@ def mark_attendance(event_id):
     """
     event = Event.query.get_or_404(event_id)
     
-    # Check permissions
-    if not (current_user.role == 'super-admin' or 
-            (current_user.role == 'editor' and event.created_by == current_user.id)):
-        flash('Access denied. You can only manage attendance for your own events.', 'danger')
-        return redirect(url_for('events.index'))
-    
     registrations = Registration.query.filter_by(event_id=event_id).all()
     
     if request.method == 'POST':
-        success, message = EventService.mark_attendance_service(event_id, request.form)
-        
-        if success:
-            flash(message, 'success')
-        else:
-            flash(message, 'danger')
+        try:
+            EventService.mark_attendance_service(event_id, request.form)
+            flash('Modifications saved!', 'success')
+        except MeetingManagerError as e:
+            flash(e.message, e.category)
         
         return redirect(url_for('events.mark_attendance', event_id=event_id))
     
@@ -209,33 +191,27 @@ def delete_registration(registration_id):
     registration = Registration.query.get_or_404(registration_id)
     event = Event.query.get(registration.event_id)
     
-    # Check permissions
+    # Manually check for registration deletion since it uses registration_id
     if not (current_user.role == 'super-admin' or 
             (current_user.role == 'editor' and event.created_by == current_user.id)):
         flash('Access denied. You can only delete registrations from your own events.', 'danger')
         return redirect(url_for('events.index'))
     
-    success, message = EventService.delete_registration_service(registration_id)
-    
-    if success:
-        flash(message, 'success')
-    else:
-        flash(message, 'danger')
+    try:
+        EventService.delete_registration_service(registration_id)
+        flash('Registration successfully deleted', 'success')
+    except MeetingManagerError as e:
+        flash(e.message, e.category)
     
     return redirect(url_for('events.mark_attendance', event_id=event.id))
 
 
 @events_bp.route('/extract_attendance/<int:event_id>')
 @login_required
+@event_owner_required
 def extract_attendance(event_id):
     """Extract attendance data as CSV (owner or super-admin only)."""
     event = Event.query.get_or_404(event_id)
-    
-    # Check permissions
-    if not (current_user.role == 'super-admin' or 
-            (current_user.role == 'editor' and event.created_by == current_user.id)):
-        flash('Access denied. You can only extract attendance data from your own events.', 'danger')
-        return redirect(url_for('events.index'))
     
     csv_data = EventService.extract_attendance_csv_service(event_id)
     
@@ -283,12 +259,16 @@ def register(event_id):
         'email': request.form.get('email', '')
     }
     
-    success, data = EventService.register_for_event_service(event_id, registration_data)
-    
-    if success:
-        return render_template('registration_confirmation.html', event=event, **data)
-    else:
-        flash(data, 'danger')
+    try:
+        registration = EventService.register_for_event_service(event_id, registration_data)
+        return render_template('registration_confirmation.html', 
+                             event=event, 
+                             email=registration.email,
+                             first_name=registration.first_name,
+                             last_name=registration.last_name,
+                             unique_key=registration.unique_key)
+    except (ValidationError, RegistrationError) as e:
+        flash(e.message, e.category)
         return redirect(url_for('events.event', event_id=event_id))
 
 
@@ -313,12 +293,11 @@ def unregister(event_id):
     email = request.form.get('email', '')
     unique_key = request.form.get('unique_key', '')
     
-    success, message = EventService.unregister_from_event_service(event_id, email, unique_key)
-    
-    if success:
-        flash(message, 'success')
-    else:
-        flash(message, 'danger')
+    try:
+        EventService.unregister_from_event_service(event_id, email, unique_key)
+        flash('Successful unregistration', 'success')
+    except (ValidationError, MeetingManagerError) as e:
+        flash(e.message, e.category)
     
     return redirect(url_for('events.event', event_id=event_id))
 

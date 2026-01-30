@@ -54,6 +54,7 @@
         <div class="col-lg-9">
             <div class="detail-section p-0 overflow-hidden">
                 <form method="POST" id="attendance-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="table-responsive">
                         <table class="table-compact table-hover w-100">
                             <thead>
@@ -71,7 +72,7 @@
                                         <td>
                                             <div class="fw-bold text-slate-900">{{ registration.first_name }} {{ registration.last_name }}</div>
                                         </td>
-                                        <td><span class="x-small text-slate-500">{{ registration.email|safe }}</span></td>
+                                        <td><span class="x-small text-slate-500">{{ registration.email }}</span></td>
                                         <td><code class="x-small text-primary">{{ registration.unique_key }}</code></td>
                                         <td class="text-center">
                                             <input type="checkbox" class="form-check-input" name="attended_{{ registration.id }}" {% if registration.attended %}checked{% endif %} data-email="{{ registration.email|strip_html }}">
@@ -146,6 +147,13 @@
         input.name = 'action';
         input.value = 'delete_' + registrationId;
         form.appendChild(input);
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.appendChild(csrfInput);
+
         document.body.appendChild(form);
         form.submit();
     }

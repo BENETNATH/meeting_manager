@@ -16,6 +16,7 @@
             </div>
 
             <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('events.create_event') }}" onsubmit="return validateForm()">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="row g-2">
                     <!-- Core Info -->
                     <div class="col-md-7">

@@ -8,11 +8,13 @@ It loads configuration from environment variables defined in .env file.
 import os
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
+
 from app import create_app
 from app.models import User, db
 
-# Load environment variables from .env file
-load_dotenv()
+
 
 # Get configuration name from environment or default to development
 config_name = os.environ.get('FLASK_ENV', 'development')

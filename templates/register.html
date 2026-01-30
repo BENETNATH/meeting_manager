@@ -70,6 +70,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <form method="POST" action="{{ url_for('events.register', event_id=event.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         
                         <!-- Personal Information Section -->
                         <div class="row g-4 mb-4">

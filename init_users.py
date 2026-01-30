@@ -53,6 +53,7 @@ from app import create_app
 from app.extensions import db
 from app.models import User
 from app.services.auth_service import AuthService
+from app.exceptions import ValidationError, MeetingManagerError
 from config import get_config
 
 
@@ -190,26 +191,26 @@ def create_default_users(app) -> Tuple[bool, list]:
     
     for user_config in default_users:
         try:
-            success, result = AuthService.create_user_service(
+            # The service now returns the temp_password directly and raises exceptions on error
+            temp_password = AuthService.create_user_service(
                 username=user_config['username'],
                 email=user_config['email'],
                 role=user_config['role']
             )
             
-            if success:
-                created_users.append({
-                    'username': user_config['username'],
-                    'email': user_config['email'],
-                    'role': user_config['role'],
-                    'password': result,
-                    'description': user_config['description']
-                })
-                logging.info(f"Successfully created user: {user_config['username']}")
-            else:
-                logging.error(f"Failed to create user {user_config['username']}: {result}")
+            created_users.append({
+                'username': user_config['username'],
+                'email': user_config['email'],
+                'role': user_config['role'],
+                'password': temp_password,
+                'description': user_config['description']
+            })
+            logging.info(f"Successfully created user: {user_config['username']}")
                 
+        except (ValidationError, MeetingManagerError) as e:
+            logging.error(f"Failed to create user {user_config['username']}: {e.message}")
         except Exception as e:
-            logging.error(f"Exception creating user {user_config['username']}: {e}")
+            logging.error(f"Unexpected exception creating user {user_config['username']}: {e}")
     
     return len(created_users) > 0, created_users
 

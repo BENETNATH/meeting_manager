@@ -108,6 +108,7 @@
                         <i class="fas fa-users me-2"></i> {{ _('Attendance') }}
                     </a>
                     <form id="deleteForm" method="POST" action="{{ url_for('events.delete_event', event_id=event.id) }}" class="w-100">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="button" class="btn btn-outline-danger w-100 justify-content-start" 
                                 onclick="if(confirm('{{ _('Confirm deletion?') }}')) this.form.submit()">
                             <i class="fas fa-trash me-2"></i> {{ _('Delete') }}

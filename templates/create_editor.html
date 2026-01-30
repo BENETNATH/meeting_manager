@@ -3,6 +3,7 @@
 {% block content %}
 <h1>{{ _('Create editor') }}</h1>
 <form method="POST" action="{{ url_for('auth.create_editor') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="username">{{ _('Username') }}:</label>
     <input type="text" id="username" name="username" required><br>
     <label for="email">{{ _('Email') }}:</label>

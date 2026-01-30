@@ -10,6 +10,7 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from flask_babel import Babel
+from flask_wtf.csrf import CSRFProtect
 
 # Initialize extensions without the app instance
 db = SQLAlchemy()
@@ -18,6 +19,7 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 mail = Mail()
 babel = Babel()
+csrf = CSRFProtect()
 
 # Configure extension settings
 login_manager.login_view = 'auth.login'
