@@ -21,10 +21,10 @@
             {% set is_admin = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id)) %}
             {% if (event.status == 'visible') or is_admin or (event.status == 'archived') %}
                 {% if (event.status != 'password-protected') or is_admin %}
-                    <div class="compact-event-card position-relative" onclick="if(!event.target.closest('a') && !event.target.closest('button') && !event.target.closest('.stat-pill-link')) window.location='{{ url_for('events.event', event_id=event.id) }}'" style="cursor: pointer;">
+                    <div class="compact-event-card position-relative clickable-card" data-url="{{ url_for('events.event', event_id=event.id) }}" style="cursor: pointer;">
                     <div class="card-image-wrapper">
                         {% if event.photo_filename %}
-                            <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" alt="{{ event.title }}">
+                            <img src="{{ url_for('events.download_photo', event_id=event.id) }}" alt="{{ event.title }}">
                         {% elif event.photo_url %}
                             <img src="{{ event.photo_url }}" alt="{{ event.title }}">
                         {% else %}
@@ -77,5 +77,17 @@
     {% endfor %}
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.clickable-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('.stat-pill-link')) {
+                window.location = this.getAttribute('data-url');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
 

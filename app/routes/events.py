@@ -12,7 +12,8 @@ from werkzeug.utils import secure_filename
 from app.services.event_service import EventService, SecurityService
 from app.models import Event, Registration, CertificateTemplate
 from app.exceptions import MeetingManagerError, ValidationError, RegistrationError
-from app.decorators import admin_required, event_owner_required
+from app.decorators import admin_required, event_owner_required, event_access_required
+from app.extensions import limiter
 
 # Create blueprint
 events_bp = Blueprint('events', __name__)
@@ -27,22 +28,15 @@ def index():
 
 
 @events_bp.route('/event/<int:event_id>')
+@event_access_required
 def event(event_id):
     """Display event details."""
     event = Event.query.get_or_404(event_id)
-    
-    # Check for password protection
-    from flask import session
-    if event.status == 'password-protected':
-        # Bypass for admin/editor owner
-        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
-        if not is_owner and not session.get(f'event_auth_{event_id}'):
-            return render_template('event_password.html', event=event)
-            
     return render_template('event.html', event=event)
 
 
 @events_bp.route('/event/<int:event_id>/verify_password', methods=['POST'])
+@limiter.limit("10 per minute")
 def verify_password(event_id):
     """Verify event password and grant access."""
     event = Event.query.get_or_404(event_id)
@@ -318,43 +312,20 @@ def extract_attendance(event_id):
         return redirect(url_for('events.index'))
 
 
-@events_bp.route('/register_page/<int:event_id>', methods=['GET', 'POST'])
+@events_bp.route('/register_page/<int:event_id>')
+@event_access_required
 def register_page(event_id):
-    """Display registration page and handle registration.
-    
-    GET: Display registration form.
-    POST: Process registration form submission.
-    """
+    """Display registration page."""
     event = Event.query.get_or_404(event_id)
-    
-    if request.method == 'POST':
-        return register(event_id)
-    
-    # Check for password protection
-    from flask import session
-    if event.status == 'password-protected':
-        # Bypass for admin/editor owner
-        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
-        if not is_owner and not session.get(f'event_auth_{event_id}'):
-            return render_template('event_password.html', event=event)
-    
     return render_template('register.html', event=event)
 
 
 @events_bp.route('/register/<int:event_id>', methods=['POST'])
+@event_access_required
 def register(event_id):
     """Handle event registration."""
     event = Event.query.get_or_404(event_id)
     
-    # Check for password protection
-    from flask import session
-    if event.status == 'password-protected':
-        # Bypass for admin/editor owner
-        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
-        if not is_owner and not session.get(f'event_auth_{event_id}'):
-            flash('This event is password protected. Please enter the password first.', 'warning')
-            return redirect(url_for('events.event', event_id=event_id))
-
     if event.status not in ['visible', 'password-protected']:
         flash('Registration is not available for this event.', 'danger')
         return redirect(url_for('events.event', event_id=event_id))
@@ -378,42 +349,19 @@ def register(event_id):
         return redirect(url_for('events.event', event_id=event_id))
 
 
-@events_bp.route('/unregister_page/<int:event_id>', methods=['GET', 'POST'])
+@events_bp.route('/unregister_page/<int:event_id>')
+@event_access_required
 def unregister_page(event_id):
-    """Display unregistration page and handle unregistration.
-    
-    GET: Display unregistration form.
-    POST: Process unregistration form submission.
-    """
+    """Display unregistration page."""
     event = Event.query.get_or_404(event_id)
-    
-    if request.method == 'POST':
-        return unregister(event_id)
-    
-    # Check for password protection
-    from flask import session
-    if event.status == 'password-protected':
-        # Bypass for admin/editor owner
-        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
-        if not is_owner and not session.get(f'event_auth_{event_id}'):
-            return render_template('event_password.html', event=event)
-    
     return render_template('unregister.html', event=event)
 
 
 @events_bp.route('/unregister/<int:event_id>', methods=['POST'])
+@event_access_required
 def unregister(event_id):
     """Handle event unregistration."""
     event = Event.query.get_or_404(event_id)
-
-    # Check for password protection
-    from flask import session
-    if event.status == 'password-protected':
-        # Bypass for admin/editor owner
-        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
-        if not is_owner and not session.get(f'event_auth_{event_id}'):
-            flash('This event is password protected. Please enter the password first.', 'warning')
-            return redirect(url_for('events.event', event_id=event_id))
 
     email = request.form.get('email', '')
     unique_key = request.form.get('unique_key', '')
@@ -453,10 +401,19 @@ def request_certificate():
         ).first()
         
         if registration and registration.attended:
+            event = Event.query.get_or_404(registration.event_id)
+            
+            # Mandatory Fix 1: Event-Aware Authorization
+            from app.security import SecurityService
+            if not SecurityService.has_event_access(event):
+                if event.status == 'password-protected':
+                    flash('This event is password-protected. Please unlock it first.', 'warning')
+                    return redirect(url_for('events.event', event_id=event.id))
+                abort(403)
+                
             pdf_data = EventService.generate_certificate_service(registration.id)
             
             if pdf_data:
-                event = Event.query.get_or_404(registration.event_id)
                 event_title_safe = "".join(c if c.isalnum() else "_" for c in event.title)
                 event_date_safe = event.date.strftime('%Y-%m-%d')
                 filename = f"{event_date_safe}_certificate_{event_title_safe}.pdf"
@@ -475,20 +432,11 @@ def request_certificate():
     return render_template('request_certificate.html')
 
 
-@events_bp.route('/event/<int:event_id>/download_ics')
+@events_bp.route('/event/<int:event_id>/ics')
+@event_access_required
 def download_ics(event_id):
-    """Download ICS calendar file for an event."""
+    """Download ICS file for an event."""
     event = Event.query.get_or_404(event_id)
-    
-    # Check for password protection
-    from flask import session
-    if event.status == 'password-protected':
-        # Bypass for admin/editor owner
-        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
-        if not is_owner and not session.get(f'event_auth_{event_id}'):
-            flash('This event is password protected. Please enter the password first.', 'warning')
-            return redirect(url_for('events.event', event_id=event_id))
-
     ics_content = EventService.generate_ics_service(event_id)
     
     if ics_content:
@@ -506,11 +454,62 @@ def download_ics(event_id):
         return redirect(url_for('events.event', event_id=event_id))
 
 
+@events_bp.route('/download/attachment/<int:attachment_id>')
+def download_attachment(attachment_id):
+    """Download an attachment with event-aware authorization."""
+    from app.models import Attachment
+    attachment = Attachment.query.get_or_404(attachment_id)
+    event = Event.query.get_or_404(attachment.event_id)
+    
+    if not SecurityService.has_event_access(event):
+        abort(403)
+        
+    from flask import send_from_directory, current_app
+    return send_from_directory(
+        current_app.config['UPLOAD_FOLDER'], 
+        attachment.filename,
+        download_name=attachment.original_filename,
+        as_attachment=True
+    )
+
+
+@events_bp.route('/download/photo/<int:event_id>')
+def download_photo(event_id):
+    """Download an event photo with event-aware authorization."""
+    event = Event.query.get_or_404(event_id)
+    
+    if not event.photo_filename:
+        abort(404)
+        
+    if not SecurityService.has_event_access(event):
+        abort(403)
+        
+    from flask import send_from_directory, current_app
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], event.photo_filename)
+
+
+@events_bp.route('/download/signature/<int:event_id>')
+@login_required
+@event_owner_required
+def download_signature(event_id):
+    """Download an event signature (Owner/Admin only)."""
+    event = Event.query.get_or_404(event_id)
+    
+    if not event.signature_filename:
+        abort(404)
+        
+    from flask import send_from_directory, current_app
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], event.signature_filename)
+
+
 @events_bp.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    """Serve uploaded files from the configured upload folder."""
-    from flask import send_from_directory, current_app
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+    """
+    Deprecated: Secure replacement uses ID-based routes. 
+    Kept for narrow transition but restricted to prevent sniffing.
+    """
+    # Fail closed: Do not allow direct access by filename anymore
+    abort(403, description="Direct upload access is disabled for security.")
 
 
 @events_bp.route('/map_columns', methods=['POST'])

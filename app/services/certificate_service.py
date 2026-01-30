@@ -58,7 +58,7 @@ class CertificateService:
 
     @staticmethod
     def upload_asset(file) -> str:
-        """Upload an image asset for certificates.
+        """Upload an image asset for certificates with validation.
         
         Returns:
             Public URL of the uploaded image.
@@ -66,18 +66,29 @@ class CertificateService:
         if not file:
             raise MeetingManagerError("No file provided")
             
-        filename = secure_filename(file.filename)
-        file_ext = os.path.splitext(filename)[1]
-        new_filename = f"{uuid.uuid4()}{file_ext}"
+        from app.security import SecurityService
         
+        # Validate extension, size, and magic bytes
+        valid, msg = SecurityService.validate_file_upload(
+            file, 
+            allowed_extensions=['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+            max_size_mb=5.0
+        )
+        if not valid:
+            raise MeetingManagerError(f"Asset upload failed validation: {msg}")
+
+        # Save securely
         save_dir = os.path.join(current_app.static_folder, 'uploads', 'certificates')
         os.makedirs(save_dir, exist_ok=True)
         
-        file_path = os.path.join(save_dir, new_filename)
-        file.save(file_path)
+        filename = SecurityService.save_secure_file(
+            file, 
+            save_dir,
+            prefix="asset"
+        )
         
         # Return URL path
-        return url_for('static', filename=f'uploads/certificates/{new_filename}')
+        return url_for('static', filename=f'uploads/certificates/{filename}')
 
     @staticmethod
     def generate_certificate_pdf(event_id: int, user_registration: Registration) -> bytes:

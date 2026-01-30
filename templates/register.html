@@ -45,7 +45,7 @@
                                             <span>{{ message }}</span>
                                         </div>
                                         <div class="mt-2">
-                                            <button type="button" onclick="copyToClipboard('{{ message.split(':')[1].strip() }}')" class="btn btn-outline-warning btn-sm rounded-3">
+                                            <button type="button" class="btn btn-outline-warning btn-sm rounded-3 copy-key-btn" data-key="{{ message.split(':')[-1].strip() }}">
                                                 <i class="fas fa-copy me-2"></i>{{ _('Copy to Clipboard') }}
                                             </button>
                                         </div>
@@ -127,35 +127,40 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
     function copyToClipboard(text) {
-        var textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        
-        // Show success feedback
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success alert-dismissible fade show rounded-3 border-0 position-fixed';
-        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
-        alertDiv.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas fa-check-circle me-2"></i>
-                <span>Registration key copied to clipboard!</span>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(alertDiv);
-        
-        // Auto-dismiss after 3 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 3000);
+        navigator.clipboard.writeText(text).then(() => {
+            // Show success feedback
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show rounded-3 border-0 position-fixed';
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span>Registration key copied to clipboard!</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 3000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.copy-key-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                copyToClipboard(this.getAttribute('data-key'));
+            });
+        });
+    });
 </script>
 {% endblock %}
 

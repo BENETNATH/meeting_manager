@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('events.edit_event', event_id=event.id) }}" onsubmit="return validateForm()">
+            <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('events.edit_event', event_id=event.id) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="row g-2">
                     <!-- Core Info -->
@@ -86,7 +86,7 @@
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <div style="width: 48px; height: 48px; border-radius: 4px; overflow: hidden; background: #f1f5f9; flex-shrink: 0;">
                                     {% if event.photo_filename %}
-                                        <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" class="w-100 h-100 object-fit-cover">
+                                        <img src="{{ url_for('events.download_photo', event_id=event.id) }}" class="w-100 h-100 object-fit-cover">
                                     {% endif %}
                                 </div>
                                 <div class="flex-grow-1">
@@ -118,10 +118,10 @@
                                     {% if event.signature_filename %}
                                         <div class="d-flex gap-2 mb-1 align-items-center">
                                             <div style="width: 100px; height: 40px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; background: #f8f9fa;">
-                                                <img src="{{ url_for('events.uploaded_file', filename=event.signature_filename) }}" class="w-100 h-100 object-fit-contain">
+                                                <img src="{{ url_for('events.download_signature', event_id=event.id) }}" class="w-100 h-100 object-fit-contain">
                                             </div>
                                             <small class="text-muted flex-grow-1">Current signature</small>
-                                            <button type="button" class="btn btn-link text-danger p-0" onclick="deleteSignature({{ event.id }})" title="Delete signature">
+                                            <button type="button" class="btn btn-link text-danger p-0 delete-sig-btn" data-event-id="{{ event.id }}" title="Delete signature">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
@@ -155,7 +155,7 @@
                                             {{ attachment.original_filename }}
                                             <span class="badge bg-secondary ms-1">{{ _(attachment.file_type|capitalize) }}</span>
                                         </div>
-                                        <form action="{{ url_for('events.delete_attachment', attachment_id=attachment.id) }}" method="POST" onsubmit="return confirm('{{ _('Delete this attachment?') }}')">
+                                        <form action="{{ url_for('events.delete_attachment', attachment_id=attachment.id) }}" method="POST" class="delete-attachment-form">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="submit" class="btn btn-link text-danger p-0 ms-2">
                                                 <i class="fas fa-times"></i>
@@ -202,10 +202,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script nonce="{{ csp_nonce() }}" src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 
-<script>
+<script nonce="{{ csp_nonce() }}">
     document.addEventListener('DOMContentLoaded', function() {
         var quillDesc = new Quill('#description_editor', { theme: 'snow' });
         var quillProg = new Quill('#program_editor', { theme: 'snow' });
@@ -231,40 +231,55 @@
         
         statusSelect.addEventListener('change', togglePassword);
         togglePassword(); // Initial state
-    });
 
-    function validateForm() {
-        const title = document.getElementById('title').value;
-        const date = document.getElementById('date').value;
-        if (!title.trim() || !date) {
-            alert('Required fields missing');
-            return false;
-        }
-        return true;
-    }
-
-    function deleteSignature(eventId) {
-        if (!confirm('Delete the signature image?')) return;
-        
-        fetch(`/admin/event/${eventId}/delete_signature`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
+        // Form Validation
+        const eventForm = document.getElementById('eventForm');
+        eventForm.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            if (!title.trim() || !date) {
+                e.preventDefault();
+                alert('Required fields missing');
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error deleting signature: ' + (data.error || 'Unknown error'));
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Error deleting signature');
         });
-    }
+
+        // Delete Signature
+        const deleteSigBtn = document.querySelector('.delete-sig-btn');
+        if (deleteSigBtn) {
+            deleteSigBtn.addEventListener('click', function() {
+                const eventId = this.getAttribute('data-event-id');
+                if (!confirm('Delete the signature image?')) return;
+                
+                fetch(`/admin/event/${eventId}/delete_signature`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting signature: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error deleting signature');
+                });
+            });
+        }
+
+        // Delete Attachments confirmation
+        document.querySelectorAll('.delete-attachment-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('{{ _('Delete this attachment?') }}')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

@@ -129,12 +129,12 @@
     </div>
 </div>
 
-<style>
+<style nonce="{{ csp_nonce() }}">
     .x-small { font-size: 0.65rem; }
     .text-slate-900 { color: var(--slate-950); }
     .text-slate-400 { color: var(--slate-400); }
 </style>
 
-<script src="{{ url_for('static', filename='manage_users.js') }}"></script>
+<script nonce="{{ csp_nonce() }}" src="{{ url_for('static', filename='manage_users.js') }}"></script>
 {% endblock %}
 

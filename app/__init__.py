@@ -13,7 +13,7 @@ from flask import Flask, request
 from flask_babel import Babel
 
 from app.extensions import (
-    db, migrate, login_manager, bcrypt, mail, babel, csrf
+    db, migrate, login_manager, bcrypt, mail, babel, csrf, limiter, talisman
 )
 from app.models import User
 from config import get_config
@@ -80,6 +80,64 @@ def init_extensions(app: Flask) -> None:
     mail.init_app(app)
     babel.init_app(app)
     csrf.init_app(app)
+    limiter.init_app(app)
+    
+    # Configure CSP for Talisman
+    csp = {
+        'default-src': [
+            '\'self\'',
+            'https://fonts.googleapis.com',
+            'https://fonts.gstatic.com',
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            'data:',
+        ],
+        'style-src': [
+            '\'self\'',
+            'https://fonts.googleapis.com',
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            '\'unsafe-inline\'', # Fallback for older browsers
+        ],
+        'style-src-elem': [
+            '\'self\'',
+            'https://fonts.googleapis.com',
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            # Nonce will be injected here by Talisman
+        ],
+        'style-src-attr': [
+            '\'self\'',
+            '\'unsafe-inline\'', # To allow style="..." attributes
+        ],
+        'script-src': [
+            '\'self\'',
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            # Nonce will be injected here
+        ],
+        'font-src': [
+            '\'self\'',
+            'https://fonts.gstatic.com',
+            'https://cdnjs.cloudflare.com',
+        ],
+        'img-src': ['\'self\'', 'data:', 'blob:', '*', 'https:'],
+    }
+    
+    # Always initialize Talisman to provide csp_nonce() to templates
+    # but only enable strict features (CSP, HTTPS, HSTS) in production
+    is_production = not app.debug and not app.testing
+    
+    talisman.init_app(
+        app,
+        content_security_policy=csp if is_production else None,
+        content_security_policy_nonce_in=['script-src', 'style-src', 'style-src-elem'],
+        force_https=app.config.get('FORCE_HTTPS', False) if is_production else False,
+        session_cookie_secure=app.config.get('SESSION_COOKIE_SECURE', True) if is_production else False,
+        session_cookie_http_only=True,
+        session_cookie_samesite='Lax',
+        force_file_save=True if is_production else False
+    )
 
 
 def register_blueprints(app: Flask) -> None:

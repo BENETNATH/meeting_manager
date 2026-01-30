@@ -17,7 +17,7 @@
                 <div class="card-header bg-light fw-bold">{{ _('Tools') }}</div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary text-start" onclick="addText()">
+                        <button class="btn btn-outline-primary text-start" id="addTextBtn">
                             <i class="fas fa-font me-2"></i> {{ _('Add Text') }}
                         </button>
                         
@@ -31,7 +31,7 @@
                                 <option value="{{ '{{ eligible_hours }}' }}">{{ _('Eligible Hours') }}</option>
                                 <option value="{{ '{{ signature }}' }}">{{ _('Signature Image') }}</option>
                             </select>
-                            <button class="btn btn-outline-primary" onclick="addVariable()">
+                            <button class="btn btn-outline-primary" id="addVarBtn">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -64,7 +64,7 @@
                          <textarea id="propContent" class="form-control form-control-sm" rows="2"></textarea>
                     </div>
                     <div class="d-grid mt-3">
-                        <button class="btn btn-outline-danger btn-sm" onclick="deleteSelectedElement()">
+                        <button class="btn btn-outline-danger btn-sm" id="deleteElemBtn">
                             <i class="fas fa-trash"></i> {{ _('Delete Element') }}
                         </button>
                     </div>
@@ -83,9 +83,9 @@
 </div>
 
 <!-- Interact.js -->
-<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script nonce="{{ csp_nonce() }}" src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
     const canvas = document.getElementById('certificateCanvas');
     const templateId = {{ template.id }};
     const csrfToken = "{{ csrf_token() }}";
@@ -326,6 +326,17 @@
             document.getElementById('propertiesPanel').style.display = 'none';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addTextBtn = document.getElementById('addTextBtn');
+        if (addTextBtn) addTextBtn.addEventListener('click', addText);
+
+        const addVarBtn = document.getElementById('addVarBtn');
+        if (addVarBtn) addVarBtn.addEventListener('click', addVariable);
+
+        const deleteElemBtn = document.getElementById('deleteElemBtn');
+        if (deleteElemBtn) deleteElemBtn.addEventListener('click', deleteSelectedElement);
+    });
 
     // --- Save Routine ---
     document.getElementById('saveBtn').addEventListener('click', () => {

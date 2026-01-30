@@ -29,7 +29,7 @@
                 
                 <div class="bg-slate-50 border rounded-1 p-2 d-flex align-items-center gap-2">
                     <code class="flex-grow-1 text-center fw-bold" style="font-size: 1.1rem; color: var(--primary);">{{ unique_key }}</code>
-                    <button class="btn btn-sm btn-primary py-1 px-3" onclick="copyKey('{{ unique_key }}', this)">
+                    <button class="btn btn-sm btn-primary py-1 px-3" id="copyBtn" data-key="{{ unique_key }}">
                         <i class="fas fa-copy"></i> {{ _('Copy') }}
                     </button>
                 </div>
@@ -47,17 +47,24 @@
     </div>
 </div>
 
-<script>
-function copyKey(key, btn) {
-    navigator.clipboard.writeText(key).then(() => {
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> Copied';
-        btn.classList.replace('btn-primary', 'btn-success');
-        setTimeout(() => {
-            btn.innerHTML = original;
-            btn.classList.replace('btn-success', 'btn-primary');
-        }, 2000);
-    });
-}
+<script nonce="{{ csp_nonce() }}">
+document.addEventListener('DOMContentLoaded', function() {
+    const copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            const key = this.getAttribute('data-key');
+            const btn = this;
+            navigator.clipboard.writeText(key).then(() => {
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.classList.replace('btn-success', 'btn-primary');
+                }, 2000);
+            });
+        });
+    }
+});
 </script>
 {% endblock %}

@@ -7,7 +7,7 @@
             <div class="col-md-auto">
                 <div style="width: 100px; height: 100px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
                     {% if event.photo_filename %}
-                        <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" class="w-100 h-100 object-fit-cover">
+                        <img src="{{ url_for('events.download_photo', event_id=event.id) }}" class="w-100 h-100 object-fit-cover">
                     {% elif event.photo_url %}
                         <img src="{{ event.photo_url }}" class="w-100 h-100 object-fit-cover">
                     {% else %}
@@ -107,7 +107,7 @@
                 <div class="section-title-compact">{{ _('Attachments') }}</div>
                 <div class="d-grid gap-2">
                     {% for attachment in event.attachments %}
-                        <a href="{{ url_for('events.uploaded_file', filename=attachment.filename) }}" class="btn btn-outline-primary w-100 justify-content-start text-truncate" target="_blank">
+                        <a href="{{ url_for('events.download_attachment', attachment_id=attachment.id) }}" class="btn btn-outline-primary w-100 justify-content-start text-truncate" target="_blank">
                             <i class="fas fa-file-download me-2 text-primary"></i> <span class="text-dark">{{ attachment.original_filename }}</span>
                             <span class="badge bg-light text-dark ms-auto border small">{{ _(attachment.file_type|capitalize) }}</span>
                         </a>
@@ -128,8 +128,8 @@
                     </a>
                     <form id="deleteForm" method="POST" action="{{ url_for('events.delete_event', event_id=event.id) }}" class="w-100">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="button" class="btn btn-outline-danger w-100 justify-content-start" 
-                                onclick="if(confirm('{{ _('Confirm deletion?') }}')) this.form.submit()">
+                        <button type="button" id="deleteEventBtn" class="btn btn-outline-danger w-100 justify-content-start" 
+                                data-confirm-message="{{ _('Confirm deletion?') }}">
                             <i class="fas fa-trash me-2"></i> {{ _('Delete') }}
                         </button>
                     </form>
@@ -140,14 +140,17 @@
     </div>
 </div>
 
-<script>
-
-function confirmDelete(button) {
-    const message = button.getAttribute('data-confirm-message');
-    if (confirm(message)) {
-        document.getElementById('deleteForm').submit();
+<script nonce="{{ csp_nonce() }}">
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteBtn = document.getElementById('deleteEventBtn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm(this.getAttribute('data-confirm-message'))) {
+                document.getElementById('deleteForm').submit();
+            }
+        });
     }
-}
+});
 </script>
 {% endblock %}
 

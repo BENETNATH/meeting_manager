@@ -10,12 +10,20 @@ from flask_login import current_user, login_required, login_user, logout_user
 from app.services.auth_service import AuthService
 from app.decorators import admin_required
 from app.exceptions import MeetingManagerError, ValidationError
+from app.extensions import limiter
 
 # Create blueprint
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 
+@auth_bp.route('/healthz')
+def healthz():
+    """Health check endpoint."""
+    return {'status': 'healthy'}, 200
+
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute; 20 per hour")
 def login():
     """Handle user login.
     
@@ -112,6 +120,7 @@ def manage_users():
 @auth_bp.route('/admin/create_editor', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit("10 per hour")
 def create_editor():
     """Create a new editor user (super-admin only)."""
     
@@ -145,6 +154,7 @@ def delete_user(user_id):
 @auth_bp.route('/reset_password/<int:user_id>', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit("5 per hour")
 def reset_password(user_id):
     """Reset user password (super-admin only)."""
     

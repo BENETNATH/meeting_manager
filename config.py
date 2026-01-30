@@ -48,11 +48,19 @@ class Config:
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=60)
+    
+    # Ratelimit settings (Flask-Limiter)
+    RATELIMIT_DEFAULT = "200 per day; 50 per hour"
+    RATELIMIT_STORAGE_URI = "memory://"
     
     # Logging settings
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', 'False').lower() in ['true', '1', 'yes']
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+    FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'False').lower() in ['true', '1', 'yes']
     
     @staticmethod
     def validate_required_config():
@@ -81,6 +89,8 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = True  # Log SQL queries for debugging
     SESSION_COOKIE_SECURE = False  # Allow HTTP in development
+    REMEMBER_COOKIE_SECURE = False
+    WTF_CSRF_ENABLED = True
 
 
 class ProductionConfig(Config):
@@ -89,6 +99,7 @@ class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_ECHO = False
     SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
 
 
 class TestingConfig(Config):
@@ -98,6 +109,8 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
     MAIL_SUPPRESS_SEND = True
+    SESSION_COOKIE_SECURE = False
+    REMEMBER_COOKIE_SECURE = False
 
 
 # Configuration mapping

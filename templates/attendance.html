@@ -27,7 +27,7 @@
                 <div class="section-title-compact">{{ _('Bulk Check-in') }}</div>
                 <p class="x-small text-muted mb-2">{{ _('Paste emails here (comma/newline separated) to mark multiple attendees as present.') }}</p>
                 <textarea class="form-control-compact mb-2" id="bulk-emails" rows="4" placeholder="email1@example.com, email2@example.com"></textarea>
-                <button type="button" class="btn btn-primary w-100 py-1 shadow-sm" onclick="extractAndMarkAttendance()">
+                <button type="button" id="bulk-check-btn" class="btn btn-primary w-100 py-1 shadow-sm">
                     <i class="fas fa-magic me-1"></i> {{ _('Bulk Check') }}
                 </button>
             </div>
@@ -78,7 +78,7 @@
                                             <input type="checkbox" class="form-check-input" name="attended_{{ registration.id }}" {% if registration.attended %}checked{% endif %} data-email="{{ registration.email|strip_html }}">
                                         </td>
                                         <td class="text-end">
-                                            <button type="button" onclick="deleteRegistration({{ registration.id }})" class="btn-icon text-danger" title="{{ _('Delete') }}">
+                                            <button type="button" class="btn-icon text-danger delete-reg-btn" data-reg-id="{{ registration.id }}" title="{{ _('Delete') }}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </td>
@@ -113,10 +113,10 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script nonce="{{ csp_nonce() }}" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script nonce="{{ csp_nonce() }}" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
     function extractAndMarkAttendance() {
         const emails = document.getElementById('bulk-emails').value.split(/[\n,]+/);
         let countChecked = 0;
@@ -158,7 +158,17 @@
         form.submit();
     }
 
-    document.getElementById('upload-form').addEventListener('submit', function(event) {
+    document.addEventListener('DOMContentLoaded', function() {
+        const bulkBtn = document.getElementById('bulk-check-btn');
+        if (bulkBtn) bulkBtn.addEventListener('click', extractAndMarkAttendance);
+
+        document.querySelectorAll('.delete-reg-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                deleteRegistration(this.getAttribute('data-reg-id'));
+            });
+        });
+
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const fileInput = document.getElementById('file-input');
         const file = fileInput.files[0];
@@ -205,13 +215,13 @@
             selects[field] = select;
         });
 
-        document.getElementById('mapColumnsButton').onclick = function() {
+        document.getElementById('mapColumnsButton').addEventListener('click', function() {
             const mapping = {};
             fields.forEach(f => mapping[f] = selects[f].value);
             addDataToTable(parsedData, mapping);
             document.getElementById('mappingModal').style.display = 'none';
-        };
-        document.getElementById('closeModal').onclick = () => document.getElementById('mappingModal').style.display = 'none';
+        });
+        document.getElementById('closeModal').addEventListener('click', () => document.getElementById('mappingModal').style.display = 'none');
     }
 
     function addDataToTable(parsedData, mapping) {
@@ -225,7 +235,7 @@
                     <td><span class="x-small text-slate-500">${row[mapping['email']]}</span></td>
                     <td><code class="x-small text-muted">NEW</code></td>
                     <td class="text-center"><input type="checkbox" class="form-check-input" name="attended_new_${index}" ${row[mapping['present']] === true ? 'checked' : ''}></td>
-                    <td class="text-end"><button type="button" class="btn-icon text-danger" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
+                    <td class="text-end"><button type="button" class="btn-icon text-danger remove-new-row"><i class="fas fa-trash-alt"></i></button></td>
                 `;
                 tableBody.appendChild(newRow);
                 ['last_name', 'first_name', 'email'].forEach(field => {
@@ -238,9 +248,16 @@
             }
         });
     }
+
+    // Event delegation for dynamically added rows
+    document.querySelector('#attendance-form tbody').addEventListener('click', function(e) {
+        if (e.target.closest('.remove-new-row')) {
+            e.target.closest('tr').remove();
+        }
+    });
 </script>
 
-<style>
+<style nonce="{{ csp_nonce() }}">
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); }
 .modal-content { background: white; margin: 10% auto; padding: 1.5rem; width: 90%; max-width: 400px; }
 .close { font-size: 1.5rem; font-weight: 700; cursor: pointer; }

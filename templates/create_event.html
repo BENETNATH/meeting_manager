@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('events.create_event') }}" onsubmit="return validateForm()">
+            <form id="eventForm" method="POST" enctype="multipart/form-data" action="{{ url_for('events.create_event') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="row g-2">
                     <!-- Core Info -->
@@ -143,10 +143,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script nonce="{{ csp_nonce() }}" src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 
-<script>
+<script nonce="{{ csp_nonce() }}">
     document.addEventListener('DOMContentLoaded', function() {
         var quillDesc = new Quill('#description_editor', { theme: 'snow' });
         var quillProg = new Quill('#program_editor', { theme: 'snow' });
@@ -172,16 +172,17 @@
         
         statusSelect.addEventListener('change', togglePassword);
         togglePassword(); // Initial state
-    });
 
-    function validateForm() {
-        const title = document.getElementById('title').value;
-        const date = document.getElementById('date').value;
-        if (!title.trim() || !date) {
-            alert('Required fields missing');
-            return false;
-        }
-        return true;
-    }
+        // Form Validation
+        const eventForm = document.getElementById('eventForm');
+        eventForm.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            if (!title.trim() || !date) {
+                e.preventDefault();
+                alert('Required fields missing');
+            }
+        });
+    });
 </script>
 {% endblock %}

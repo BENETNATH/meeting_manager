@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 
 from app.models import Event, Registration, CertificateTemplate
 from app.services.certificate_service import CertificateService
-from app.decorators import admin_required
+from app.decorators import admin_required, event_access_required
 from app.exceptions import MeetingManagerError
 from app.extensions import db
 
@@ -94,7 +94,7 @@ def save_template_layout(template_id):
         return jsonify({'error': str(e)}), 500
 
 @certificates_bp.route('/event/<int:event_id>/download-certificate')
-@login_required
+@event_access_required
 def download_certificate(event_id):
     """Download the customized PDF certificate."""
     # Find registration

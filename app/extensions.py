@@ -11,6 +11,9 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from flask_babel import Babel
 from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 
 # Initialize extensions without the app instance
 db = SQLAlchemy()
@@ -20,6 +23,8 @@ bcrypt = Bcrypt()
 mail = Mail()
 babel = Babel()
 csrf = CSRFProtect()
+limiter = Limiter(key_func=get_remote_address)
+talisman = Talisman()
 
 # Configure extension settings
 login_manager.login_view = 'auth.login'

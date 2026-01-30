@@ -34,12 +34,8 @@ from app.exceptions import (
     EventCreationError, EventUpdateError, RegistrationError, 
     ValidationError, MeetingManagerError
 )
+from app.security import SecurityService
 
-
-# HTML sanitization constants
-ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'strong', 'em', 'br', 'span', 'div']
-ALLOWED_ATTRIBUTES = {'span': ['style'], 'div': ['style'], '*': ['class']}
-CSS_SANITIZER = CSSSanitizer()
 
 @dataclass
 class EventStats:
@@ -47,29 +43,6 @@ class EventStats:
     event: Event
     total_registered: int
     total_attended: int
-
-class SecurityService:
-    """Service for security-related operations."""
-    
-    @staticmethod
-    def sanitize_html(content: str) -> str:
-        """Sanitize HTML content to prevent XSS.
-        
-        Args:
-            content: HTML string to sanitize.
-            
-        Returns:
-            Sanitized HTML string.
-        """
-        if not content:
-            return ""
-        return bleach.clean(
-            content, 
-            tags=ALLOWED_TAGS, 
-            attributes=ALLOWED_ATTRIBUTES, 
-            css_sanitizer=CSS_SANITIZER,
-            strip=True
-        )
 
 class EventService:
     """Service class for event-related operations."""
@@ -786,27 +759,32 @@ class EventService:
     
     @staticmethod
     def _save_signature(signature_file) -> Optional[str]:
-        """Save and validate signature file.
-        
-        Args:
-            signature_file: Uploaded signature file.
-        
-        Returns:
-            Filename if successful, None if failed.
-        """
+        """Save and validate signature file using secure pipeline."""
         if not signature_file:
             return None
         
-        file_extension = os.path.splitext(signature_file.filename)[1]
-        filename = f"{uuid.uuid4()}_signature{file_extension}"
+        # Validate extension and size
+        valid, msg = SecurityService.validate_file_upload(
+            signature_file, 
+            allowed_extensions=['.jpg', '.jpeg', '.png'],
+            max_size_mb=2.0
+        )
+        if not valid:
+            logging.warning(f"Signature upload failed validation: {msg}")
+            return None
+
+        # Save securely with UUID
+        filename = SecurityService.save_secure_file(
+            signature_file, 
+            current_app.config['UPLOAD_FOLDER'],
+            prefix="signature"
+        )
         signature_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        
-        os.makedirs(os.path.dirname(signature_path), exist_ok=True)
-        signature_file.save(signature_path)
         
         try:
             with Image.open(signature_path) as img:
-                if img.width > 800 or img.height > 600:
+                # Limit dimensions
+                if img.width > 1200 or img.height > 1200:
                     os.remove(signature_path)
                     return None
                 img.thumbnail((250, 250))
@@ -820,32 +798,36 @@ class EventService:
     
     @staticmethod
     def _save_picture(picture_file) -> Optional[str]:
-        """Save and validate picture file.
-        
-        Args:
-            picture_file: Uploaded picture file.
-        
-        Returns:
-            Filename if successful, None if failed.
-        """
+        """Save and validate picture file using secure pipeline."""
         if not picture_file:
             return None
         
-        file_extension = os.path.splitext(picture_file.filename)[1]
-        filename = f"{uuid.uuid4()}_picture{file_extension}"
+        # Validate extension and size
+        valid, msg = SecurityService.validate_file_upload(
+            picture_file, 
+            allowed_extensions=['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+            max_size_mb=5.0
+        )
+        if not valid:
+            logging.warning(f"Picture upload failed validation: {msg}")
+            return None
+
+        # Save securely with UUID
+        filename = SecurityService.save_secure_file(
+            picture_file, 
+            current_app.config['UPLOAD_FOLDER'],
+            prefix="picture"
+        )
         picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        
-        os.makedirs(os.path.dirname(picture_path), exist_ok=True)
-        picture_file.save(picture_path)
         
         try:
             with Image.open(picture_path) as img:
-                # Validate image dimensions (max 1920x1080)
-                if img.width > 1920 or img.height > 1080:
+                # Validate image dimensions (max 4k for safety)
+                if img.width > 4096 or img.height > 4096:
                     os.remove(picture_path)
                     return None
                 # Create a thumbnail for display
-                img.thumbnail((800, 600))
+                img.thumbnail((1200, 800))
                 img.save(picture_path)
         except Exception:
             if os.path.exists(picture_path):
@@ -1069,27 +1051,29 @@ class EventService:
     
     @staticmethod
     def _save_attachment(file, event_id: int, file_type: str) -> Optional[Attachment]:
-        """Save a generic attachment file.
-        
-        Args:
-            file: Uploaded file.
-            event_id: ID of the event.
-            file_type: Type of attachment.
-            
-        Returns:
-            Attachment object if successful, None otherwise.
-        """
+        """Save a generic attachment file with validation."""
         if not file or not file.filename:
             return None
             
+        # Validate extension, size, and magic bytes
+        valid, msg = SecurityService.validate_file_upload(
+            file, 
+            allowed_extensions=['.pdf', '.jpg', '.jpeg', '.png', '.docx', '.xlsx', '.txt'],
+            max_size_mb=16.0
+        )
+        if not valid:
+            logging.warning(f"Attachment upload failed validation: {msg}")
+            return None
+
+        # Save securely with UUID to prevent path traversal/overwrites
+        filename = SecurityService.save_secure_file(
+            file, 
+            current_app.config['UPLOAD_FOLDER'],
+            prefix=f"attach_{file_type}"
+        )
+        
         from werkzeug.utils import secure_filename
         original_filename = secure_filename(file.filename)
-        file_extension = os.path.splitext(original_filename)[1]
-        filename = f"{uuid.uuid4()}{file_extension}"
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        file.save(file_path)
         
         attachment = Attachment(
             event_id=event_id,
