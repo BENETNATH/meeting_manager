@@ -68,7 +68,12 @@
                                         <option value="visible" {% if event.status == 'visible' %}selected{% endif %}>{{ _('Visible') }}</option>
                                         <option value="hidden" {% if event.status == 'hidden' %}selected{% endif %}>{{ _('Hidden') }}</option>
                                         <option value="archived" {% if event.status == 'archived' %}selected{% endif %}>{{ _('Archived') }}</option>
+                                        <option value="password-protected" {% if event.status == 'password-protected' %}selected{% endif %}>{{ _('Protected') }}</option>
                                     </select>
+                                </div>
+                                <div class="col-6" id="passwordGroup" style="display: none;">
+                                    <label class="form-label-compact">{{ _('Password') }}</label>
+                                    <input type="password" name="event_password" class="form-control-compact" placeholder="{{ _('New password (optional)') }}">
                                 </div>
                             </div>
                         </div>
@@ -215,6 +220,17 @@
         quillProg.on('text-change', function() {
             document.querySelector('input[name="program"]').value = quillProg.root.innerHTML;
         });
+
+        // Toggle password field
+        const statusSelect = document.querySelector('select[name="status"]');
+        const passwordGroup = document.getElementById('passwordGroup');
+        
+        function togglePassword() {
+            passwordGroup.style.display = statusSelect.value === 'password-protected' ? 'block' : 'none';
+        }
+        
+        statusSelect.addEventListener('change', togglePassword);
+        togglePassword(); // Initial state
     });
 
     function validateForm() {

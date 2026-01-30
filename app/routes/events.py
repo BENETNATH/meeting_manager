@@ -30,7 +30,31 @@ def index():
 def event(event_id):
     """Display event details."""
     event = Event.query.get_or_404(event_id)
+    
+    # Check for password protection
+    from flask import session
+    if event.status == 'password-protected':
+        # Bypass for admin/editor owner
+        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
+        if not is_owner and not session.get(f'event_auth_{event_id}'):
+            return render_template('event_password.html', event=event)
+            
     return render_template('event.html', event=event)
+
+
+@events_bp.route('/event/<int:event_id>/verify_password', methods=['POST'])
+def verify_password(event_id):
+    """Verify event password and grant access."""
+    event = Event.query.get_or_404(event_id)
+    provided_password = request.form.get('password', '')
+    
+    if EventService.check_event_password(event, provided_password):
+        from flask import session
+        session[f'event_auth_{event_id}'] = True
+        return redirect(url_for('events.event', event_id=event_id))
+    else:
+        flash('Incorrect password.', 'danger')
+        return render_template('event_password.html', event=event)
 
 
 @events_bp.route('/admin/create_event', methods=['GET', 'POST'])
@@ -61,6 +85,7 @@ def create_event():
             'status': request.form['status'],
             'timezone': request.form.get('timezone', 'UTC'),
             'template_id': request.form.get('template_id'),
+            'event_password': request.form.get('event_password'),
             'picture': request.files.get('picture'),
             'signature': request.files.get('signature'),
             'registry_form': request.files.get('registry_form'),
@@ -111,7 +136,8 @@ def edit_event(event_id):
             'eligible_hours': request.form.get('eligible_hours', 0),
             'status': request.form['status'],
             'timezone': request.form.get('timezone', event.timezone),
-            'template_id': request.form.get('template_id'),
+            'notify_time_change': request.form.get('notify_time_change'),
+            'event_password': request.form.get('event_password'),
             'picture': request.files.get('picture'),
             'signature': request.files.get('signature'),
             'registry_form': request.files.get('registry_form'),
@@ -304,6 +330,14 @@ def register_page(event_id):
     if request.method == 'POST':
         return register(event_id)
     
+    # Check for password protection
+    from flask import session
+    if event.status == 'password-protected':
+        # Bypass for admin/editor owner
+        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
+        if not is_owner and not session.get(f'event_auth_{event_id}'):
+            return render_template('event_password.html', event=event)
+    
     return render_template('register.html', event=event)
 
 
@@ -312,7 +346,16 @@ def register(event_id):
     """Handle event registration."""
     event = Event.query.get_or_404(event_id)
     
-    if event.status != 'visible':
+    # Check for password protection
+    from flask import session
+    if event.status == 'password-protected':
+        # Bypass for admin/editor owner
+        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
+        if not is_owner and not session.get(f'event_auth_{event_id}'):
+            flash('This event is password protected. Please enter the password first.', 'warning')
+            return redirect(url_for('events.event', event_id=event_id))
+
+    if event.status not in ['visible', 'password-protected']:
         flash('Registration is not available for this event.', 'danger')
         return redirect(url_for('events.event', event_id=event_id))
     
@@ -347,12 +390,31 @@ def unregister_page(event_id):
     if request.method == 'POST':
         return unregister(event_id)
     
+    # Check for password protection
+    from flask import session
+    if event.status == 'password-protected':
+        # Bypass for admin/editor owner
+        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
+        if not is_owner and not session.get(f'event_auth_{event_id}'):
+            return render_template('event_password.html', event=event)
+    
     return render_template('unregister.html', event=event)
 
 
 @events_bp.route('/unregister/<int:event_id>', methods=['POST'])
 def unregister(event_id):
     """Handle event unregistration."""
+    event = Event.query.get_or_404(event_id)
+
+    # Check for password protection
+    from flask import session
+    if event.status == 'password-protected':
+        # Bypass for admin/editor owner
+        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
+        if not is_owner and not session.get(f'event_auth_{event_id}'):
+            flash('This event is password protected. Please enter the password first.', 'warning')
+            return redirect(url_for('events.event', event_id=event_id))
+
     email = request.form.get('email', '')
     unique_key = request.form.get('unique_key', '')
     forgot_key = request.form.get('forgot_key') == 'on'
@@ -416,6 +478,17 @@ def request_certificate():
 @events_bp.route('/event/<int:event_id>/download_ics')
 def download_ics(event_id):
     """Download ICS calendar file for an event."""
+    event = Event.query.get_or_404(event_id)
+    
+    # Check for password protection
+    from flask import session
+    if event.status == 'password-protected':
+        # Bypass for admin/editor owner
+        is_owner = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))
+        if not is_owner and not session.get(f'event_auth_{event_id}'):
+            flash('This event is password protected. Please enter the password first.', 'warning')
+            return redirect(url_for('events.event', event_id=event_id))
+
     ics_content = EventService.generate_ics_service(event_id)
     
     if ics_content:

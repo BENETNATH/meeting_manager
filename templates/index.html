@@ -18,8 +18,10 @@
     <div class="event-grid">
         {% for item in events_stats %}
             {% set event = item.event %}
-            {% if event.status != 'hidden' or (current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id))) %}
-                <div class="compact-event-card position-relative" onclick="if(!event.target.closest('a') && !event.target.closest('button') && !event.target.closest('.stat-pill-link')) window.location='{{ url_for('events.event', event_id=event.id) }}'" style="cursor: pointer;">
+            {% set is_admin = current_user.is_authenticated and (current_user.role == 'super-admin' or (current_user.role == 'editor' and event.created_by == current_user.id)) %}
+            {% if (event.status == 'visible') or is_admin or (event.status == 'archived') %}
+                {% if (event.status != 'password-protected') or is_admin %}
+                    <div class="compact-event-card position-relative" onclick="if(!event.target.closest('a') && !event.target.closest('button') && !event.target.closest('.stat-pill-link')) window.location='{{ url_for('events.event', event_id=event.id) }}'" style="cursor: pointer;">
                     <div class="card-image-wrapper">
                         {% if event.photo_filename %}
                             <img src="{{ url_for('events.uploaded_file', filename=event.photo_filename) }}" alt="{{ event.title }}">
@@ -71,7 +73,8 @@
                     </div>
                 </div>
             {% endif %}
-        {% endfor %}
+        {% endif %}
+    {% endfor %}
     </div>
 </div>
 {% endblock %}

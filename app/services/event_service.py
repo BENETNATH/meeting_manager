@@ -178,7 +178,8 @@ class EventService:
             signature_url=data.get('signature_url', ''),
             signature_filename=signature_filename,
             timezone=timezone_str,
-            template_id=data.get('template_id')
+            template_id=data.get('template_id'),
+            password=EventService._hash_password(data.get('event_password')) if data.get('status') == 'password-protected' else None
         )
         
         try:
@@ -263,6 +264,13 @@ class EventService:
         event.status = data['status']
         event.timezone = timezone_str
         event.template_id = data.get('template_id')
+        
+        # Update password if status is password-protected and a new password is provided
+        if data['status'] == 'password-protected':
+            if data.get('event_password'):
+                event.password = EventService._hash_password(data['event_password'])
+        else:
+            event.password = None
         
         # Handle picture upload
         if data.get('picture'):
@@ -401,6 +409,38 @@ class EventService:
             return False, 'Error updating status'
     
     @staticmethod
+    def check_event_password(event: Event, provided_password: str) -> bool:
+        """Check if the provided password matches the event hashed password.
+        
+        Args:
+            event: Event object.
+            provided_password: Plain text password to check.
+        
+        Returns:
+            True if password matches, False otherwise.
+        """
+        if not event.password:
+            return False
+            
+        from flask_bcrypt import check_password_hash
+        return check_password_hash(event.password, provided_password)
+    
+    @staticmethod
+    def _hash_password(password: str) -> str:
+        """Hash the event password.
+        
+        Args:
+            password: Plain text password.
+        
+        Returns:
+            Hashed password.
+        """
+        if not password:
+            return None
+        from flask_bcrypt import generate_password_hash
+        return generate_password_hash(password).decode('utf-8')
+    
+    @staticmethod
     def register_for_event_service(event_id: int, registration_data: Dict[str, str]) -> Registration:
         """Register a user for an event.
         
@@ -417,7 +457,7 @@ class EventService:
         """
         event = Event.query.get_or_404(event_id)
         
-        if event.status != 'visible':
+        if event.status not in ['visible', 'password-protected']:
             raise ValidationError('Registration is not available for this event.')
         
         email = registration_data['email']

@@ -110,6 +110,7 @@ class Event(db.Model):
         signature_url: URL to organizer signature.
         signature_filename: Filename of uploaded organizer signature.
         timezone: Event timezone.
+        password: Hashed password for protected events.
     """
     
     __tablename__ = 'event'
@@ -132,6 +133,7 @@ class Event(db.Model):
     signature_filename: Mapped[Optional[str]] = mapped_column(db.String(200), nullable=True)
 
     timezone: Mapped[str] = mapped_column(db.String(50), nullable=False, default='UTC')
+    password: Mapped[Optional[str]] = mapped_column(db.String(150), nullable=True)
     template_id: Mapped[Optional[int]] = mapped_column(db.Integer, db.ForeignKey('certificate_template.id'), nullable=True)
     
     template = relationship('CertificateTemplate', backref='events')
@@ -141,7 +143,7 @@ class Event(db.Model):
     
     # Constraints
     __table_args__ = (
-        CheckConstraint("status IN ('hidden', 'visible', 'archived')", name='valid_status'),
+        CheckConstraint("status IN ('hidden', 'visible', 'archived', 'password-protected')", name='valid_status'),
         CheckConstraint("eligible_hours >= 0", name='positive_eligible_hours'),
     )
     
