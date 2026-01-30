@@ -482,6 +482,66 @@ class EventService:
             raise MeetingManagerError('Error processing unregistration.')
 
     @staticmethod
+    def is_mail_configured() -> bool:
+        """Check if mail settings are properly configured.
+        
+        Returns:
+            True if mail is configured, False otherwise.
+        """
+        try:
+            # Check for essential mail configuration
+            return all([
+                current_app.config.get('MAIL_SERVER'),
+                current_app.config.get('MAIL_USERNAME'),
+                current_app.config.get('MAIL_PASSWORD'),
+                current_app.config.get('MAIL_DEFAULT_SENDER')
+            ])
+        except Exception:
+            return False
+
+    @staticmethod
+    def send_forgotten_key_service(event_id: int, email: str) -> Tuple[bool, str]:
+        """Send forgotten unique key to user.
+        
+        Args:
+            event_id: ID of the event.
+            email: User email.
+            
+        Returns:
+            Tuple of (success: bool, message: str).
+        """
+        # Neutral message to protect privacy
+        neutral_success_msg = 'the unique key will be sent if your email was registered'
+        
+        event = Event.query.get(event_id)
+        if not event:
+            return True, neutral_success_msg
+
+        if not EventService.is_mail_configured():
+            return False, f'SMTP not configured. If your email was registered, please contact the event organizer ({event.organizer or "N/A"}).'
+            
+        registration = Registration.query.filter_by(
+            event_id=event_id, email=email
+        ).first()
+        
+        # If no registration, still return success to be neutral
+        if not registration:
+            return True, neutral_success_msg
+            
+        try:
+            subject = f'Forgotten Unique Key: {event.title}'
+            body = (f'Hello {registration.first_name},\n\n'
+                   f'You requested your unique key for the event: {event.title}.\n'
+                   f'Your unique key is: {registration.unique_key}\n\nThank you!')
+            
+            msg = Message(subject=subject, recipients=[email], body=body)
+            mail.send(msg)
+            return True, neutral_success_msg
+        except Exception as e:
+            logging.error(f'Error sending forgotten key email to {email}: {e}')
+            return False, f'Error sending email. If your email was registered, please contact the event organizer ({event.organizer or "N/A"}).'
+
+    @staticmethod
     def mark_attendance_service(event_id: int, attendance_data: Dict[str, Any]) -> None:
         """Mark attendance for event registrations.
         

@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 
 from app.services.event_service import EventService, SecurityService
 from app.models import Event, Registration
-from app.exceptions import MeetingManagerError, ValidationError
+from app.exceptions import MeetingManagerError, ValidationError, RegistrationError
 from app.decorators import admin_required, event_owner_required
 
 # Create blueprint
@@ -320,6 +320,15 @@ def unregister(event_id):
     """Handle event unregistration."""
     email = request.form.get('email', '')
     unique_key = request.form.get('unique_key', '')
+    forgot_key = request.form.get('forgot_key') == 'on'
+    
+    if forgot_key:
+        success, message = EventService.send_forgotten_key_service(event_id, email)
+        if success:
+            flash(message, 'success')
+        else:
+            flash(message, 'danger')
+        return redirect(url_for('events.unregister_page', event_id=event_id))
     
     try:
         EventService.unregister_from_event_service(event_id, email, unique_key)

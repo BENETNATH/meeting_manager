@@ -14,13 +14,20 @@
                         <label for="email" class="form-label-compact">{{ _('Email Address') }}</label>
                         <input type="email" id="email" name="email" class="form-control-compact" required placeholder="john@example.com">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3" id="unique_key_container">
                         <label for="unique_key" class="form-label-compact">{{ _('Unique Key') }}</label>
                         <input type="text" id="unique_key" name="unique_key" class="form-control-compact" required placeholder="Enter your key">
                     </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="forgot_key" name="forgot_key">
+                        <label class="form-check-label small" for="forgot_key">
+                            {{ _('I forgot my unique key') }}
+                        </label>
+                    </div>
                     
                     <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-danger py-2">
+                        <button type="submit" id="submit_btn" class="btn btn-danger py-2">
                             <i class="fas fa-user-minus me-2"></i> {{ _('Cancel My Registration') }}
                         </button>
                         <a href="{{ url_for('events.event', event_id=event.id) }}" class="btn btn-outline-primary py-2">
@@ -28,6 +35,26 @@
                         </a>
                     </div>
                 </form>
+
+                <script>
+                    document.getElementById('forgot_key').addEventListener('change', function() {
+                        const uniqueKeyInput = document.getElementById('unique_key');
+                        const uniqueKeyContainer = document.getElementById('unique_key_container');
+                        const submitBtn = document.getElementById('submit_btn');
+                        
+                        if (this.checked) {
+                            uniqueKeyContainer.style.display = 'none';
+                            uniqueKeyInput.required = false;
+                            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> {{ _("Send Me My Key") }}';
+                            submitBtn.className = 'btn btn-primary py-2';
+                        } else {
+                            uniqueKeyContainer.style.display = 'block';
+                            uniqueKeyInput.required = true;
+                            submitBtn.innerHTML = '<i class="fas fa-user-minus me-2"></i> {{ _("Cancel My Registration") }}';
+                            submitBtn.className = 'btn btn-danger py-2';
+                        }
+                    });
+                </script>
             </div>
             
             <p class="text-center mt-3 text-muted x-small">
