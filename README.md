@@ -17,6 +17,7 @@ Meeting Manager is a web application designed to manage events and generate cert
 
 - Python 3.x
 - Virtual Environment (optional but recommended)
+- GTK3 Runtime (Windows only, required for PDF generation)
 
 ### Installation
 
@@ -141,6 +142,24 @@ All configuration is managed through the `.env` file:
 
 The application follows 12-Factor App principles with environment-based configuration.
 
+
+
+## PDF Generation (WeasyPrint) Setup
+This application uses WeasyPrint for generating PDF certificates.
+
+### Linux
+WeasyPrint usually works out-of-the-box on Linux if the system dependencies are installed:
+```bash
+# Debian / Ubuntu
+sudo apt-get install python3-pip python3-cffi python3-brotli libpango-1.0-0 libpangoft2-1.0-0
+```
+
+### Windows
+On Windows, WeasyPrint requires the GTK3 runtime libraries.
+1. Download and install the **GTK3 Runtime for Windows** from [here](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
+2. Restart your terminal/IDE after installation.
+
+**Note:** If GTK3 is not detected, the application will still run, but PDF generation features will be disabled.
 
 
 ## Related ressources

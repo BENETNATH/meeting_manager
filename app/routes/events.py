@@ -10,7 +10,7 @@ from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
 from app.services.event_service import EventService, SecurityService
-from app.models import Event, Registration
+from app.models import Event, Registration, CertificateTemplate
 from app.exceptions import MeetingManagerError, ValidationError, RegistrationError
 from app.decorators import admin_required, event_owner_required
 
@@ -60,6 +60,7 @@ def create_event():
             'eligible_hours': request.form.get('eligible_hours', 0),
             'status': request.form['status'],
             'timezone': request.form.get('timezone', 'UTC'),
+            'template_id': request.form.get('template_id'),
             'picture': request.files.get('picture'),
             'signature': request.files.get('signature'),
             'registry_form': request.files.get('registry_form'),
@@ -77,9 +78,11 @@ def create_event():
             sanitized_form = request.form.to_dict()
             sanitized_form['description'] = SecurityService.sanitize_html(sanitized_form.get('description', ''))
             sanitized_form['program'] = SecurityService.sanitize_html(sanitized_form.get('program', ''))
-            return render_template('create_event.html', form_data=sanitized_form)
+            templates = CertificateTemplate.query.all()
+            return render_template('create_event.html', form_data=sanitized_form, templates=templates)
     
-    return render_template('create_event.html', form_data={})
+    templates = CertificateTemplate.query.all()
+    return render_template('create_event.html', form_data={}, templates=templates)
 
 
 @events_bp.route('/admin/edit_event/<int:event_id>', methods=['GET', 'POST'])
@@ -108,6 +111,7 @@ def edit_event(event_id):
             'eligible_hours': request.form.get('eligible_hours', 0),
             'status': request.form['status'],
             'timezone': request.form.get('timezone', event.timezone),
+            'template_id': request.form.get('template_id'),
             'picture': request.files.get('picture'),
             'signature': request.files.get('signature'),
             'registry_form': request.files.get('registry_form'),
@@ -126,9 +130,11 @@ def edit_event(event_id):
             sanitized_form = request.form.to_dict()
             sanitized_form['description'] = SecurityService.sanitize_html(sanitized_form.get('description', ''))
             sanitized_form['program'] = SecurityService.sanitize_html(sanitized_form.get('program', ''))
-            return render_template('edit_event.html', event=event, form_data=sanitized_form)
+            templates = CertificateTemplate.query.all()
+            return render_template('edit_event.html', event=event, form_data=sanitized_form, templates=templates)
     
-    return render_template('edit_event.html', event=event, form_data={})
+    templates = CertificateTemplate.query.all()
+    return render_template('edit_event.html', event=event, form_data={}, templates=templates)
 
 
 @events_bp.route('/update_status/<int:event_id>', methods=['POST'])
@@ -232,6 +238,35 @@ def delete_attachment(attachment_id):
         flash(e.message, e.category)
     
     return redirect(url_for('events.edit_event', event_id=event.id))
+
+
+@events_bp.route('/admin/event/<int:event_id>/delete_signature', methods=['POST'])
+@login_required
+@event_owner_required
+def delete_signature(event_id):
+    """Delete event signature image (owner or super-admin only)."""
+    import os
+    from flask import current_app, jsonify
+    
+    event = Event.query.get_or_404(event_id)
+    
+    if event.signature_filename:
+        try:
+            # Delete file from disk
+            signature_path = os.path.join(current_app.config['UPLOAD_FOLDER'], event.signature_filename)
+            if os.path.exists(signature_path):
+                os.remove(signature_path)
+            
+            # Clear from database
+            event.signature_filename = None
+            from app.extensions import db
+            db.session.commit()
+            
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    return jsonify({'success': False, 'error': 'No signature to delete'}), 400
 
 
 @events_bp.route('/extract_attendance/<int:event_id>')

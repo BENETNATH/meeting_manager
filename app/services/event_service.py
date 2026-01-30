@@ -177,7 +177,8 @@ class EventService:
             status=data['status'],
             signature_url=data.get('signature_url', ''),
             signature_filename=signature_filename,
-            timezone=timezone_str
+            timezone=timezone_str,
+            template_id=data.get('template_id')
         )
         
         try:
@@ -261,6 +262,7 @@ class EventService:
         event.eligible_hours = eligible_hours
         event.status = data['status']
         event.timezone = timezone_str
+        event.template_id = data.get('template_id')
         
         # Handle picture upload
         if data.get('picture'):
@@ -667,6 +669,11 @@ class EventService:
         event = Event.query.get_or_404(registration.event_id)
         
         try:
+            # Check if event uses a custom template
+            if event.template_id:
+                from app.services.certificate_service import CertificateService
+                return BytesIO(CertificateService.generate_certificate_pdf(event.id, registration))
+            
             return EventService._generate_certificate_pdf(registration, event)
         except Exception as e:
             logging.error(f'Error generating certificate for registration {registration_id}: {e}')

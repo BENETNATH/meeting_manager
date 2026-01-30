@@ -67,6 +67,28 @@ class User(UserMixin, db.Model):
         return f'<User {self.username}>'
 
 
+class CertificateTemplate(db.Model):
+    """Model for customizable certificate templates.
+    
+    Attributes:
+        id: Primary key.
+        name: Template name.
+        layout_data: JSON data describing the layout elements.
+        background_img: Path to background image.
+        created_at: Creation timestamp.
+    """
+    __tablename__ = 'certificate_template'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(db.String(100), nullable=False)
+    layout_data: Mapped[dict] = mapped_column(db.JSON, nullable=False)
+    background_img: Mapped[Optional[str]] = mapped_column(db.String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self) -> str:
+        return f'<CertificateTemplate {self.name}>'
+
+
 class Event(db.Model):
     """Event model for managing events and their details.
     
@@ -108,7 +130,11 @@ class Event(db.Model):
     created_by: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     signature_url: Mapped[Optional[str]] = mapped_column(db.String(200), nullable=True)
     signature_filename: Mapped[Optional[str]] = mapped_column(db.String(200), nullable=True)
+
     timezone: Mapped[str] = mapped_column(db.String(50), nullable=False, default='UTC')
+    template_id: Mapped[Optional[int]] = mapped_column(db.Integer, db.ForeignKey('certificate_template.id'), nullable=True)
+    
+    template = relationship('CertificateTemplate', backref='events')
     
     attachments = relationship('Attachment', backref='event', lazy=True, cascade="all, delete-orphan")
     registrations = relationship('Registration', backref='event', lazy=True)

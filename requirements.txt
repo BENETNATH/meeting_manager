@@ -44,3 +44,5 @@ gunicorn>=21.2.0; sys_platform != "win32"
 # Development and Testing
 pytest>=7.4.0
 pytest-flask>=1.2.0
+
+WeasyPrint

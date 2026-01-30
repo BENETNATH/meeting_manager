@@ -88,6 +88,15 @@
                             <div class="section-title-compact">{{ _('Documents') }}</div>
                             <div class="row g-2">
                                 <div class="col-12">
+                                    <label class="form-label-compact">{{ _('Certificate Template') }}</label>
+                                    <select name="template_id" class="form-control-compact">
+                                        <option value="">{{ _('Default / None') }}</option>
+                                        {% for t in templates %}
+                                            <option value="{{ t.id }}" {% if form_data.get('template_id')|int == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12">
                                     <label class="form-label-compact">Signature (IMG)</label>
                                     <input type="file" name="signature" class="form-control-compact" accept="image/*">
                                 </div>

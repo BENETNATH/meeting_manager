@@ -90,9 +90,11 @@ def register_blueprints(app: Flask) -> None:
     """
     from app.routes.auth import auth_bp
     from app.routes.events import events_bp
+    from app.routes.certificates import certificates_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(events_bp)
+    app.register_blueprint(certificates_bp)
 
 
 def configure_logging(app: Flask) -> None:
@@ -124,14 +126,15 @@ def configure_logging(app: Flask) -> None:
         app.logger.setLevel(logging.INFO)
         app.logger.info('Meeting Manager startup')
         
-        # Configure SQLAlchemy logging to reduce verbosity in production
-        # Set SQLAlchemy engine logger to WARNING level to suppress SQL query logs
-        sqlalchemy_logger = logging.getLogger('sqlalchemy.engine')
-        sqlalchemy_logger.setLevel(logging.WARNING)
-        
-        # Also configure the generic sqlalchemy logger
-        sqlalchemy_base_logger = logging.getLogger('sqlalchemy')
-        sqlalchemy_base_logger.setLevel(logging.WARNING)
+        # Silence excessive logging from libraries
+        for logger_name in [
+            'fontTools', 'weasyprint', 'sqlalchemy', 'sqlalchemy.engine', 
+            'fontTools.subset', 'fontTools.ttLib.ttFont', 'fontTools.subset.timer',
+            'weasyprint.progress', 'pill', 'PIL'
+        ]:
+            l = logging.getLogger(logger_name)
+            l.setLevel(logging.WARNING)
+            l.propagate = False
 
 
 def register_template_filters(app: Flask) -> None:

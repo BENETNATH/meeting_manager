@@ -95,8 +95,36 @@
                             <div class="section-title-compact">{{ _('Documents') }}</div>
                             <div class="row g-2">
                                 <div class="col-12">
+                                    <label class="form-label-compact">{{ _('Certificate Template') }}</label>
+                                    <div class="d-flex gap-2">
+                                        <select name="template_id" class="form-control-compact flex-grow-1">
+                                            <option value="">{{ _('Default / None') }}</option>
+                                            {% for t in templates %}
+                                                <option value="{{ t.id }}" {% if event.template_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <a href="{{ url_for('certificates.list_templates') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center" target="_blank" title="{{ _('Manage Templates') }}">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-12">
                                     <label class="form-label-compact">Signature (IMG)</label>
+                                    {% if event.signature_filename %}
+                                        <div class="d-flex gap-2 mb-1 align-items-center">
+                                            <div style="width: 100px; height: 40px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; background: #f8f9fa;">
+                                                <img src="{{ url_for('events.uploaded_file', filename=event.signature_filename) }}" class="w-100 h-100 object-fit-contain">
+                                            </div>
+                                            <small class="text-muted flex-grow-1">Current signature</small>
+                                            <button type="button" class="btn btn-link text-danger p-0" onclick="deleteSignature({{ event.id }})" title="Delete signature">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    {% endif %}
                                     <input type="file" name="signature" class="form-control-compact" accept="image/*">
+                                    {% if event.signature_filename %}
+                                        <small class="text-muted">Upload a new file to replace</small>
+                                    {% endif %}
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label-compact">Registry / Program (PDF)</label>
@@ -197,6 +225,30 @@
             return false;
         }
         return true;
+    }
+
+    function deleteSignature(eventId) {
+        if (!confirm('Delete the signature image?')) return;
+        
+        fetch(`/admin/event/${eventId}/delete_signature`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting signature: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error deleting signature');
+        });
     }
 </script>
 {% endblock %}

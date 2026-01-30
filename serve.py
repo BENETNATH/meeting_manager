@@ -12,18 +12,25 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# --- DEFENSIVE LOGGING SUPPRESSION ---
+# This must happen as early as possible to catch loggers before they are initialized by imports
+# We use WARNING level and NullHandler to ensure silence even if propagate is True somewhere
+for logger_name in [
+    'fontTools', 'weasyprint', 'sqlalchemy', 'sqlalchemy.engine', 
+    'fontTools.subset', 'fontTools.ttLib.ttFont', 'fontTools.subset.timer',
+    'weasyprint.progress', 'pill', 'PIL', 'asyncio'
+]:
+    l = logging.getLogger(logger_name)
+    l.setLevel(logging.WARNING)
+    l.propagate = False
+    l.handlers = [logging.NullHandler()] 
 
-# Configure SQLAlchemy logging BEFORE importing the app
-# This ensures the loggers are configured before SQLAlchemy creates them
-sqlalchemy_logger = logging.getLogger('sqlalchemy.engine')
-sqlalchemy_logger.setLevel(logging.WARNING)
-sqlalchemy_logger.propagate = False  # Prevent propagation to root logger
-sqlalchemy_logger.handlers.clear()   # Remove any existing handlers
+# --- END LOGGING SUPPRESSION ---
 
-sqlalchemy_base_logger = logging.getLogger('sqlalchemy')
-sqlalchemy_base_logger.setLevel(logging.WARNING)
-sqlalchemy_base_logger.propagate = False  # Prevent propagation to root logger
-sqlalchemy_base_logger.handlers.clear()   # Remove any existing handlers
+# Set locale environment variables to help GLib/WeasyPrint with encoding on Windows
+# This fixes "Conversion from character set UTF-8 to iso_1 is not supported" errors
+os.environ['LANG'] = 'en_US.UTF-8'
+os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 from app import create_app
 
@@ -45,15 +52,6 @@ def main():
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
-    # Configure SQLAlchemy logging to reduce verbosity
-    # Set SQLAlchemy engine logger to WARNING level to suppress SQL query logs
-    sqlalchemy_logger = logging.getLogger('sqlalchemy.engine')
-    sqlalchemy_logger.setLevel(logging.WARNING)
-    
-    # Also configure the generic sqlalchemy logger
-    sqlalchemy_base_logger = logging.getLogger('sqlalchemy')
-    sqlalchemy_base_logger.setLevel(logging.WARNING)
     
     # Also configure the Flask app's SQLAlchemy logging
     # This ensures the logging configuration is applied when the app is created
